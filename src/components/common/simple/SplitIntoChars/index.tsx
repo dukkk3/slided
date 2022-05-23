@@ -1,42 +1,62 @@
-import React, { memo, useRef } from "react";
+import React, { memo, useMemo } from "react";
 
-import {
-	SplitIntoWords,
-	Props as SplitIntoWordsProps,
-} from "@components/common/simple/SplitIntoWords";
+import { splitIntoWords, splitIntoChars, calculateCurrentIndex3D } from "@core/utils";
 
-import { splitIntoChars } from "@core/utils";
-
-export interface Props extends Omit<SplitIntoWordsProps, "children"> {
+export interface Props {
 	text: string | string[];
-	children: (
-		...args: [
-			Omit<Parameters<SplitIntoWordsProps["children"]>[0], "word"> & {
-				char: string;
-				wordIndex: number;
-			}
-		]
-	) => React.ReactNode;
+	debug?: boolean;
+	children: (props: {
+		index: number;
+		char: string;
+		count: number;
+		rowIndex: number;
+		wordIndex: number;
+		absoluteIndex: number;
+	}) => React.ReactNode;
 }
 
-export const SplitIntoChars: React.FC<Props> = memo(({ text, children }) => {
-	const absoluteIndexRef = useRef(0);
+export const SplitIntoChars: React.FC<Props> = memo(({ text, children, debug = false }) => {
+	const textAsArray = useMemo(() => (Array.isArray(text) ? text : [text]), [text]);
+	const textAsCharsArray = useMemo(
+		() =>
+			textAsArray.map((row) =>
+				splitIntoWords(row, true).map((word) => splitIntoChars(word))
+			) as string[][][],
+		[textAsArray]
+	);
+	const count = useMemo(() => textAsCharsArray.flat(Infinity).length, [textAsCharsArray]);
 
 	return (
-		<SplitIntoWords text={text}>
-			{({ word, index: wordIndex, absoluteIndex, ...rest }) => (
-				<>
-					{splitIntoChars(word).map((char, index) => {
-						const currentAbsoluteIndex = absoluteIndexRef.current;
-						absoluteIndexRef.current += 1;
-						return (
-							<React.Fragment key={currentAbsoluteIndex}>
-								{children({ char, index, wordIndex, absoluteIndex: currentAbsoluteIndex, ...rest })}
-							</React.Fragment>
-						);
-					})}
-				</>
-			)}
-		</SplitIntoWords>
+		<>
+			{textAsCharsArray.map((row, rowIndex) => (
+				<p key={rowIndex}>
+					{row.map((word, wordIndex) => (
+						<span key={wordIndex} className='animated-inline-unit-wrapper'>
+							{word.map((char, charIndex) => {
+								const absoluteIndex = calculateCurrentIndex3D(
+									textAsCharsArray,
+									rowIndex,
+									wordIndex,
+									charIndex
+								);
+
+								return (
+									<React.Fragment key={absoluteIndex}>
+										{children({
+											char,
+											count,
+											rowIndex,
+											wordIndex,
+											absoluteIndex,
+											index: charIndex,
+										})}
+									</React.Fragment>
+								);
+							})}
+						</span>
+					))}
+				</p>
+			))}
+		</>
 	);
 });

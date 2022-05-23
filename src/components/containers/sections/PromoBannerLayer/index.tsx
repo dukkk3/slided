@@ -1,114 +1,69 @@
-import { useEffect, useCallback } from "react";
-import { useAnimation, motion } from "framer-motion";
+import { a } from "react-spring";
 import { Observer } from "mobx-react-lite";
 
 import { SplitIntoWords } from "@components/common/simple/SplitIntoWords";
 
 import { Button } from "@components/common/ui/Button";
 
-import { useGlobalStore, useLocalStore, useScroll } from "@core/hooks";
-import { animationConfig } from "@core/config";
+import { useIterationControls } from "@core/hooks";
 
 import * as S from "./styled";
 
 export const PromoBannerLayer: React.FC = () => {
-	const scroll = useScroll();
-	const animationControls = useAnimation();
-	const componentsAnimationsControls = useAnimation();
-	const localStore = useLocalStore({ swapControls: false });
-	const promoStore = useGlobalStore((store) => store.layout.promo);
-
-	const animate = useCallback(async () => {
-		await animationControls.start("active");
-		localStore.setSwapControls(true);
-		promoStore.setPromoBannerOpeningAnimationEnded(true);
-	}, [animationControls, promoStore, localStore]);
-
-	const handleScrollProgressChange = useCallback(() => {
-		if (!scroll.enabled) return;
-
-		const progress = scroll.animated.range(0, 0.5 / scroll.store.pages);
-
-		componentsAnimationsControls.set({ y: `-${progress * 100}%`, opacity: 1 - progress });
-	}, [componentsAnimationsControls, scroll]);
-
-	useEffect(
-		() => scroll.animated.progress.onChange(handleScrollProgressChange),
-		[handleScrollProgressChange, scroll]
-	);
-
-	useEffect(() => {
-		animate();
-	}, [animate]);
+	const iterationControls = useIterationControls();
+	const commonInterpolatedValue = iterationControls.animated.toRange(0, 0.5);
 
 	return (
 		<S.PromoBannerLayer>
 			<Observer>
-				{() => (
-					<motion.div animate={animationControls} initial='initial' variants={containerVariants}>
-						<S.Head>
-							<S.TitleWrapper>
-								<SplitIntoWords text={["Professionally", "designed presentations", "without effort"]}>
-									{({ word, absoluteIndex }) => (
-										<motion.span
-											key={absoluteIndex}
-											className='animated-inline-unit'
-											animate={localStore.swapControls && componentsAnimationsControls}
-											variants={commonVariants}
-											transition={animationConfig.defaultSpringTransition}>
-											{word}
-										</motion.span>
-									)}
-								</SplitIntoWords>
-							</S.TitleWrapper>
-							<S.SubtitleWrapper>
-								<SplitIntoWords text={["For the price of a coffee cup & croissant"]}>
-									{({ word, absoluteIndex }) => (
-										<motion.span
-											key={absoluteIndex}
-											className='animated-inline-unit'
-											animate={localStore.swapControls && componentsAnimationsControls}
-											variants={commonVariants}
-											transition={animationConfig.defaultSpringTransition}>
-											{word}
-										</motion.span>
-									)}
-								</SplitIntoWords>
-							</S.SubtitleWrapper>
-						</S.Head>
-						<motion.div
-							animate={localStore.swapControls && componentsAnimationsControls}
-							variants={commonVariants}
-							transition={animationConfig.defaultSpringTransition}>
-							<Button size='m'>Get started</Button>
-						</motion.div>
-					</motion.div>
-				)}
+				{() =>
+					iterationControls.store.inRange(0) ? (
+						<div>
+							<S.Head>
+								<S.TitleWrapper>
+									<SplitIntoWords text={["Professionally", "designed presentations", "without effort"]}>
+										{({ word, absoluteIndex }) => (
+											<a.span
+												key={absoluteIndex}
+												className='animated-inline-unit'
+												style={{
+													y: commonInterpolatedValue.to((value) => `-${100 * value}%`),
+													opacity: commonInterpolatedValue.to((value) => 1 - value),
+												}}>
+												{word}
+											</a.span>
+										)}
+									</SplitIntoWords>
+								</S.TitleWrapper>
+								<S.SubtitleWrapper>
+									<SplitIntoWords text={["For the price of a coffee cup & croissant"]}>
+										{({ word, absoluteIndex }) => (
+											<a.span
+												key={absoluteIndex}
+												className='animated-inline-unit'
+												style={{
+													y: commonInterpolatedValue
+														// .to((value) => iterationControls.range(value, absoluteIndex / count, 1))
+														.to((value) => `-${100 * value}%`),
+													opacity: commonInterpolatedValue.to((value) => 1 - value),
+												}}>
+												{word}
+											</a.span>
+										)}
+									</SplitIntoWords>
+								</S.SubtitleWrapper>
+							</S.Head>
+							<a.div
+								style={{
+									y: commonInterpolatedValue.to((value) => `-${100 * value}%`),
+									opacity: commonInterpolatedValue.to((value) => 1 - value),
+								}}>
+								<Button size='m'>Get started</Button>
+							</a.div>
+						</div>
+					) : null
+				}
 			</Observer>
 		</S.PromoBannerLayer>
 	);
-};
-
-const containerVariants = {
-	active: {
-		transition: {
-			staggerChildren: 0.03,
-			staggerDirection: 1,
-		},
-	},
-};
-
-const commonVariants = {
-	initial: {
-		opacity: 0,
-		y: "-100%",
-	},
-	active: {
-		opacity: 1,
-		y: "0%",
-	},
-	exit: {
-		opacity: 0,
-		y: "-100%",
-	},
 };

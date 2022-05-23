@@ -3,17 +3,15 @@ import { reaction } from "mobx";
 
 import { Header } from "@components/containers/layout/Header";
 
-import { ScrollControls } from "@components/common/hoc/ScrollControls";
+import { IterationControls } from "@components/common/hoc/IterationControls";
 
 import { useResizeObserver } from "@core/hooks";
 
 import * as S from "./styled";
 
-export interface Props extends React.PropsWithChildren<{}> {
-	scrollEnabled?: boolean;
-}
+export interface Props extends React.PropsWithChildren<{}> {}
 
-export const Layout: React.FC<Props> = ({ children, scrollEnabled = true }) => {
+export const Layout: React.FC<Props> = ({ children }) => {
 	const headerResizeObserver = useResizeObserver({ calculateSizeWithPaddings: true });
 
 	const updateCSSProperties = useCallback(() => {
@@ -38,7 +36,7 @@ export const Layout: React.FC<Props> = ({ children, scrollEnabled = true }) => {
 				<Header />
 			</S.HeaderWrapper>
 			<main>
-				<ScrollControls enabled={scrollEnabled}>{children}</ScrollControls>
+				<IterationControls iterations={10}>{children}</IterationControls>
 			</main>
 		</S.Layout>
 	);

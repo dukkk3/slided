@@ -100,8 +100,26 @@ export function damp(x: number, y: number, lambda: number, dt: number) {
 	return lerp(x, y, 1 - Math.exp(-lambda * dt));
 }
 
-export function calculateCurrentIndex(array: any[], mainIndex: number, childIndex: number) {
-	return array.slice(0, mainIndex).reduce((acc, row) => acc + row.length, 0) + childIndex;
+export function calculateCurrentIndex2D(array: any[], x: number, y: number) {
+	return array.slice(0, x + 1).reduce((acc, row) => acc + row.length, 0) + y;
+}
+
+export function calculateCurrentIndex3D(array: any[][], x: number, y: number, z: number) {
+	return (
+		array
+			.slice(0, x + 1)
+			.reduce(
+				(acc, row, rowIndex) =>
+					acc +
+					(rowIndex === x
+						? row
+								.slice(0, y + 1)
+								.reduce((acc, word, wordIndex) => (wordIndex === y ? acc : acc + word.length), 0)
+						: row.flat(Infinity).length),
+				0
+			) + z
+	);
+	// return calculateCurrentIndex2D(array.slice(0, x), y, z);
 }
 
 export function safelyGetElementDOMRect(element: HTMLElement | SVGElement | null) {

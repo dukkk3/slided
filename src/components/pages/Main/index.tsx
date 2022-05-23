@@ -1,6 +1,4 @@
-import { Observer } from "mobx-react-lite";
-import { useTransform } from "framer-motion";
-
+import { useCallback, useEffect } from "react";
 import { Layout } from "@components/containers/layout/Layout";
 import { PromoContainer } from "@components/containers/layout/PromoContainer";
 
@@ -8,32 +6,41 @@ import { TableBackground } from "@components/containers/sections/TableBackground
 import { PromoBannerLayer } from "@components/containers/sections/PromoBannerLayer";
 import { AssistantLayer } from "@components/containers/sections/AssistantLayer";
 
-import { useGlobalStore, useScroll } from "@core/hooks";
+import { useIterationControls } from "@core/hooks";
 
 import * as S from "./styled";
 
 const Content: React.FC = () => {
-	const scroll = useScroll();
-	console.log(scroll);
-	const wrapperYTranslate = useTransform(
-		scroll.animated.progress,
-		(value) => value * (scroll.store.pages - 1) * scroll.store.containerHeight
+	const iterationControls = useIterationControls();
+
+	const handleDocumentKeydown = useCallback(
+		(event: KeyboardEvent) => {
+			switch (event.key) {
+				case "ArrowDown":
+					return iterationControls.animate(iterationControls.getTarget() + 1);
+				case "ArrowUp":
+					return iterationControls.animate(iterationControls.getTarget() - 1);
+			}
+		},
+		[iterationControls]
 	);
 
+	useEffect(() => {
+		document.addEventListener("keydown", handleDocumentKeydown);
+
+		return () => {
+			document.removeEventListener("keydown", handleDocumentKeydown);
+		};
+	}, [handleDocumentKeydown]);
+
 	return (
-		<S.Wrapper
-			style={{
-				y: wrapperYTranslate,
-			}}>
+		<S.Wrapper>
 			<S.TableBackgroundWrapper>
 				<TableBackground />
 			</S.TableBackgroundWrapper>
 			<S.LayerWrapper>
 				<PromoContainer>
-					{[
-						<AssistantLayer />,
-						// <PromoBannerLayer />
-					].map((content, index) => (
+					{[<PromoBannerLayer />, <AssistantLayer />].map((content, index) => (
 						<S.LayerWrapper key={index}>{content}</S.LayerWrapper>
 					))}
 				</PromoContainer>
@@ -43,20 +50,9 @@ const Content: React.FC = () => {
 };
 
 export const Main: React.FC = () => {
-	const promoStore = useGlobalStore((store) => store.layout.promo);
-
 	return (
-		<Observer>
-			{() => (
-				<Layout
-					scrollEnabled={
-						// promoStore.promoBannerOpeningAnimationEnded &&
-						promoStore.sequenceOpeningAnimationEnded
-					}>
-					<Content />
-					<S.Content />
-				</Layout>
-			)}
-		</Observer>
+		<Layout>
+			<Content />
+		</Layout>
 	);
 };

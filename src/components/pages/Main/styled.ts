@@ -1,11 +1,11 @@
-import { motion } from "framer-motion";
 import styled from "styled-components";
 
 export const Content = styled.div`
-	height: 500rem;
+	/* height: 500rem; */
+	height: 100vh;
 `;
 
-export const Wrapper = styled(motion.div)`
+export const Wrapper = styled.div`
 	top: 0;
 	left: 0;
 	width: 100%;

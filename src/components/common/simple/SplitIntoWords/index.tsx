@@ -1,6 +1,6 @@
 import React, { memo, useMemo } from "react";
 
-import { splitIntoWords, calculateCurrentIndex } from "@core/utils";
+import { splitIntoWords, calculateCurrentIndex2D } from "@core/utils";
 
 export interface Props {
 	text: string | string[];
@@ -15,15 +15,15 @@ export interface Props {
 
 export const SplitIntoWords: React.FC<Props> = memo(({ text, children }) => {
 	const textAsArray = useMemo(() => (Array.isArray(text) ? text : [text]), [text]);
-	const textAsCharsArray = useMemo(
+	const textAsWordsArray = useMemo(
 		() => textAsArray.map((row) => splitIntoWords(row, true)) as string[][],
 		[textAsArray]
 	);
-	const count = useMemo(() => textAsCharsArray.flat(Infinity).length, [textAsCharsArray]);
+	const count = useMemo(() => textAsWordsArray.flat(Infinity).length, [textAsWordsArray]);
 
 	return (
 		<>
-			{textAsCharsArray.map((row, rowIndex) => (
+			{textAsWordsArray.map((row, rowIndex) => (
 				<p key={rowIndex}>
 					{row.map((word, index) => (
 						<span key={index} className='animated-inline-unit-wrapper'>
@@ -32,7 +32,7 @@ export const SplitIntoWords: React.FC<Props> = memo(({ text, children }) => {
 								index,
 								count,
 								rowIndex,
-								absoluteIndex: calculateCurrentIndex(textAsCharsArray, rowIndex, index),
+								absoluteIndex: calculateCurrentIndex2D(textAsWordsArray, rowIndex, index),
 							})}
 						</span>
 					))}
