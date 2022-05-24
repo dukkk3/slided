@@ -1,5 +1,5 @@
 import { createContext, useCallback, useMemo, useRef } from "react";
-import { Interpolation, SpringValue, useSpring, config } from "react-spring";
+import { Interpolation, SpringValue, useSpring } from "react-spring";
 
 import { useLocalStore } from "@core/hooks";
 import { clamp } from "@core/utils";
@@ -12,6 +12,7 @@ export type Context = {
 	};
 	store: {
 		progress: number;
+		compare: (a: number, type: CompareKind) => boolean;
 		inRange: (a: number, b?: number) => boolean;
 		toRange: (a: number, b: number) => number;
 	};
@@ -35,6 +36,9 @@ export const IterationControls: React.FC<Props> = ({ children, iterations }) => 
 		},
 		toRange: function (a: number, b: number) {
 			return rangeImpl(this.progress * iterations, a, b);
+		},
+		compare: function (a: number, type: CompareKind) {
+			return compareImpl(this.progress * iterations, a, type);
 		},
 	});
 	const [{ value: animatedProgress }, animatedProgressApi] = useSpring(() => ({
@@ -132,4 +136,19 @@ function inRangeImpl(iterations: number, progress: number, a: number, b?: number
 
 function rangeImpl(value: number, a: number, b: number) {
 	return value < a ? 0 : value >= b ? 1 : (value - a) / (b - a);
+}
+
+type CompareKind = "gte" | "gt" | "lt" | "lte";
+
+function compareImpl(value: number, a: number, type: CompareKind) {
+	switch (type) {
+		case "gt":
+			return a > value;
+		case "gte":
+			return a >= value;
+		case "lt":
+			return a < value;
+		case "lte":
+			return a <= value;
+	}
 }

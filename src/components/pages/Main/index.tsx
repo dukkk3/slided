@@ -5,6 +5,7 @@ import { PromoContainer } from "@components/containers/layout/PromoContainer";
 import { TableBackground } from "@components/containers/sections/TableBackground";
 import { PromoBannerLayer } from "@components/containers/sections/PromoBannerLayer";
 import { AssistantLayer } from "@components/containers/sections/AssistantLayer";
+import { PhoneLayer } from "@components/containers/sections/PhoneLayer";
 
 import { useIterationControls } from "@core/hooks";
 
@@ -27,11 +28,12 @@ const Content: React.FC = () => {
 
 	useEffect(() => {
 		document.addEventListener("keydown", handleDocumentKeydown);
+		iterationControls.set(4);
 
 		return () => {
 			document.removeEventListener("keydown", handleDocumentKeydown);
 		};
-	}, [handleDocumentKeydown]);
+	}, [handleDocumentKeydown, iterationControls]);
 
 	return (
 		<S.Wrapper>
@@ -40,8 +42,14 @@ const Content: React.FC = () => {
 			</S.TableBackgroundWrapper>
 			<S.LayerWrapper>
 				<PromoContainer>
-					{[<PromoBannerLayer />, <AssistantLayer />].map((content, index) => (
-						<S.LayerWrapper key={index}>{content}</S.LayerWrapper>
+					{[
+						{ fullscreen: true, component: <PromoBannerLayer /> },
+						{ fullscreen: true, component: <PhoneLayer /> },
+						{ fullscreen: false, component: <AssistantLayer /> },
+					].map(({ fullscreen, component }, index) => (
+						<S.LayerWrapper key={index} $fullscreen={fullscreen}>
+							{component}
+						</S.LayerWrapper>
 					))}
 				</PromoContainer>
 			</S.LayerWrapper>

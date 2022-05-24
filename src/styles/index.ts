@@ -79,7 +79,7 @@ export const GlobalStyle = createGlobalStyle`
     }
 
     .animated-inline-unit {
-	    will-change: transform;
+	    will-change: transform, opacity;
     }
 
     p, p span {

@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useMemo } from "react";
 
 import { useIterationControls } from "@core/hooks";
 import { clamp } from "@core/utils";
@@ -14,17 +14,13 @@ export function useIteration(iteration: number, offset: number = 0.5) {
 		[iteration, iterationControls.iterations, offset]
 	);
 
-	const inRange = useCallback(() => {
-		return iterationControls.store.inRange(start, end);
-	}, [end, iterationControls, start]);
-
 	const interpolations = useMemo(
 		() => [
 			iterationControls.animated.toRange(start, iteration),
 			iterationControls.animated.toRange(iteration, end),
 		],
-		[iterationControls, start, iteration, end]
+		[end, iteration, iterationControls, start]
 	);
 
-	return { interpolations, inRange };
+	return { start, end, center: iteration, interpolations };
 }

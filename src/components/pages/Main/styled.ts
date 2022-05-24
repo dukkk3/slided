@@ -13,16 +13,22 @@ export const Wrapper = styled.div`
 	position: absolute;
 `;
 
-export const LayerWrapper = styled.div`
+interface LayerWrapperProps {
+	$fullscreen?: boolean;
+}
+
+export const LayerWrapper = styled.div<LayerWrapperProps>`
 	top: 0;
 	left: 0;
 	width: 100%;
-	height: 100%;
 	position: absolute;
+	height: ${(props) => props.$fullscreen && "100%"};
+	max-height: ${(props) => !props.$fullscreen && "100%"};
 `;
 
 export const TableBackgroundWrapper = styled(LayerWrapper)`
 	z-index: 0;
+	height: 100%;
 `;
 
 export const PulseCircleWrapper = styled.div`

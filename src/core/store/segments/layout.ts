@@ -9,5 +9,7 @@ export const layout = {
 	promo: schemaHelper.generateStoreSchema({
 		sequenceOpeningAnimationEnded: false,
 		promoBannerOpeningAnimationEnded: false,
+		endPointFaceContainerSize: { width: 0, height: 0 },
+		endPointFaceOffset: { top: 0, left: 0 },
 	}),
 };

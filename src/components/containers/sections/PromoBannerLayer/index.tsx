@@ -5,13 +5,16 @@ import { SplitIntoWords } from "@components/common/simple/SplitIntoWords";
 
 import { Button } from "@components/common/ui/Button";
 
-import { useIterationControls } from "@core/hooks";
+import { useIteration, useIterationControls } from "@core/hooks";
 
 import * as S from "./styled";
 
 export const PromoBannerLayer: React.FC = () => {
 	const iterationControls = useIterationControls();
-	const commonInterpolatedValue = iterationControls.animated.toRange(0, 0.5);
+
+	const {
+		interpolations: [, iteration0ClosingInterpolation],
+	} = useIteration(0);
 
 	return (
 		<S.PromoBannerLayer>
@@ -27,8 +30,8 @@ export const PromoBannerLayer: React.FC = () => {
 												key={absoluteIndex}
 												className='animated-inline-unit'
 												style={{
-													y: commonInterpolatedValue.to((value) => `-${100 * value}%`),
-													opacity: commonInterpolatedValue.to((value) => 1 - value),
+													y: iteration0ClosingInterpolation.to((value) => `-${100 * value}%`),
+													opacity: iteration0ClosingInterpolation.to((value) => 1 - value),
 												}}>
 												{word}
 											</a.span>
@@ -42,10 +45,8 @@ export const PromoBannerLayer: React.FC = () => {
 												key={absoluteIndex}
 												className='animated-inline-unit'
 												style={{
-													y: commonInterpolatedValue
-														// .to((value) => iterationControls.range(value, absoluteIndex / count, 1))
-														.to((value) => `-${100 * value}%`),
-													opacity: commonInterpolatedValue.to((value) => 1 - value),
+													y: iteration0ClosingInterpolation.to((value) => `-${100 * value}%`),
+													opacity: iteration0ClosingInterpolation.to((value) => 1 - value),
 												}}>
 												{word}
 											</a.span>
@@ -55,8 +56,8 @@ export const PromoBannerLayer: React.FC = () => {
 							</S.Head>
 							<a.div
 								style={{
-									y: commonInterpolatedValue.to((value) => `-${100 * value}%`),
-									opacity: commonInterpolatedValue.to((value) => 1 - value),
+									y: iteration0ClosingInterpolation.to((value) => `-${100 * value}%`),
+									opacity: iteration0ClosingInterpolation.to((value) => 1 - value),
 								}}>
 								<Button size='m'>Get started</Button>
 							</a.div>
