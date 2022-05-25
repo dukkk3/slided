@@ -35,12 +35,12 @@ export const AssistantLayer: React.FC = () => {
 	const {
 		interpolations: [iteration1OpeningInterpolation, iteration1ClosingInterpolation],
 		...iteration1
-	} = useIteration(1, 0.25, 0.25);
+	} = useIteration(1);
 
 	const {
 		interpolations: [iteration2OpeningInterpolation, iteration2ClosingInterpolation],
 		...iteration2
-	} = useIteration(2, 0.25, 0.25);
+	} = useIteration(2);
 
 	const iteration3 = useIteration(3);
 

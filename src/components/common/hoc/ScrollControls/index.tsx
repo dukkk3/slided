@@ -119,7 +119,7 @@ export const ScrollControls: React.FC<Props> = ({ children, pages, enabled = tru
 						</S.Content>
 					</context.Provider>
 				</S.Fixed>
-				<S.Fill ref={fillRef} style={{ height: `${pages * 100}vh` }} />
+				<S.Fill ref={fillRef} style={{ height: `${pages * 300}vh` }} />
 			</S.Container>
 		</S.ScrollControls>
 	);

@@ -11,12 +11,18 @@ import { PhoneLayer } from "@components/containers/sections/PhoneLayer";
 
 import { DebugIterationControls } from "@components/common/simple/DebugIterationControls";
 
-import { useIterationControls } from "@core/hooks";
+import { useIteration, useIterationControls } from "@core/hooks";
 
 import * as S from "./styled";
 
 const Content: React.FC = () => {
 	const iterationControls = useIterationControls();
+
+	const iteration0 = useIteration(0);
+	const iteration2 = useIteration(2);
+	const iteration3 = useIteration(3);
+
+	console.log({ iteration0, iteration2 });
 
 	// const handleDocumentKeydown = useCallback(
 	// 	(event: KeyboardEvent) => {
@@ -58,17 +64,17 @@ const Content: React.FC = () => {
 						{
 							fullscreen: true,
 							component: <PromoBannerLayer />,
-							isVisible: () => iterationControls.store.compare(0.5, "gt"),
+							isVisible: () => iterationControls.store.compare(iteration0.end, "gt"),
 						},
 						{
 							fullscreen: true,
 							component: <PhoneLayer />,
-							isVisible: () => iterationControls.store.compare(2.5, "lte"),
+							isVisible: () => iterationControls.store.compare(iteration2.center, "lte"),
 						},
 						{
 							fullscreen: false,
 							component: <AssistantLayer />,
-							isVisible: () => iterationControls.store.compare(0.75, "lte"),
+							isVisible: () => iterationControls.store.compare(iteration0.center, "lte"),
 						},
 					].map(({ fullscreen, component, isVisible }, index) => (
 						<Observer key={index}>

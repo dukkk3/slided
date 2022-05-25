@@ -6,7 +6,7 @@ import { SplitIntoWords } from "@components/common/simple/SplitIntoWords";
 
 import { Button } from "@components/common/ui/Button";
 
-import { useGlobalStore, useIteration } from "@core/hooks";
+import { useGlobalStore, useIteration, useIterationControls } from "@core/hooks";
 import { splitRowsIntoWords } from "@core/utils";
 
 import * as S from "./styled";
@@ -23,6 +23,7 @@ export const PromoBannerLayer: React.FC = () => {
 		opacity: 0,
 	}));
 	const [buttonStyle, buttonStyleApi] = useSpring(() => ({ opacity: 0, y: "-2rem" }));
+	const iterationControls = useIterationControls();
 
 	const {
 		interpolations: [, iteration0ClosingInterpolation],
@@ -57,16 +58,22 @@ export const PromoBannerLayer: React.FC = () => {
 					<S.TitleWrapper>
 						<Observer>
 							{() => (
-								<SplitIntoWords words={titleWords} rerenderFlag={promoStore.interactiveEnabled()}>
-									{({ word, absoluteIndex }) => (
+								<SplitIntoWords
+									words={titleWords}
+									rerenderFlag={promoStore.interactiveEnabled()}
+									hidden={false}>
+									{({ word, rowIndex, rowsCount, absoluteIndex }) => (
 										<a.span
 											key={absoluteIndex}
-											className='animated-inline-unit'
 											style={
 												promoStore.interactiveEnabled()
 													? {
-															y: iteration0ClosingInterpolation.to((value) => `-${100 * value}%`),
-															opacity: iteration0ClosingInterpolation.to((value) => 1 - value),
+															y: iteration0ClosingInterpolation
+																.to((value) => iterationControls.range(value, rowIndex / rowsCount, 1))
+																.to((value) => `-${100 * value}%`),
+															opacity: iteration0ClosingInterpolation
+																.to((value) => iterationControls.range(value, rowIndex / rowsCount, 1))
+																.to((value) => 1 - value),
 													  }
 													: titleWordsStyles[absoluteIndex]
 											}>
@@ -80,16 +87,23 @@ export const PromoBannerLayer: React.FC = () => {
 					<S.SubtitleWrapper>
 						<Observer>
 							{() => (
-								<SplitIntoWords words={subtitleWords} rerenderFlag={promoStore.interactiveEnabled()}>
-									{({ word, absoluteIndex }) => (
+								<SplitIntoWords
+									words={subtitleWords}
+									rerenderFlag={promoStore.interactiveEnabled()}
+									hidden={false}>
+									{({ word, count, absoluteIndex }) => (
 										<a.span
 											key={absoluteIndex}
 											className='animated-inline-unit'
 											style={
 												promoStore.interactiveEnabled()
 													? {
-															y: iteration0ClosingInterpolation.to((value) => `-${100 * value}%`),
-															opacity: iteration0ClosingInterpolation.to((value) => 1 - value),
+															y: iteration0ClosingInterpolation
+																.to((value) => iterationControls.range(value, absoluteIndex / count, 1))
+																.to((value) => `-${100 * value}%`),
+															opacity: iteration0ClosingInterpolation
+																.to((value) => iterationControls.range(value, absoluteIndex / count, 1))
+																.to((value) => 1 - value),
 													  }
 													: subtitleWordsStyles[absoluteIndex]
 											}>

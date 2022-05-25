@@ -20,8 +20,8 @@ export function useIteration(
 
 	const interpolations = useMemo(
 		() => [
-			iterationControls.animated.toRange(start, iteration),
-			iterationControls.animated.toRange(iteration, end),
+			iterationControls.animated.toRange(start, iteration - 0.2),
+			iterationControls.animated.toRange(iteration + 0.2, end),
 		],
 		[end, iteration, iterationControls, start]
 	);

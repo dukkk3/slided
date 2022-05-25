@@ -7,17 +7,19 @@ export interface Props {
 	text?: string | string[];
 	words?: string[][];
 	rerenderFlag?: boolean;
+	hidden?: boolean;
 	children: (props: {
 		word: string;
 		index: number;
 		count: number;
 		rowIndex: number;
+		rowsCount: number;
 		absoluteIndex: number;
 	}) => React.ReactNode;
 }
 
 export const SplitIntoWords: React.FC<Props> = memo(
-	({ text, words, children }) => {
+	({ text, words, children, hidden = true }) => {
 		const wordsAreReceived = useMemo(() => !text && Boolean(words), [text, words]);
 		const target = useMemo(() => (text || words) as string[], [text, words]);
 		const textAsArray = useMemo(() => (Array.isArray(target) ? target : [target]), [target]);
@@ -29,18 +31,23 @@ export const SplitIntoWords: React.FC<Props> = memo(
 			[textAsArray, words, wordsAreReceived]
 		);
 		const count = useMemo(() => textAsWordsArray.flat(Infinity).length, [textAsWordsArray]);
-		console.log(textAsWordsArray);
+		const rowsCount = useMemo(() => textAsWordsArray.length, [textAsWordsArray]);
+
 		return (
 			<>
 				{textAsWordsArray.map((row, rowIndex) => (
 					<p key={rowIndex}>
 						{row.map((word, index) => (
-							<span key={index} className='animated-inline-unit-wrapper'>
+							<span
+								key={index}
+								className='animated-inline-unit-wrapper'
+								style={!hidden ? { overflow: "initial" } : {}}>
 								{children({
 									word,
 									index,
 									count,
 									rowIndex,
+									rowsCount,
 									absoluteIndex: calculateCurrentIndex2D(textAsWordsArray, rowIndex, index),
 								})}
 							</span>
