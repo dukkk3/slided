@@ -3,5 +3,7 @@ export * from "./useIteration";
 export * from "./useLocalStore";
 export * from "./useBreakpoint";
 export * from "./useGlobalStore";
+export * from "./useScrollControls";
 export * from "./useResizeObserver";
 export * from "./useIterationControls";
+export * from "./useSharedIterationsContextFactory";

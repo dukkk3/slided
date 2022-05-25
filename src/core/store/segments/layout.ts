@@ -11,5 +11,8 @@ export const layout = {
 		promoBannerOpeningAnimationEnded: false,
 		endPointFaceContainerSize: { width: 0, height: 0 },
 		endPointFaceOffset: { top: 0, left: 0 },
+		interactiveEnabled: function () {
+			return this.sequenceOpeningAnimationEnded && this.promoBannerOpeningAnimationEnded;
+		},
 	}),
 };

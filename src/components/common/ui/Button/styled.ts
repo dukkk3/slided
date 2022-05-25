@@ -28,6 +28,7 @@ export const Button = styled.button<ButtonProps>`
 	padding: ${(props) => getButtonSize(props.$size, props.theme).padding};
 	font-size: ${(props) => getButtonSize(props.$size, props.theme).fontSize};
 	border-radius: 0.5rem;
+	text-align: center;
 	font-weight: 700;
 	color: black;
 `;

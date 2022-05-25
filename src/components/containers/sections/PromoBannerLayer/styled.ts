@@ -5,7 +5,7 @@ export const PromoBannerLayer = styled.div`
 	height: 100%;
 	display: flex;
 	justify-content: center;
-	align-items: center;
+	/* align-items: center; */
 	text-align: center;
 `;
 
@@ -18,9 +18,10 @@ export const TitleWrapper = styled.div`
 export const SubtitleWrapper = styled.div`
 	font-weight: 600;
 	font-size: 2rem;
-	margin-top: 2rem;
+	margin-top: 1.4rem;
 `;
 
 export const Head = styled.div`
 	margin-bottom: 4.4rem;
+	margin-top: 6.5rem;
 `;

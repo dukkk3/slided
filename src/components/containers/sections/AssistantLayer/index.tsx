@@ -35,12 +35,12 @@ export const AssistantLayer: React.FC = () => {
 	const {
 		interpolations: [iteration1OpeningInterpolation, iteration1ClosingInterpolation],
 		...iteration1
-	} = useIteration(1);
+	} = useIteration(1, 0.25, 0.25);
 
 	const {
 		interpolations: [iteration2OpeningInterpolation, iteration2ClosingInterpolation],
 		...iteration2
-	} = useIteration(2);
+	} = useIteration(2, 0.25, 0.25);
 
 	const iteration3 = useIteration(3);
 
@@ -98,7 +98,9 @@ export const AssistantLayer: React.FC = () => {
 				() =>
 					iterationControls.store.compare(iteration1.start, "lte") &&
 					iterationControls.store.toRange(iteration1.start, iteration1.center) >= 1,
-				(animated) => {
+				(animated, prevAnimated) => {
+					if (animated === prevAnimated) return;
+
 					if (animated) {
 						facePulseApi.start({
 							to: { scale: 1 },
@@ -154,7 +156,9 @@ export const AssistantLayer: React.FC = () => {
 							</S.AssistantFaceCircle>
 						</S.AssistantFaceBackground>
 						<S.AssistantFaceContentLayer>
-							<S.AssistantFaceVideoWrapper style={{ scale: iteration1OpeningInterpolation }}>
+							<S.AssistantFaceVideoWrapper
+								className='safari-border-radius-overflow-bugfix'
+								style={{ scale: iteration1OpeningInterpolation }}>
 								<a.video
 									src={getVideoByName("BasicGirlSource")}
 									muted
@@ -168,58 +172,69 @@ export const AssistantLayer: React.FC = () => {
 					</S.AssistantFace>
 				</S.AssistantFaceContainer>
 				<Observer>
-					{() =>
-						iterationControls.store.inRange(iteration1.start, iteration2.end) ? (
-							<S.Description>
-								<S.DescriptionContent>
-									<Observer>
-										{() =>
-											iterationControls.store.inRange(iteration1.start, iteration1.end) ? (
-												<SplitIntoChars text={["Let’s see how it works.", "Upload your content."]}>
-													{({ char, absoluteIndex, count }) => (
-														<a.span
-															className='animated-inline-unit'
-															style={{
-																opacity: iterationControls.store.inRange(iteration1.start, iteration1.end)
-																	? iteration1OpeningInterpolation.to((value) =>
-																			iterationControls.range(value, absoluteIndex / count, 1)
-																	  )
-																	: iteration1ClosingInterpolation.to((value) => 1 - value),
-															}}>
-															{char}
-														</a.span>
-													)}
-												</SplitIntoChars>
-											) : null
-										}
-									</Observer>
-								</S.DescriptionContent>
-								<S.DescriptionContent>
-									<Observer>
-										{() =>
-											iterationControls.store.inRange(iteration2.start, iteration2.end) ? (
-												<SplitIntoChars text={["I’m here to organize it all", "into a neat structure"]}>
-													{({ char, absoluteIndex, count }) => (
-														<a.span
-															className='animated-inline-unit'
-															style={{
-																opacity: iterationControls.store.inRange(iteration2.start, iteration2.center)
-																	? iteration2OpeningInterpolation.to((value) =>
-																			iterationControls.range(value, absoluteIndex / count, 1)
-																	  )
-																	: iteration2ClosingInterpolation.to((value) => 1 - value),
-															}}>
-															{char}
-														</a.span>
-													)}
-												</SplitIntoChars>
-											) : null
-										}
-									</Observer>
-								</S.DescriptionContent>
-							</S.Description>
-						) : null
-					}
+					{() => (
+						<S.Description
+							style={
+								!iterationControls.store.inRange(iteration1.start, iteration2.end)
+									? { pointerEvents: "none", opacity: 0 }
+									: {}
+							}>
+							<Observer>
+								{() => (
+									<S.DescriptionContent
+										style={
+											!iterationControls.store.inRange(iteration1.start, iteration1.end)
+												? { pointerEvents: "none", opacity: 0 }
+												: {}
+										}>
+										<SplitIntoChars
+											text={["Let’s see how it works.", "Upload your content."]}
+											rerenderFlag={iterationControls.store.inRange(iteration1.start, iteration1.center)}>
+											{({ char, count, absoluteIndex }) => (
+												<a.span
+													style={{
+														opacity: iterationControls.store.inRange(iteration1.start, iteration1.center)
+															? iteration1OpeningInterpolation.to((value) =>
+																	iterationControls.range(value, absoluteIndex / count, 1)
+															  )
+															: iteration1ClosingInterpolation.to((value) => 1 - value),
+													}}>
+													{char}
+												</a.span>
+											)}
+										</SplitIntoChars>
+									</S.DescriptionContent>
+								)}
+							</Observer>
+							<Observer>
+								{() => (
+									<S.DescriptionContent
+										style={
+											!iterationControls.store.inRange(iteration2.start, iteration2.end)
+												? { pointerEvents: "none", opacity: 0 }
+												: {}
+										}>
+										<SplitIntoChars
+											text={["I’m here to organize it all", "into a neat structure"]}
+											rerenderFlag={iterationControls.store.inRange(iteration2.start, iteration2.center)}>
+											{({ char, count, absoluteIndex }) => (
+												<a.span
+													style={{
+														opacity: iterationControls.store.inRange(iteration2.start, iteration2.center)
+															? iteration2OpeningInterpolation.to((value) =>
+																	iterationControls.range(value, absoluteIndex / count, 1)
+															  )
+															: iteration2ClosingInterpolation.to((value) => 1 - value),
+													}}>
+													{char}
+												</a.span>
+											)}
+										</SplitIntoChars>
+									</S.DescriptionContent>
+								)}
+							</Observer>
+						</S.Description>
+					)}
 				</Observer>
 			</S.Layer>
 		</S.AssistantLayer>

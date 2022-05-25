@@ -3,7 +3,6 @@ import styled from "styled-components";
 
 export const AssistantLayer = styled.div`
 	width: 100%;
-	height: 100%;
 `;
 
 export const Layer = styled.div`
@@ -26,6 +25,7 @@ export const AssistantFace = styled(a.div)`
 	width: 100%;
 	height: 100%;
 	position: relative;
+	will-change: transform;
 `;
 
 export const AssistantFaceContentLayer = styled.div`
@@ -41,12 +41,13 @@ export const AssistantFaceVideoWrapper = styled(a.div)`
 	height: 100%;
 	overflow: hidden;
 	border-radius: 50%;
-	-webkit-mask-image: -webkit-radial-gradient(white, black);
+	will-change: transform;
 
 	video {
 		width: 100%;
 		height: 100%;
 		object-fit: cover;
+		will-change: transform;
 	}
 `;
 
@@ -67,6 +68,7 @@ export const AssistantFacePulse = styled(a.div)`
 	position: absolute;
 	border-radius: 50%;
 	background: rgba(255, 255, 255, 0.35);
+	will-change: transform;
 `;
 
 export const AssistantFaceCircle = styled.div`
@@ -103,7 +105,7 @@ export const Description = styled.div`
 	color: black;
 `;
 
-export const DescriptionContent = styled(a.div)`
+export const DescriptionContent = styled.div`
 	top: 0;
 	left: 0;
 	width: 100%;

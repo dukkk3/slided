@@ -2,7 +2,12 @@ import { useCallback, useEffect, useRef } from "react";
 import { reaction, transaction } from "mobx";
 import useAnimationFrame from "@phntms/use-animation-frame";
 
-import { useLocalStore, useGlobalStore, useResizeObserver } from "@core/hooks";
+import {
+	useLocalStore,
+	useGlobalStore,
+	useResizeObserver,
+	useIterationControls,
+} from "@core/hooks";
 import { drawImageCover, mergeRefs } from "@core/utils";
 import { imagesHelper } from "@core/helpers";
 
@@ -19,7 +24,9 @@ export const TableBackground: React.FC = () => {
 	const canvasRef = useRef<HTMLCanvasElement>(null!);
 	const containerRef = useRef<HTMLDivElement>(null);
 	const contextRef = useRef<CanvasRenderingContext2D>(null!);
+	const prevRenderedFrameIndexRef = useRef<number>(null!);
 	const promoStore = useGlobalStore((store) => store.layout.promo);
+	const iterationsControls = useIterationControls();
 	const canvasResizeObserver = useResizeObserver();
 	const localStore = useLocalStore({
 		animated: false,
@@ -36,19 +43,25 @@ export const TableBackground: React.FC = () => {
 	}, []);
 
 	const drawFrame = useCallback(
-		(index: number) => {
+		(index: number, rerendering = false) => {
+			if (prevRenderedFrameIndexRef.current === index && !rerendering) return;
+
 			const context = contextRef.current;
 			const sequenceFrame = sequence.getSequence()[index];
 			const { width, height } = canvasResizeObserver.getSize();
 
 			drawImageCover(context, sequenceFrame.image, 0, 0, width, height, 0.5, 0.5);
+			prevRenderedFrameIndexRef.current = index;
 		},
 		[canvasResizeObserver]
 	);
 
-	const drawCurrentFrame = useCallback(() => {
-		drawFrame(localStore.currentFrameIndex);
-	}, [drawFrame, localStore]);
+	const drawCurrentFrame = useCallback(
+		(rerendering = false) => {
+			drawFrame(localStore.currentFrameIndex, rerendering);
+		},
+		[drawFrame, localStore]
+	);
 
 	const updateTargetFrameIndex = useCallback(
 		(index: number) => {
@@ -70,6 +83,25 @@ export const TableBackground: React.FC = () => {
 		localStore.setStartFrameIndex(null);
 		localStore.setAnimated(false);
 	}, [localStore]);
+
+	const drawIterationSequence = useCallback(
+		(iteration: number) => {
+			if (!iterationsControls.store.inRange(iteration - 1, iteration)) return;
+
+			const [startIteration, endIteration] = [iterations[iteration - 1], iterations[iteration]];
+			const progress = iterationsControls.store.toRange(
+				iteration - 1,
+				iteration === 3 ? 2.5 : iteration
+			);
+
+			const diff = Math.abs(startIteration.frameIndex - endIteration.frameIndex);
+			const frameIndex = startIteration.frameIndex + Math.round(diff * progress);
+
+			localStore.setCurrentFrameIndex(frameIndex);
+			drawCurrentFrame();
+		},
+		[drawCurrentFrame, iterationsControls.store, localStore]
+	);
 
 	useAnimationFrame(() => {
 		const { currentFrameIndex, targetFrameIndex } = localStore;
@@ -107,17 +139,31 @@ export const TableBackground: React.FC = () => {
 
 					context.scale(dpr, dpr);
 
-					drawCurrentFrame();
+					drawCurrentFrame(true);
 				}
 			),
 		[canvasResizeObserver, drawCurrentFrame]
 	);
 
 	useEffect(() => {
+		if (iterationsControls.store.progress > 0.1) return;
 		updateTargetFrameIndex(iterations[0].frameIndex);
-		// localStore.setCurrentFrameIndex(iterations[0].frameIndex);
-		// drawCurrentFrame();
-	}, [drawCurrentFrame, localStore, updateTargetFrameIndex]);
+	}, [iterationsControls, updateTargetFrameIndex]);
+
+	useEffect(
+		() =>
+			reaction(
+				() => iterationsControls.store.toRange(0, iterations.length - 1),
+				(progress) => {
+					if (!promoStore.interactiveEnabled()) return;
+
+					drawIterationSequence(1);
+					drawIterationSequence(2);
+					drawIterationSequence(3);
+				}
+			),
+		[drawCurrentFrame, drawIterationSequence, iterationsControls, localStore, promoStore]
+	);
 
 	useEffect(
 		() =>

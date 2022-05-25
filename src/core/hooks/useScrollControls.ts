@@ -1,8 +1,7 @@
 import { useContext } from "react";
 
 import { context } from "@components/common/hoc/ScrollControls";
-// import { context } from "@components/common/hoc/IterationControls";
 
-export function useIterationControls() {
+export function useScrollControls() {
 	return useContext(context);
 }

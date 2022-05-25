@@ -1,17 +1,20 @@
 import React, { useCallback, useEffect } from "react";
+import { Observer } from "mobx-react-lite";
 import { reaction } from "mobx";
 
 import { Header } from "@components/containers/layout/Header";
 
+import { ScrollControls } from "@components/common/hoc/ScrollControls";
 import { IterationControls } from "@components/common/hoc/IterationControls";
 
-import { useResizeObserver } from "@core/hooks";
+import { useGlobalStore, useResizeObserver } from "@core/hooks";
 
 import * as S from "./styled";
 
 export interface Props extends React.PropsWithChildren<{}> {}
 
 export const Layout: React.FC<Props> = ({ children }) => {
+	const promoStore = useGlobalStore((store) => store.layout.promo);
 	const headerResizeObserver = useResizeObserver({ calculateSizeWithPaddings: true });
 
 	const updateCSSProperties = useCallback(() => {
@@ -36,7 +39,14 @@ export const Layout: React.FC<Props> = ({ children }) => {
 				<Header />
 			</S.HeaderWrapper>
 			<main>
-				<IterationControls iterations={10}>{children}</IterationControls>
+				<Observer>
+					{() => (
+						// <IterationControls iterations={10}>{children}</IterationControls>
+						<ScrollControls pages={6} enabled={promoStore.interactiveEnabled()}>
+							{children}
+						</ScrollControls>
+					)}
+				</Observer>
 			</main>
 		</S.Layout>
 	);

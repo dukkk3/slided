@@ -69,17 +69,21 @@ export const GlobalStyle = createGlobalStyle`
         transition: opacity 250ms ease;
     }
 
-    .animated-inline-unit-wrapper, .animated-inline-unit {
-        white-space: pre;
-        display: inline-block;
-    }
-
     .animated-inline-unit-wrapper {
         overflow: hidden;
     }
 
-    .animated-inline-unit {
+    .animated-inline-unit-wrapper, .animated-inline-unit-wrapper > span {
+        white-space: pre;
+        display: inline-block;
+    }
+
+    .animated-inline-unit-wrapper > span {
 	    will-change: transform, opacity;
+    }
+
+    .safari-border-radius-overflow-bugfix {
+        -webkit-mask-image: -webkit-radial-gradient(white, black);
     }
 
     p, p span {

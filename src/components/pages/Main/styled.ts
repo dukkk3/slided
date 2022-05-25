@@ -1,3 +1,4 @@
+import { a } from "react-spring";
 import styled from "styled-components";
 
 export const Content = styled.div`
@@ -5,12 +6,14 @@ export const Content = styled.div`
 	height: 100vh;
 `;
 
-export const Wrapper = styled.div`
+export const Wrapper = styled(a.div)`
 	top: 0;
 	left: 0;
 	width: 100%;
 	height: 100vh;
 	position: absolute;
+	will-change: transform;
+	backface-visibility: hidden;
 `;
 
 interface LayerWrapperProps {

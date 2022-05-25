@@ -35,6 +35,14 @@ export function splitIntoWords(string: string, includeSpaces: boolean = false) {
 		.flatMap((word, index) => (includeSpaces && index !== 0 ? [" ", word] : [word]));
 }
 
+export function splitRowsIntoChars(rows: string[]) {
+	return rows.map((row) => splitIntoWords(row, true).map((word) => splitIntoChars(word)));
+}
+
+export function splitRowsIntoWords(rows: string[]) {
+	return rows.map((row) => splitIntoWords(row, true));
+}
+
 export function mergeRefs<E = any>(...refs: (React.ForwardedRef<any> | null | undefined)[]) {
 	const filteredRefs = refs.filter(Boolean);
 
@@ -101,7 +109,7 @@ export function damp(x: number, y: number, lambda: number, dt: number) {
 }
 
 export function calculateCurrentIndex2D(array: any[], x: number, y: number) {
-	return array.slice(0, x + 1).reduce((acc, row) => acc + row.length, 0) + y;
+	return array.slice(0, x).reduce((acc, row) => acc + row.length, 0) + y;
 }
 
 export function calculateCurrentIndex3D(array: any[][], x: number, y: number, z: number) {
