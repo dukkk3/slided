@@ -3,6 +3,8 @@ import { useMemo } from "react";
 import { useIterationControls } from "@core/hooks";
 import { clamp } from "@core/utils";
 
+const OFFSET = 0.15;
+
 export function useIteration(
 	iteration: number,
 	startOffset: number = 0.5,
@@ -20,8 +22,10 @@ export function useIteration(
 
 	const interpolations = useMemo(
 		() => [
-			iterationControls.animated.toRange(start, iteration - 0.2),
-			iterationControls.animated.toRange(iteration + 0.2, end),
+			iterationControls.animated.toRange(start, iteration - OFFSET),
+			iterationControls.animated.toRange(iteration + OFFSET, end),
+			// iterationControls.animated.toRange(start, iteration - 0.2),
+			// iterationControls.animated.toRange(iteration + 0.2, end),
 		],
 		[end, iteration, iterationControls, start]
 	);

@@ -271,3 +271,46 @@ export function generateRandomInteger(min: number, max: number) {
 	max = Math.floor(max);
 	return Math.floor(Math.random() * (max - min) + min);
 }
+
+export function debounce<T extends any[]>(callback: (...args: T) => void, time: number) {
+	let isCooldown = false;
+
+	return (...args: T) => {
+		if (isCooldown) {
+			return;
+		}
+
+		callback(...args);
+
+		isCooldown = true;
+
+		setTimeout(() => (isCooldown = false), time);
+	};
+}
+
+export function throttle<T extends any[]>(callback: (...args: T) => void, time: number) {
+	let isThrottled = false;
+	let savedArgs: T | null = null;
+
+	function wrapper(...args: T) {
+		if (isThrottled) {
+			// savedArgs = args;
+			return;
+		}
+
+		callback(...args);
+
+		isThrottled = true;
+
+		setTimeout(function () {
+			isThrottled = false;
+
+			if (savedArgs) {
+				wrapper(...savedArgs);
+				savedArgs = null;
+			}
+		}, time);
+	}
+
+	return wrapper;
+}

@@ -10,7 +10,7 @@ export const Header: React.FC = () => {
 		<S.Header>
 			<S.Container>
 				<S.Logo>
-					<Image src={getVectorImageByName("LogoSource")} lazy={false} />
+					<Image src={getVectorImageByName("common", "LogoSource")} lazy={false} />
 				</S.Logo>
 				<S.Navbar>
 					<S.NavItem>

@@ -1,9 +1,10 @@
-import { createContext, useCallback, useEffect, useLayoutEffect } from "react";
-import { Interpolation } from "react-spring";
+import { createContext, useCallback, useEffect, useLayoutEffect, useMemo } from "react";
+import { easings, Interpolation } from "react-spring";
 import { reaction } from "mobx";
 import useRefs from "react-use-refs";
 
 import {
+	useQueryParams,
 	useResizeObserver,
 	IterationsContext,
 	useSharedIterationsContextFactory,
@@ -26,12 +27,22 @@ export const ScrollControls: React.FC<Props> = ({ children, pages, enabled = tru
 	const [containerRef, fixedRef, fillRef, contentRef] = useRefs<HTMLDivElement>(null);
 	const containerResizeObserver = useResizeObserver({ ref: containerRef });
 	const contentResizeObserver = useResizeObserver({ ref: contentRef });
+	const queryParams = useQueryParams();
+	const fixedIteration = useMemo(() => queryParams.get("type") === "fixed", [queryParams]);
 	const iterationsContext = useSharedIterationsContextFactory({
 		iterations: pages,
-		animationConfig: {
-			tension: 280,
-			friction: 80,
-		},
+		animationConfig: false
+			? {
+					duration: 2000,
+					easing: easings.linear,
+			  }
+			: { tension: 260, friction: 120, mass: 0.85 },
+		animationConfigLinear: fixedIteration
+			? {
+					easing: easings.linear,
+					duration: 2000,
+			  }
+			: { tension: 220, friction: 80, mass: 0.5 },
 	});
 
 	const scrollTop = iterationsContext.animated.progress.to((value) => {
@@ -57,9 +68,11 @@ export const ScrollControls: React.FC<Props> = ({ children, pages, enabled = tru
 		const container = containerRef.current!;
 		const { scrollTop, scrollHeight } = container;
 		const progress = calculateProgress(scrollTop, scrollHeight);
+		// const iteration = Math.round(progress * pages);
+		const iteration = fixedIteration ? Math.floor(progress * pages) : progress * pages;
 
-		iterationsContext.animate(progress * pages);
-	}, [calculateProgress, containerRef, enabled, iterationsContext, pages]);
+		iterationsContext.animate(iteration);
+	}, [calculateProgress, containerRef, enabled, iterationsContext, pages, fixedIteration]);
 
 	const scrollTo = useCallback(
 		(y: number) => {
@@ -119,7 +132,7 @@ export const ScrollControls: React.FC<Props> = ({ children, pages, enabled = tru
 						</S.Content>
 					</context.Provider>
 				</S.Fixed>
-				<S.Fill ref={fillRef} style={{ height: `${pages * 300}vh` }} />
+				<S.Fill ref={fillRef} style={{ height: `${pages * 200}vh` }} />
 			</S.Container>
 		</S.ScrollControls>
 	);

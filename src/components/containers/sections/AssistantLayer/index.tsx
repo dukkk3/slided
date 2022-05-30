@@ -195,7 +195,7 @@ export const AssistantLayer: React.FC = () => {
 													style={{
 														opacity: iterationControls.store.inRange(iteration1.start, iteration1.center)
 															? iteration1OpeningInterpolation.to((value) =>
-																	iterationControls.range(value, absoluteIndex / count, 1)
+																	iterationControls.range(value, absoluteIndex / (count - 1), 1)
 															  )
 															: iteration1ClosingInterpolation.to((value) => 1 - value),
 													}}>

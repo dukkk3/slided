@@ -26,8 +26,8 @@ export const DebugIterationControls: React.FC = memo(() => {
 					Iteration:{" "}
 					<a.span>
 						{
-							iterationControls.animated.progress.to(
-								(value) => value * iterationControls.iterations
+							iterationControls.animated.progress.to((value) =>
+								(value * iterationControls.iterations).toFixed(4)
 							) as unknown as number
 						}
 					</a.span>

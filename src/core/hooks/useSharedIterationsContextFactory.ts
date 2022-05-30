@@ -1,4 +1,4 @@
-import { useCallback } from "react";
+import { useCallback, useMemo, useRef } from "react";
 import { Interpolation, SpringValue, SpringConfig, useSpring } from "react-spring";
 
 import { useLocalStore } from "@core/hooks";
@@ -7,7 +7,14 @@ import { clamp } from "@core/utils";
 interface Options {
 	iterations: number;
 	animationConfig?: SpringConfig;
+	animationConfigLinear?: SpringConfig;
 }
+
+type Listener<T extends any[] = never[]> = (...args: T) => void;
+type Listeners = {
+	change: Set<Listener<[number]>>;
+	rest: Set<Listener>;
+};
 
 export interface IterationsContext {
 	animated: {
@@ -17,22 +24,45 @@ export interface IterationsContext {
 	};
 	store: {
 		progress: number;
+		readonly iteration: number;
 		compare: (a: number, type: CompareKind) => boolean;
+		inRange: (a: number, b?: number) => boolean;
+		toRange: (a: number, b: number) => number;
+	};
+	storeLinear: {
+		progress: number;
 		inRange: (a: number, b?: number) => boolean;
 		toRange: (a: number, b: number) => number;
 	};
 	range: (value: number, a: number, b: number) => number;
 	animate: (iteration: number) => void;
 	set: (iteration: number) => void;
+	addListener: <T extends keyof Listeners>(
+		type: T,
+		listener: Listeners[T] extends Set<infer R> ? R : never
+	) => () => void;
+	removeListener: <T extends keyof Listeners>(
+		type: T,
+		listener: Listeners[T] extends Set<infer R> ? R : never
+	) => void;
 	iterations: number;
 }
 
 export function useSharedIterationsContextFactory({
 	iterations,
 	animationConfig,
+	animationConfigLinear,
 }: Options): IterationsContext {
+	const listeners = useMemo<Listeners>(
+		() => ({ change: new Set<Listener<[number]>>(), rest: new Set<Listener>() }),
+		[]
+	);
+	const targetRef = useRef(0);
 	const localStore = useLocalStore<IterationsContext["store"]>({
 		progress: 0,
+		get iteration() {
+			return this.progress * iterations;
+		},
 		inRange: function (a: number, b?: number) {
 			return inRangeImpl(iterations, this.progress, a, b);
 		},
@@ -43,12 +73,38 @@ export function useSharedIterationsContextFactory({
 			return compareImpl(this.progress * iterations, a, type);
 		},
 	});
+	const localStoreLinear = useLocalStore<IterationsContext["storeLinear"]>({
+		progress: 0,
+		inRange: function (a: number, b?: number) {
+			return inRangeImpl(iterations, this.progress, a, b);
+		},
+		toRange: function (a: number, b: number) {
+			return rangeImpl(this.progress * iterations, a, b);
+		},
+	});
+	const [{ value: animatedProgressLinear }, animatedProgressLinearApi] = useSpring(() => ({
+		value: 0,
+		config: animationConfigLinear,
+		onChange: {
+			value: (value: number) => {
+				localStoreLinear.setProgress(value);
+			},
+		},
+	}));
 	const [{ value: animatedProgress }, animatedProgressApi] = useSpring(() => ({
 		value: 0,
 		config: animationConfig,
 		onChange: {
 			value: (value: number) => {
 				localStore.setProgress(value);
+				listeners.change.forEach((listener) => listener(value));
+			},
+		},
+		onRest: {
+			value: (payload) => {
+				if (payload.finished) {
+					listeners.rest.forEach((listener) => listener());
+				}
 			},
 		},
 	}));
@@ -76,16 +132,52 @@ export function useSharedIterationsContextFactory({
 
 	const set = useCallback(
 		(iteration: number) => {
-			animatedProgressApi.set({ value: toProgress(iteration) });
+			const progress = toProgress(iteration);
+			animatedProgressApi.set({ value: progress });
+			animatedProgressLinearApi.set({ value: progress });
 		},
-		[animatedProgressApi, toProgress]
+		[animatedProgressApi, animatedProgressLinearApi, toProgress]
 	);
 
 	const animate = useCallback(
 		(iteration: number) => {
-			animatedProgressApi.start({ value: toProgress(iteration) });
+			if (iteration === targetRef.current) return;
+			let config: SpringConfig | undefined;
+			const progress = toProgress(iteration);
+
+			// if (animationConfig?.duration) {
+			// 	const delta = Math.abs(localStore.progress - progress);
+			// 	const duration = animationConfig.duration * iterations * delta;
+			// 	config = { ...animationConfig, duration };
+			// }
+			// console.log({ delta, duration, a: animationConfig?.duration });
+			animatedProgressApi.start({ value: progress, config });
+			animatedProgressLinearApi.start({ value: progress, config });
+			targetRef.current = iteration;
 		},
-		[animatedProgressApi, toProgress]
+		[
+			animatedProgressApi,
+			animatedProgressLinearApi,
+			animationConfig,
+			iterations,
+			localStore.progress,
+			toProgress,
+		]
+	);
+
+	const removeListener = useCallback(
+		<T extends keyof Listeners>(type: T, listener: Listeners[T] extends Set<infer R> ? R : never) => {
+			listeners[type].delete(listener as any);
+		},
+		[listeners]
+	);
+
+	const addListener = useCallback(
+		<T extends keyof Listeners>(type: T, listener: Listeners[T] extends Set<infer R> ? R : never) => {
+			listeners[type].add(listener as any);
+			return () => removeListener(type, listener);
+		},
+		[listeners, removeListener]
 	);
 
 	return {
@@ -94,10 +186,13 @@ export function useSharedIterationsContextFactory({
 			inRange,
 			toRange,
 		},
+		storeLinear: localStoreLinear,
 		store: localStore,
 		range: rangeImpl,
 		iterations,
 		animate,
+		removeListener,
+		addListener,
 		set,
 	};
 }

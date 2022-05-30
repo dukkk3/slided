@@ -4,15 +4,22 @@ import * as rasterImages from "./raster";
 export type VectorImages = typeof vectorImages;
 export type RasterImages = typeof rasterImages;
 
-export type VectorImageNameKind = keyof VectorImages;
+export type VectorImageTypeKind = keyof VectorImages;
 export type RasterImageNameKind = keyof RasterImages;
 
-export function getVectorImageByName<T extends VectorImageNameKind>(name: T) {
-	const isComponent = typeof vectorImages[name] !== "string";
-	const Component = vectorImages[name] as any;
+export function getVectorImageByName<
+	T extends VectorImageTypeKind,
+	N extends keyof VectorImages[T]
+>(
+	type: T,
+	name: N,
+	props?: VectorImages[T][N] extends React.FC ? React.ComponentProps<"svg"> : never
+) {
+	const isComponent = typeof vectorImages[type][name] !== "string";
+	const Component = vectorImages[type][name] as any;
 	return (
-		isComponent ? <Component className='original' /> : vectorImages[name]
-	) as VectorImages[T] extends string ? string : React.ReactNode;
+		isComponent ? <Component {...(props || {})} /> : vectorImages[type][name]
+	) as VectorImages[T][N] extends string ? string : React.ReactNode;
 }
 
 export function getRasterImageByName(name: RasterImageNameKind) {
