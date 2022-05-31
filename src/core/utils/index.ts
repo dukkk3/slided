@@ -217,6 +217,14 @@ export function scrollTo(scroll: number) {
 	}
 }
 
+export function calculateScale(a: number, b: number) {
+	return a / b;
+}
+
+export function calculateCoord(a: number, b: number, aSize: number, bSize: number) {
+	return b - a + (bSize - aSize) / 2;
+}
+
 export function drawImageCover(
 	ctx: CanvasRenderingContext2D,
 	img: CanvasImageSource,

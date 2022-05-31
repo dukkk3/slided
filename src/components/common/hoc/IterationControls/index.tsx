@@ -1,9 +1,9 @@
 import { createContext, useCallback, useRef } from "react";
 
-import { useSharedIterationsContextFactory, IterationsContext } from "@core/hooks";
+import { useIterationControlsContext, IterationControlsContext } from "@core/hooks";
 import { clamp } from "@core/utils";
 
-export interface Context extends IterationsContext {
+export interface Context extends IterationControlsContext {
 	getTarget: () => number;
 }
 
@@ -13,7 +13,7 @@ export interface Props extends React.PropsWithChildren<{}> {
 
 export const IterationControls: React.FC<Props> = ({ children, iterations }) => {
 	const targetRef = useRef(0);
-	const iterationsContext = useSharedIterationsContextFactory({
+	const iterationsContext = useIterationControlsContext({
 		iterations,
 		animationConfig: {
 			tension: 280,

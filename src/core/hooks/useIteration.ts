@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
 import { useIterationControls } from "@core/hooks";
 import { clamp } from "@core/utils";
@@ -11,6 +11,8 @@ export function useIteration(
 	endOffset: number = 0.5
 ) {
 	const iterationControls = useIterationControls();
+	const fromStartCenter = useMemo(() => iteration - OFFSET, [iteration]);
+	const toEndCenter = useMemo(() => iteration + OFFSET, [iteration]);
 	const start = useMemo(
 		() => clamp(iteration - startOffset, 0, iterationControls.iterations),
 		[iteration, iterationControls.iterations, startOffset]
@@ -20,15 +22,34 @@ export function useIteration(
 		[endOffset, iteration, iterationControls]
 	);
 
+	const visible = useCallback(() => {
+		return iterationControls.store.inRange(start, end);
+	}, [end, iterationControls, start]);
+
 	const interpolations = useMemo(
-		() => [
-			iterationControls.animated.toRange(start, iteration - OFFSET),
-			iterationControls.animated.toRange(iteration + OFFSET, end),
-			// iterationControls.animated.toRange(start, iteration - 0.2),
-			// iterationControls.animated.toRange(iteration + 0.2, end),
-		],
-		[end, iteration, iterationControls, start]
+		() => ({
+			opening: iterationControls.animated.toRange(start, fromStartCenter),
+			closing: iterationControls.animated.toRange(toEndCenter, end),
+		}),
+		[end, fromStartCenter, iterationControls, start, toEndCenter]
 	);
 
-	return { start, end, center: iteration, interpolations };
+	const ranges = useMemo(
+		() => ({
+			opening: () => iterationControls.store.toRange(start, fromStartCenter),
+			closing: () => iterationControls.store.toRange(toEndCenter, end),
+		}),
+		[end, fromStartCenter, iterationControls, start, toEndCenter]
+	);
+
+	return {
+		end,
+		start,
+		visible,
+		toEndCenter,
+		fromStartCenter,
+		center: iteration,
+		interpolations,
+		ranges,
+	};
 }

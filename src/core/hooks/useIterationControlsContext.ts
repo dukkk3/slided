@@ -16,7 +16,7 @@ type Listeners = {
 	rest: Set<Listener>;
 };
 
-export interface IterationsContext {
+export interface IterationControlsContext {
 	animated: {
 		progress: SpringValue<number>;
 		toRange: (a: number, b: number) => Interpolation<number, number>;
@@ -48,17 +48,17 @@ export interface IterationsContext {
 	iterations: number;
 }
 
-export function useSharedIterationsContextFactory({
+export function useIterationControlsContext({
 	iterations,
 	animationConfig,
 	animationConfigLinear,
-}: Options): IterationsContext {
+}: Options): IterationControlsContext {
 	const listeners = useMemo<Listeners>(
 		() => ({ change: new Set<Listener<[number]>>(), rest: new Set<Listener>() }),
 		[]
 	);
 	const targetRef = useRef(0);
-	const localStore = useLocalStore<IterationsContext["store"]>({
+	const localStore = useLocalStore<IterationControlsContext["store"]>({
 		progress: 0,
 		get iteration() {
 			return this.progress * iterations;
@@ -73,7 +73,7 @@ export function useSharedIterationsContextFactory({
 			return compareImpl(this.progress * iterations, a, type);
 		},
 	});
-	const localStoreLinear = useLocalStore<IterationsContext["storeLinear"]>({
+	const localStoreLinear = useLocalStore<IterationControlsContext["storeLinear"]>({
 		progress: 0,
 		inRange: function (a: number, b?: number) {
 			return inRangeImpl(iterations, this.progress, a, b);
@@ -82,7 +82,7 @@ export function useSharedIterationsContextFactory({
 			return rangeImpl(this.progress * iterations, a, b);
 		},
 	});
-	const [{ value: animatedProgressLinear }, animatedProgressLinearApi] = useSpring(() => ({
+	const [, animatedProgressLinearApi] = useSpring(() => ({
 		value: 0,
 		config: animationConfigLinear,
 		onChange: {
@@ -155,14 +155,7 @@ export function useSharedIterationsContextFactory({
 			animatedProgressLinearApi.start({ value: progress, config });
 			targetRef.current = iteration;
 		},
-		[
-			animatedProgressApi,
-			animatedProgressLinearApi,
-			animationConfig,
-			iterations,
-			localStore.progress,
-			toProgress,
-		]
+		[animatedProgressApi, animatedProgressLinearApi, toProgress]
 	);
 
 	const removeListener = useCallback(

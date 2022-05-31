@@ -5,12 +5,35 @@ export const layout = {
 		scrollEnabled: false,
 		dampingScrollEnabled: false,
 		breakpoint: clientHelper.detectBreakpoint(),
+		feedbackOpened: false,
 	}),
 	promo: schemaHelper.generateStoreSchema({
 		sequenceOpeningAnimationEnded: false,
 		promoBannerOpeningAnimationEnded: false,
-		endPointFaceContainerSize: { width: 0, height: 0 },
-		endPointFaceOffset: { top: 0, left: 0 },
+		faceStyles: {
+			top: 0,
+			left: 0,
+			width: 0,
+			height: 0,
+		},
+		minFaceStyles: {
+			top: 0,
+			left: 0,
+			width: 0,
+			height: 0,
+		},
+		executorFaceStyles: {
+			top: 0,
+			left: 0,
+			width: 0,
+			height: 0,
+		},
+		minFaceWithExecutorStyles: {
+			top: 0,
+			left: 0,
+			width: 0,
+			height: 0,
+		},
 		interactiveEnabled: function () {
 			return this.sequenceOpeningAnimationEnded && this.promoBannerOpeningAnimationEnded;
 		},

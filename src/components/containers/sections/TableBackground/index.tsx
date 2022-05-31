@@ -42,7 +42,7 @@ export const TableBackground: React.FC = () => {
 			const diff = Math.abs(startIteration - endIteration);
 			const frameIndex = startIteration + diff * progress;
 
-			video.currentTime = clamp(frameIndex, 0, video.duration);
+			video.currentTime = clamp(frameIndex, 0, video.duration - 0.01);
 		},
 		[iterationControls]
 	);

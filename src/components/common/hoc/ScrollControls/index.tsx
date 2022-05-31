@@ -1,55 +1,60 @@
-import { createContext, useCallback, useEffect, useLayoutEffect, useMemo } from "react";
+import { createContext, useCallback, useEffect, useLayoutEffect } from "react";
 import { easings, Interpolation } from "react-spring";
 import { reaction } from "mobx";
 import useRefs from "react-use-refs";
 
 import {
-	useQueryParams,
 	useResizeObserver,
-	IterationsContext,
-	useSharedIterationsContextFactory,
+	IterationControlsContext,
+	useIterationControlsContext,
 } from "@core/hooks";
 import { clamp } from "@core/utils";
 
 import * as S from "./styled";
 
-export type Context = IterationsContext & {
-	animated: IterationsContext["animated"] & { scrollTop: Interpolation<number, number> };
+export type Context = IterationControlsContext & {
+	animated: IterationControlsContext["animated"] & { scrollTop: Interpolation<number, number> };
 };
 
-export interface Props {
+export interface Props extends React.PropsWithChildren<{}> {
 	pages: number;
 	enabled?: boolean;
-	children?: React.ReactNode;
+	fixedAnimation?: boolean;
 }
 
-export const ScrollControls: React.FC<Props> = ({ children, pages, enabled = true }) => {
+export const ScrollControls: React.FC<Props> = ({
+	pages,
+	children,
+	enabled = true,
+	fixedAnimation = false,
+}) => {
 	const [containerRef, fixedRef, fillRef, contentRef] = useRefs<HTMLDivElement>(null);
 	const containerResizeObserver = useResizeObserver({ ref: containerRef });
 	const contentResizeObserver = useResizeObserver({ ref: contentRef });
-	const queryParams = useQueryParams();
-	const fixedIteration = useMemo(() => queryParams.get("type") === "fixed", [queryParams]);
-	const iterationsContext = useSharedIterationsContextFactory({
+	const iterationControlsContext = useIterationControlsContext({
 		iterations: pages,
-		animationConfig: false
+		animationConfig: { tension: 260, friction: 120, mass: 0.85 },
+		animationConfigLinear: fixedAnimation
 			? {
-					duration: 2000,
 					easing: easings.linear,
+					duration: 2000,
 			  }
 			: { tension: 260, friction: 120, mass: 0.85 },
-		animationConfigLinear: fixedIteration
-			? {
-					easing: easings.linear,
-					duration: 2000,
-			  }
-			: { tension: 220, friction: 80, mass: 0.5 },
 	});
 
-	const scrollTop = iterationsContext.animated.progress.to((value) => {
+	const scrollTop = iterationControlsContext.animated.progress.to((value) => {
 		const containerHeight = containerResizeObserver.getSize().height;
 		const y = -(value * (pages - 1)) * containerHeight;
 		return y;
 	});
+
+	const calculateIteration = useCallback(
+		(progress: number) => {
+			const iteration = iterationControlsContext.iterations * progress;
+			return fixedAnimation ? Math.floor(iteration) : iteration;
+		},
+		[fixedAnimation, iterationControlsContext]
+	);
 
 	const calculateProgress = useCallback(
 		(scrollTop: number, scrollHeight: number) => {
@@ -68,11 +73,10 @@ export const ScrollControls: React.FC<Props> = ({ children, pages, enabled = tru
 		const container = containerRef.current!;
 		const { scrollTop, scrollHeight } = container;
 		const progress = calculateProgress(scrollTop, scrollHeight);
-		// const iteration = Math.round(progress * pages);
-		const iteration = fixedIteration ? Math.floor(progress * pages) : progress * pages;
+		const iteration = calculateIteration(progress);
 
-		iterationsContext.animate(iteration);
-	}, [calculateProgress, containerRef, enabled, iterationsContext, pages, fixedIteration]);
+		iterationControlsContext.animate(iteration);
+	}, [enabled, containerRef, calculateProgress, calculateIteration, iterationControlsContext]);
 
 	const scrollTo = useCallback(
 		(y: number) => {
@@ -93,14 +97,16 @@ export const ScrollControls: React.FC<Props> = ({ children, pages, enabled = tru
 					const container = containerRef.current!;
 					const { scrollTop, scrollHeight } = container;
 					const progress = calculateProgress(scrollTop, scrollHeight);
+					const iteration = calculateIteration(progress);
 
-					iterationsContext.animate(progress * pages);
+					iterationControlsContext.set(iteration);
 				}
 			),
 		[
+			iterationControlsContext,
 			containerResizeObserver,
 			contentResizeObserver,
-			iterationsContext,
+			calculateIteration,
 			calculateProgress,
 			containerRef,
 			pages,
@@ -122,7 +128,10 @@ export const ScrollControls: React.FC<Props> = ({ children, pages, enabled = tru
 			<S.Container ref={containerRef} style={{ overflow: enabled ? "hidden auto" : "hidden" }}>
 				<S.Fixed ref={fixedRef}>
 					<context.Provider
-						value={{ ...iterationsContext, animated: { ...iterationsContext.animated, scrollTop } }}>
+						value={{
+							...iterationControlsContext,
+							animated: { ...iterationControlsContext.animated, scrollTop },
+						}}>
 						<S.Content
 							ref={contentRef}
 							style={{

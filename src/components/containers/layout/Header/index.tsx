@@ -1,11 +1,21 @@
+import { useCallback } from "react";
+
 import { Image } from "@components/common/ui/Image";
 import { Button } from "@components/common/ui/Button";
+
+import { useGlobalStore } from "@core/hooks";
 
 import { getVectorImageByName } from "@assets/images";
 
 import * as S from "./styled";
 
 export const Header: React.FC = () => {
+	const layoutStore = useGlobalStore((store) => store.layout);
+
+	const handleButtonClick = useCallback(() => {
+		layoutStore.setFeedbackOpened(true);
+	}, [layoutStore]);
+
 	return (
 		<S.Header>
 			<S.Container>
@@ -20,7 +30,7 @@ export const Header: React.FC = () => {
 						<S.NavLink>Pricing</S.NavLink>
 					</S.NavItem>
 					<S.NavItem>
-						<Button>Get started</Button>
+						<Button onClick={handleButtonClick}>Get started</Button>
 					</S.NavItem>
 				</S.Navbar>
 			</S.Container>

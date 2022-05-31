@@ -85,10 +85,19 @@ export const Content = styled.div`
 	position: relative;
 `;
 
-export const AssistantFaceContainer = styled.div`
+export const AssistantFaceGroup = styled.div`
 	width: 10rem;
 	height: 10rem;
 	margin: 5rem auto 0;
+	position: relative;
+`;
+
+export const AssistantFaceContainer = styled.div`
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	position: absolute;
 `;
 
 export const Description = styled.div`
@@ -107,6 +116,15 @@ export const DescriptionOverlayContent = styled.div`
 	left: 0;
 	width: 100%;
 	height: 100%;
+	position: absolute;
+`;
+
+export const DescriptionOverlayContentBig = styled.div`
+	top: 3.4rem;
+	left: 0;
+	width: 100%;
+	line-height: 70%;
+	font-size: 4.8rem;
 	position: absolute;
 `;
 

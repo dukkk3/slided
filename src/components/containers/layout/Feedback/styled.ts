@@ -1,15 +1,19 @@
 import styled from "styled-components";
 
-import { Content as ContentImpl } from "@components/common/ordinary/FullScreenContainerLayout/styled";
+import {
+	Content as ContentImpl,
+	FullScreenContainerLayout,
+} from "@components/common/ordinary/FullScreenContainerLayout/styled";
 import { Button } from "@components/common/ui/Button/styled";
 
 export const Feedback = styled.div`
 	width: 100%;
-	height: 100vh;
-	position: fixed;
-	top: 0;
-	left: 0;
-	z-index: 9999;
+	height: 100%;
+
+	${FullScreenContainerLayout} {
+		/* margin-top: calc(var(--header-height) * -1); */
+		/* height: calc(100% + var(--header-height)); */
+	}
 
 	${ContentImpl} {
 		background: black;

@@ -1,6 +1,8 @@
 import { a } from "react-spring";
 import styled from "styled-components";
 
+const ASSISTANT_FACE_BACKGROUND_ADDITIONAL_SIZE = "1.6rem";
+
 export const AssistantLayer = styled.div`
 	width: 100%;
 `;
@@ -19,6 +21,7 @@ export const Layer = styled.div`
 export const AssistantFaceContainer = styled.div`
 	width: 15rem;
 	height: 15rem;
+	margin-top: ${ASSISTANT_FACE_BACKGROUND_ADDITIONAL_SIZE};
 `;
 
 export const AssistantFace = styled(a.div)`
@@ -50,8 +53,6 @@ export const AssistantFaceVideoWrapper = styled(a.div)`
 		will-change: transform;
 	}
 `;
-
-const ASSISTANT_FACE_BACKGROUND_ADDITIONAL_SIZE = "1.6rem";
 
 export const AssistantFaceBackground = styled(AssistantFaceContentLayer)`
 	top: -${ASSISTANT_FACE_BACKGROUND_ADDITIONAL_SIZE};

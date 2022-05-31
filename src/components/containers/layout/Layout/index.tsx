@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect } from "react";
+import { useSpring } from "react-spring";
 import { Observer } from "mobx-react-lite";
 import { reaction } from "mobx";
 
@@ -19,7 +20,9 @@ export interface Props extends React.PropsWithChildren<{}> {}
 
 export const Layout: React.FC<Props> = ({ children }) => {
 	const promoStore = useGlobalStore((store) => store.layout.promo);
+	const layoutStore = useGlobalStore((store) => store.layout);
 	const headerResizeObserver = useResizeObserver({ calculateSizeWithPaddings: true });
+	const [feedbackStyle, feedbackApi] = useSpring(() => ({ y: "100%" }));
 
 	const updateCSSProperties = useCallback(() => {
 		const { height: headerHeight, width: headerWidth } = headerResizeObserver.getSize();
@@ -27,6 +30,17 @@ export const Layout: React.FC<Props> = ({ children }) => {
 		document.body.style.setProperty("--header-height", `${headerHeight}px`);
 		document.body.style.setProperty("--header-width", `${headerWidth}px`);
 	}, [headerResizeObserver]);
+
+	useEffect(
+		() =>
+			reaction(
+				() => layoutStore.feedbackOpened,
+				(opened) => {
+					feedbackApi.start({ y: opened ? "0%" : "100%" });
+				}
+			),
+		[feedbackApi, layoutStore]
+	);
 
 	useEffect(
 		() =>
@@ -39,17 +53,19 @@ export const Layout: React.FC<Props> = ({ children }) => {
 
 	return (
 		<S.Layout>
+			<S.FeedbackWrapper style={feedbackStyle}>
+				<Feedback />
+			</S.FeedbackWrapper>
 			<S.HeaderWrapper ref={headerResizeObserver.ref}>
 				<Header />
 			</S.HeaderWrapper>
-			{/* <Feedback /> */}
 			{/* <Footer /> */}
 			{/* <Plans /> */}
 			<main>
 				<Observer>
 					{() => (
 						// <IterationControls iterations={10}>{children}</IterationControls>
-						<ScrollControls pages={6} enabled={promoStore.interactiveEnabled()}>
+						<ScrollControls pages={20} enabled={promoStore.interactiveEnabled()}>
 							{children}
 						</ScrollControls>
 					)}

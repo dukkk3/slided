@@ -25,9 +25,7 @@ export const PromoBannerLayer: React.FC = () => {
 	const [buttonStyle, buttonStyleApi] = useSpring(() => ({ opacity: 0, y: "-2rem" }));
 	const iterationControls = useIterationControls();
 
-	const {
-		interpolations: [, iteration0ClosingInterpolation],
-	} = useIteration(0);
+	const iteration0 = useIteration(0);
 
 	const animate = useCallback(async () => {
 		await Promise.all([
@@ -68,10 +66,10 @@ export const PromoBannerLayer: React.FC = () => {
 											style={
 												promoStore.interactiveEnabled()
 													? {
-															y: iteration0ClosingInterpolation
+															y: iteration0.interpolations.closing
 																.to((value) => iterationControls.range(value, rowIndex / rowsCount, 1))
 																.to((value) => `-${100 * value}%`),
-															opacity: iteration0ClosingInterpolation
+															opacity: iteration0.interpolations.closing
 																.to((value) => iterationControls.range(value, rowIndex / rowsCount, 1))
 																.to((value) => 1 - value),
 													  }
@@ -98,10 +96,10 @@ export const PromoBannerLayer: React.FC = () => {
 											style={
 												promoStore.interactiveEnabled()
 													? {
-															y: iteration0ClosingInterpolation
+															y: iteration0.interpolations.closing
 																.to((value) => iterationControls.range(value, absoluteIndex / count, 1))
 																.to((value) => `-${100 * value}%`),
-															opacity: iteration0ClosingInterpolation
+															opacity: iteration0.interpolations.closing
 																.to((value) => iterationControls.range(value, absoluteIndex / count, 1))
 																.to((value) => 1 - value),
 													  }
@@ -121,8 +119,8 @@ export const PromoBannerLayer: React.FC = () => {
 							style={
 								promoStore.interactiveEnabled()
 									? {
-											y: iteration0ClosingInterpolation.to((value) => `${-2 * value}rem`),
-											opacity: iteration0ClosingInterpolation.to((value) => 1 - value),
+											y: iteration0.interpolations.closing.to((value) => `${-2 * value}rem`),
+											opacity: iteration0.interpolations.closing.to((value) => 1 - value),
 									  }
 									: buttonStyle
 							}>

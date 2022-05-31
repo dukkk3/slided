@@ -8,6 +8,7 @@ import { TableBackground } from "@components/containers/sections/TableBackground
 import { PromoBannerLayer } from "@components/containers/sections/PromoBannerLayer";
 import { AssistantLayer } from "@components/containers/sections/AssistantLayer";
 import { PhoneLayer } from "@components/containers/sections/PhoneLayer";
+import { UsersLayer } from "@components/containers/sections/UsersLayer";
 
 import { DebugIterationControls } from "@components/common/simple/DebugIterationControls";
 
@@ -21,6 +22,7 @@ const Content: React.FC = () => {
 	const iteration0 = useIteration(0);
 	const iteration2 = useIteration(2);
 	const iteration3 = useIteration(3);
+	const iteration5 = useIteration(5);
 
 	console.log({ iteration0, iteration2 });
 
@@ -72,16 +74,21 @@ const Content: React.FC = () => {
 							isVisible: () => iterationControls.store.compare(iteration2.center, "lte"),
 						},
 						{
+							fullscreen: true,
+							component: <UsersLayer />,
+							isVisible: () => iterationControls.store.compare(iteration5.start, "lte"),
+						},
+						{
 							fullscreen: false,
 							component: <AssistantLayer />,
-							isVisible: () => iterationControls.store.compare(iteration0.center, "lte"),
+							isVisible: () => iterationControls.store.compare(iteration0.end, "lte"),
 						},
 					].map(({ fullscreen, component, isVisible }, index) => (
 						<Observer key={index}>
 							{() => (
 								<S.LayerWrapper
 									$fullscreen={fullscreen}
-									style={isVisible() ? {} : { pointerEvents: "none", opacity: 0 }}>
+									style={isVisible() ? {} : { visibility: "hidden" }}>
 									{component}
 								</S.LayerWrapper>
 							)}
