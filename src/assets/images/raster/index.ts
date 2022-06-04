@@ -5,3 +5,4 @@ export { default as Blue2TemplateSource } from "./Blue2Template.jpg";
 export { default as BrightTemplateSource } from "./BrightTemplate.jpg";
 export { default as GreenTemplateSource } from "./GreenTemplate.jpg";
 export { default as SilverTemplateSource } from "./SilverTemplate.jpg";
+export { default as CarTemplateSource } from "./CarTemplate.jpg";

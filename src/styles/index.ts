@@ -24,9 +24,8 @@ export const GlobalStyle = createGlobalStyle`
         font-family: ${(props) => props.theme.font.primary};
         overflow: hidden;
         height: 100vh;
-        background: white;
 
-        --container-gap: 3vw;
+        --container-gap: 4rem;
         --container-bigger-gap: 10vw;
 
         --container-width-bigger: calc(100vw - var(--container-gap) * 2);
@@ -69,17 +68,9 @@ export const GlobalStyle = createGlobalStyle`
         transition: opacity 250ms ease;
     }
 
-    .animated-inline-unit-wrapper {
-        overflow: hidden;
-    }
-
-    .animated-inline-unit-wrapper, .animated-inline-unit-wrapper > span {
+    .animated-row span {
         white-space: pre;
         display: inline-block;
-    }
-
-    .animated-inline-unit-wrapper > span {
-	    will-change: transform, opacity;
     }
 
     .safari-border-radius-overflow-bugfix {
@@ -116,7 +107,7 @@ export const GlobalStyle = createGlobalStyle`
         width: 100%;
         height: 100%;
 
-        &:not(.original) {
+        &.icon {
          fill: inherit;
          stroke: inherit;
          stroke-width: inherit;

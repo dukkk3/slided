@@ -4,13 +4,10 @@ import { Observer } from "mobx-react-lite";
 import { reaction } from "mobx";
 
 import { Header } from "@components/containers/layout/Header";
-import { Footer } from "@components/containers/layout/Footer";
-import { Feedback } from "@components/containers/layout/Feedback";
-
-import { Plans } from "@components/containers/sections/Plans";
+// import { Footer } from "@components/containers/layout/Footer";
+// import { Feedback } from "@components/containers/layout/Feedback";
 
 import { ScrollControls } from "@components/common/hoc/ScrollControls";
-import { IterationControls } from "@components/common/hoc/IterationControls";
 
 import { useGlobalStore, useResizeObserver } from "@core/hooks";
 
@@ -53,9 +50,7 @@ export const Layout: React.FC<Props> = ({ children }) => {
 
 	return (
 		<S.Layout>
-			<S.FeedbackWrapper style={feedbackStyle}>
-				<Feedback />
-			</S.FeedbackWrapper>
+			<S.FeedbackWrapper style={feedbackStyle}>{/* <Feedback /> */}</S.FeedbackWrapper>
 			<S.HeaderWrapper ref={headerResizeObserver.ref}>
 				<Header />
 			</S.HeaderWrapper>

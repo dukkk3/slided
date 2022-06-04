@@ -23,6 +23,10 @@ function generateButtonTheme(theme: DefaultTheme) {
 			color: "white",
 			background: "black",
 		},
+		grey: {
+			color: "black",
+			background: "radial-gradient(100% 267.77% at 100% 0%, #ACB3BF 0%, #DDDEE1 100%)",
+		},
 	};
 }
 

@@ -302,7 +302,7 @@ export function throttle<T extends any[]>(callback: (...args: T) => void, time: 
 
 	function wrapper(...args: T) {
 		if (isThrottled) {
-			// savedArgs = args;
+			savedArgs = args;
 			return;
 		}
 
@@ -321,4 +321,16 @@ export function throttle<T extends any[]>(callback: (...args: T) => void, time: 
 	}
 
 	return wrapper;
+}
+
+export function generateCircPoints(start: number, end: number, step: number = 0.1) {
+	const points: number[] = [];
+
+	if (start > end) [start, end] = [end, start];
+
+	for (let i = start; i <= end; i += step) {
+		points.push(Math.sin(i) * 1.5);
+	}
+
+	return points;
 }

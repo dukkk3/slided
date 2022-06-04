@@ -1,9 +1,6 @@
 import styled from "styled-components";
 
-import {
-	Container as ContainerImpl,
-	GAP as CONTAINER_GAP,
-} from "@components/common/ui/Container/styled";
+import { Container as ContainerImpl } from "@components/common/ui/Container/styled";
 import { Image } from "@components/common/ui/Image/styled";
 
 export const Header = styled.div`
@@ -15,7 +12,7 @@ export const Container = styled(ContainerImpl)`
 	flex-direction: row;
 	align-items: center;
 	justify-content: space-between;
-	padding: calc(${CONTAINER_GAP} * 0.75) 0;
+	padding: calc(var(--container-gap) * 0.75) 0;
 `;
 
 export const Logo = styled.div`

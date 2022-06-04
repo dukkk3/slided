@@ -1,19 +1,15 @@
 import { createContext, useCallback, useEffect, useLayoutEffect } from "react";
-import { easings, Interpolation } from "react-spring";
+import { Interpolation } from "react-spring";
 import { reaction } from "mobx";
 import useRefs from "react-use-refs";
 
-import {
-	useResizeObserver,
-	IterationControlsContext,
-	useIterationControlsContext,
-} from "@core/hooks";
+import { useResizeObserver, useIterationContextFactory, IterationContext } from "@core/hooks";
 import { clamp } from "@core/utils";
 
 import * as S from "./styled";
 
-export type Context = IterationControlsContext & {
-	animated: IterationControlsContext["animated"] & { scrollTop: Interpolation<number, number> };
+export type Context = IterationContext & {
+	animated: IterationContext["animated"] & { scrollTop: Interpolation<number, number> };
 };
 
 export interface Props extends React.PropsWithChildren<{}> {
@@ -31,29 +27,22 @@ export const ScrollControls: React.FC<Props> = ({
 	const [containerRef, fixedRef, fillRef, contentRef] = useRefs<HTMLDivElement>(null);
 	const containerResizeObserver = useResizeObserver({ ref: containerRef });
 	const contentResizeObserver = useResizeObserver({ ref: contentRef });
-	const iterationControlsContext = useIterationControlsContext({
+	const iterationContext = useIterationContextFactory({
 		iterations: pages,
 		animationConfig: { tension: 260, friction: 120, mass: 0.85 },
-		animationConfigLinear: fixedAnimation
-			? {
-					easing: easings.linear,
-					duration: 2000,
-			  }
-			: { tension: 260, friction: 120, mass: 0.85 },
 	});
 
-	const scrollTop = iterationControlsContext.animated.progress.to((value) => {
+	const scrollTop = iterationContext.animated.progress.to((value) => {
 		const containerHeight = containerResizeObserver.getSize().height;
-		const y = -(value * (pages - 1)) * containerHeight;
-		return y;
+		return -(value * (pages - 1)) * containerHeight;
 	});
 
 	const calculateIteration = useCallback(
 		(progress: number) => {
-			const iteration = iterationControlsContext.iterations * progress;
+			const iteration = iterationContext.iterations * progress;
 			return fixedAnimation ? Math.floor(iteration) : iteration;
 		},
-		[fixedAnimation, iterationControlsContext]
+		[fixedAnimation, iterationContext]
 	);
 
 	const calculateProgress = useCallback(
@@ -66,17 +55,15 @@ export const ScrollControls: React.FC<Props> = ({
 	);
 
 	const handleScroll = useCallback(() => {
-		if (!enabled) {
-			return;
-		}
+		if (!enabled) return;
 
 		const container = containerRef.current!;
 		const { scrollTop, scrollHeight } = container;
 		const progress = calculateProgress(scrollTop, scrollHeight);
 		const iteration = calculateIteration(progress);
 
-		iterationControlsContext.animate(iteration);
-	}, [enabled, containerRef, calculateProgress, calculateIteration, iterationControlsContext]);
+		iterationContext.animate(iteration);
+	}, [enabled, containerRef, calculateProgress, calculateIteration, iterationContext]);
 
 	const scrollTo = useCallback(
 		(y: number) => {
@@ -99,11 +86,11 @@ export const ScrollControls: React.FC<Props> = ({
 					const progress = calculateProgress(scrollTop, scrollHeight);
 					const iteration = calculateIteration(progress);
 
-					iterationControlsContext.set(iteration);
+					iterationContext.set(iteration);
 				}
 			),
 		[
-			iterationControlsContext,
+			iterationContext,
 			containerResizeObserver,
 			contentResizeObserver,
 			calculateIteration,
@@ -129,8 +116,8 @@ export const ScrollControls: React.FC<Props> = ({
 				<S.Fixed ref={fixedRef}>
 					<context.Provider
 						value={{
-							...iterationControlsContext,
-							animated: { ...iterationControlsContext.animated, scrollTop },
+							...iterationContext,
+							animated: { ...iterationContext.animated, scrollTop },
 						}}>
 						<S.Content
 							ref={contentRef}
