@@ -86,11 +86,17 @@ export const PlugImageWrapper = styled(a.div)`
 	}
 `;
 
+export const ContentWrapper = styled.div`
+	width: 100%;
+	padding: var(--phone-padding);
+	padding-top: 0;
+
+	--phone-padding: 2.5rem;
+`;
+
 export const Content = styled.div`
 	width: 100%;
-	padding: 2.5rem;
-	padding-top: 0;
-	position: relative;
+	/* position: relative; */
 `;
 
 export const AssistantFaceGroup = styled.div`

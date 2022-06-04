@@ -130,9 +130,15 @@ export const PhoneFace = styled.div`
 	position: relative;
 `;
 
-export const PhoneButtonWrapper = styled.div`
-	position: relative;
-	width: 100%;
+interface PhoneButtonWrapperProps {
+	$overlay?: boolean;
+}
+
+export const PhoneButtonWrapper = styled(a.div)<PhoneButtonWrapperProps>`
+	width: ${(props) => (props.$overlay ? "calc(100% - var(--phone-padding) * 2)" : "100%")};
+	position: ${(props) => (props.$overlay ? "absolute" : "relative")};
+	left: ${(props) => props.$overlay && "var(--phone-padding)"};
+	bottom: ${(props) => props.$overlay && "var(--phone-padding)"};
 	height: var(--height);
 
 	--height: 6rem;

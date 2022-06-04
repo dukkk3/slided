@@ -44,7 +44,9 @@ export const Phone: React.FC<Props> = ({
 						<Image src={getRasterImageByName("Blue2TemplateSource")} lazy={false} />
 					</S.PlugImageWrapper>
 				</S.Plug>
-				<S.Content>{children}</S.Content>
+				<S.ContentWrapper>
+					<S.Content>{children}</S.Content>
+				</S.ContentWrapper>
 			</S.Container>
 		</S.Phone>
 	);

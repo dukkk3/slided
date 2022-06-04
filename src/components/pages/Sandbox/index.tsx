@@ -28,6 +28,7 @@ import { mergeRefs } from "@core/utils";
 import { getRasterImageByName } from "@assets/images";
 
 import * as S from "./styled";
+import { reaction } from "mobx";
 
 export const Sandbox: React.FC = () => {
 	const iterationControls = useIterationControls();
@@ -89,6 +90,18 @@ export const Sandbox: React.FC = () => {
 			return { x, y, scaleX, scaleY };
 		},
 		[transformDifferenceBtwFaceAndPhoneFace, transformDifferenceBtwPhoneFaceAndShiftedPhoneFace]
+	);
+
+	useEffect(
+		() =>
+			reaction(
+				() => iteration8.started(),
+				(started) => {
+					if (!started) return;
+					transformDifferenceBtwSmallTemplateAndPhoneTemplate.calculate();
+				}
+			),
+		[iteration8, transformDifferenceBtwSmallTemplateAndPhoneTemplate]
 	);
 
 	return (
@@ -191,6 +204,14 @@ export const Sandbox: React.FC = () => {
 												]}
 											/>
 										</S.PhoneReadyTemplatesCardsWrapper>
+										<S.PhoneButtonWrapper
+											$overlay
+											style={{
+												y: iteration9.interpolations.opening.to((value) => `${5 * (1 - value)}rem`),
+												opacity: iteration9.interpolations.opening,
+											}}>
+											<Button>Download</Button>
+										</S.PhoneButtonWrapper>
 									</Phone>
 								</S.PhoneWrapper>
 							</VisibilitySwitch>
