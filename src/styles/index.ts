@@ -1,4 +1,4 @@
-import { createGlobalStyle } from "styled-components";
+import { createGlobalStyle, css } from "styled-components";
 
 import { breakpoint } from "./breakpoint";
 import { fontsStyle } from "./fonts";
@@ -73,6 +73,10 @@ export const GlobalStyle = createGlobalStyle`
         display: inline-block;
     }
 
+    .animated-row.words span, .animated-row.chars span span {
+        will-change: transform, opacity;
+    }
+
     .safari-border-radius-overflow-bugfix {
         -webkit-mask-image: -webkit-radial-gradient(white, black);
     }
@@ -123,4 +127,11 @@ export const GlobalStyle = createGlobalStyle`
     .noselect {
         user-select: none;
     }
+`;
+
+export const descriptionMixin = css`
+	line-height: 100%;
+	font-weight: 700;
+	text-align: center;
+	color: black;
 `;

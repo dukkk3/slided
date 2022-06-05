@@ -1,43 +1,38 @@
-import { useCallback, useEffect } from "react";
+import { reaction } from "mobx";
+import { useCallback, useEffect, useRef } from "react";
 import { Observer } from "mobx-react-lite";
-import { a, config, easings, useSpring } from "react-spring";
+import { config, easings, useSpring } from "react-spring";
 
-import { PromoContainer } from "@components/containers/layout/PromoContainer";
-import { TemplatesCards } from "@components/containers/animated/TemplatesCards";
-import { AssistantFace } from "@components/containers/animated/AssistantFace";
-import { AnimatedSplitChars } from "@components/containers/animated/AnimatedSplitChars";
 import { Promo } from "@components/containers/animated/Promo";
-import { Phone } from "@components/containers/animated/Phone";
+import { Assistant } from "@components/containers/animated/Assistant";
 import { Executors } from "@components/containers/animated/Executors";
-import { CarTemplate } from "@components/containers/animated/CarTemplate";
-import { ReadyTemplatesCards } from "@components/containers/animated/ReadyTemplatesCards";
+import { PhoneAssistant } from "@components/containers/animated/PhoneAssistant";
+import { PhoneTemplates } from "@components/containers/animated/PhoneTemplates";
 import { TableBackground } from "@components/containers/animated/TableBackground";
+import { TemplatesGrid } from "@components/containers/animated/TemplatesGrid";
+import { Tariff } from "@components/containers/animated/Tariff";
+
+import { AssistantFace } from "@components/promo/AssistantFace";
+import { CarTemplate } from "@components/promo/CarTemplate";
+import { UserCursor } from "@components/promo/UserCursor";
 
 import { VisibilitySwitch } from "@components/common/hoc/VisibilitySwitch";
-
-import { UserCursor } from "@components/common/ordinary/UserCursor";
 
 import { DebugIterationControls } from "@components/common/simple/DebugIterationControls";
 
 import { Image } from "@components/common/ui/Image";
-import { Button } from "@components/common/ui/Button";
+import { PromoContainer } from "@components/common/ui/PromoContainer";
 
-import { useTransformDifference, useIterationControls, useIteration } from "@core/hooks";
-import { mergeRefs } from "@core/utils";
+import { useIteration, useIterationControls, useTransformDifference } from "@core/hooks";
+import { mergeRefs, step } from "@core/utils";
 
 import { getRasterImageByName } from "@assets/images";
 
 import * as S from "./styled";
-import { reaction } from "mobx";
+import { AnimatedSplitChars } from "@components/promo/AnimatedSplitChars";
 
 export const Sandbox: React.FC = () => {
 	const iterationControls = useIterationControls();
-	const { scaleProgress: locatorPulse } = useSpring({
-		from: { scaleProgress: 0.3 },
-		to: { scaleProgress: 1 },
-		config: { duration: 1500, easing: easings.linear },
-		loop: true,
-	});
 	const { scaleProgress: assistantFacePulse } = useSpring({
 		from: { scaleProgress: 0 },
 		to: { scaleProgress: 1 },
@@ -45,10 +40,15 @@ export const Sandbox: React.FC = () => {
 		config: config.gentle,
 	});
 
+	const sandboxRef = useRef<HTMLDivElement>(null);
+
 	const transformDifferenceBtwFaceAndPhoneFace = useTransformDifference();
 	const transformDifferenceBtwPhoneFaceAndShiftedPhoneFace = useTransformDifference();
 	const transformDifferenceBtwExecutorFaceAndExecutorPhoneFace = useTransformDifference();
 	const transformDifferenceBtwBigTemplateAndSmallTemplate = useTransformDifference();
+	const transformDifferenceBtwSmallTemplateAndGridTemplate = useTransformDifference({
+		calculationPreset: "rect",
+	});
 	const transformDifferenceBtwSmallTemplateAndPhoneTemplate = useTransformDifference({
 		debug: true,
 		calculationPreset: "rect",
@@ -56,14 +56,14 @@ export const Sandbox: React.FC = () => {
 
 	const iteration0 = useIteration(0);
 	const iteration1 = useIteration(1);
-	const iteration2 = useIteration(2);
 	const iteration3 = useIteration(3);
 	const iteration4 = useIteration(4);
 	const iteration5 = useIteration(5);
-	const iteration6 = useIteration(6);
 	const iteration7 = useIteration(7);
 	const iteration8 = useIteration(8);
 	const iteration9 = useIteration(9);
+	const iteration10 = useIteration(10);
+	const iteration11 = useIteration(11);
 
 	const getFaceStyle = useCallback(
 		(stage: "to-min" | "to-min-shifted") => {
@@ -95,6 +95,33 @@ export const Sandbox: React.FC = () => {
 	useEffect(
 		() =>
 			reaction(
+				() => transformDifferenceBtwSmallTemplateAndPhoneTemplate.startResizeObserver.getSize(),
+				(size) => {
+					const sandbox = sandboxRef.current;
+					if (!sandbox) return;
+					sandbox.style.setProperty("--template-card-ratio", `${size.width / size.height}`);
+				}
+			),
+		[transformDifferenceBtwSmallTemplateAndPhoneTemplate]
+	);
+
+	useEffect(
+		() =>
+			reaction(
+				() => transformDifferenceBtwSmallTemplateAndGridTemplate.startResizeObserver.getSize(),
+				(size) => {
+					const sandbox = sandboxRef.current;
+					if (!sandbox) return;
+					sandbox.style.setProperty("--template-card-width", `${size.width}px`);
+					sandbox.style.setProperty("--template-card-height", `${size.height}px`);
+				}
+			),
+		[transformDifferenceBtwSmallTemplateAndGridTemplate]
+	);
+
+	useEffect(
+		() =>
+			reaction(
 				() => iteration8.started(),
 				(started) => {
 					if (!started) return;
@@ -105,31 +132,84 @@ export const Sandbox: React.FC = () => {
 	);
 
 	return (
-		<S.Sandbox style={{ y: iterationControls.animated.scrollTop.to((value) => -value) }}>
+		<S.Sandbox
+			ref={sandboxRef}
+			style={{
+				y: iterationControls.animated.scrollTop.to((value) => -value),
+			}}>
 			<DebugIterationControls />
-			<TableBackground />
+			{/* <TableBackground /> */}
 			<S.LayerWrapper>
 				<Observer>
 					{() => (
-						<>
-							<VisibilitySwitch visible={iteration6.visible("closing")}>
-								<S.PulseCircle
+						<VisibilitySwitch visible={iteration11.visible()}>
+							<S.TariffWrapper>
+								<Tariff />
+							</S.TariffWrapper>
+						</VisibilitySwitch>
+					)}
+				</Observer>
+				<Observer>
+					{() => (
+						<VisibilitySwitch visible={iteration9.startClosed() || iteration10.visible()}>
+							<div>
+								<VisibilitySwitch visible={false}>
+									<S.TemplatesGridWrapper>
+										<TemplatesGrid
+											centerTemplateRef={transformDifferenceBtwSmallTemplateAndGridTemplate.endRef}
+										/>
+									</S.TemplatesGridWrapper>
+								</VisibilitySwitch>
+								<S.TemplatesGridWrapper
 									style={{
-										scale: iteration6.interpolations.closing,
-										opacity: iteration6.interpolations.closing.to((value) => 0.8 * (1 - value)),
-									}}
-								/>
-							</VisibilitySwitch>
-							<VisibilitySwitch visible={iteration5.visible()}>
-								<S.PulseCircle
-									$theme='white'
-									style={{
-										scale: locatorPulse,
-										opacity: locatorPulse.to((value) => 1 - value),
-									}}
-								/>
-							</VisibilitySwitch>
-						</>
+										y: iteration10.interpolations.closing.to((value) => `${-50 * value}%`),
+										opacity: iteration10.interpolations.closing.to((value) => 1 - value),
+									}}>
+									<TemplatesGrid />
+									<Observer>
+										{() => (
+											<VisibilitySwitch visible={iteration10.visible()}>
+												<S.TemplatesGridTitle>
+													<Observer>
+														{() => (
+															<AnimatedSplitChars
+																type={iteration10.visible("opening") ? "opening" : "closing"}
+																content={["We have thousands", "of slides behind"]}
+																openingInterpolation={iteration10.interpolations.opening}
+																closingInterpolation={iteration10.interpolations.closing}
+															/>
+														)}
+													</Observer>
+												</S.TemplatesGridTitle>
+											</VisibilitySwitch>
+										)}
+									</Observer>
+								</S.TemplatesGridWrapper>
+							</div>
+						</VisibilitySwitch>
+					)}
+				</Observer>
+				<Observer>
+					{() => (
+						<VisibilitySwitch visible={iteration9.visible("closing")}>
+							<S.TemplateCard
+								style={{
+									...transformDifferenceBtwSmallTemplateAndGridTemplate.startResizeObserver.getSize(),
+									top: transformDifferenceBtwSmallTemplateAndGridTemplate.getStartOffset().top,
+									left: transformDifferenceBtwSmallTemplateAndGridTemplate.getStartOffset().left,
+									x: iteration9.interpolations.closing.to(
+										(value) => transformDifferenceBtwSmallTemplateAndGridTemplate.getPosition().x * value
+									),
+									y: iteration9.interpolations.closing.to(
+										(value) => transformDifferenceBtwSmallTemplateAndGridTemplate.getPosition().y * value
+									),
+									opacity: iteration9.interpolations.closing
+										.to((value) => step(value, 0.99))
+										.to((value) => 1 - value),
+								}}>
+								<Image src={getRasterImageByName("CarTemplateSource")} />
+							</S.TemplateCard>
+						</VisibilitySwitch>
 					)}
 				</Observer>
 				<PromoContainer>
@@ -137,7 +217,7 @@ export const Sandbox: React.FC = () => {
 						{() => (
 							<VisibilitySwitch visible={iteration0.visible()}>
 								<S.PromoWrapper>
-									<Promo closingInterpolation={iteration0.interpolations.closing} />
+									<Promo />
 								</S.PromoWrapper>
 							</VisibilitySwitch>
 						)}
@@ -146,73 +226,10 @@ export const Sandbox: React.FC = () => {
 						{() => (
 							<VisibilitySwitch visible={iteration8.started()}>
 								<S.PhoneWrapper $alternative>
-									<Phone
-										openingInterpolation={iteration7.interpolations.closing.to((value) =>
-											iterationControls.toRange(value, 0.99, 1)
-										)}
-										backgroundZoomInterpolation={iteration7.interpolations.closing.to((value) =>
-											iterationControls.toRange(value, 0.99, 1)
-										)}
-										hiddenContent>
-										<S.PhoneDescriptionWrapper>
-											<Observer>
-												{() => (
-													<VisibilitySwitch visible={iteration8.visible()}>
-														<S.PhoneDescription>
-															<AnimatedSplitChars
-																content={["You can", "track progress", "in real time on your phone"]}
-																openingInterpolation={iteration8.interpolations.opening}
-																closingInterpolation={iteration8.interpolations.closing}
-																type={iteration8.visible("opening") ? "opening" : "closing"}
-															/>
-														</S.PhoneDescription>
-													</VisibilitySwitch>
-												)}
-											</Observer>
-											<Observer>
-												{() => (
-													<VisibilitySwitch visible={iteration9.visible()}>
-														<S.PhoneDescription $overlay>
-															<AnimatedSplitChars
-																content={["Your", "presentation", "is done!"]}
-																openingInterpolation={iteration9.interpolations.opening}
-																closingInterpolation={iteration9.interpolations.closing}
-																type={iteration9.visible("opening") ? "opening" : "closing"}
-															/>
-														</S.PhoneDescription>
-													</VisibilitySwitch>
-												)}
-											</Observer>
-										</S.PhoneDescriptionWrapper>
-										<S.PhoneReadyTemplatesCardsWrapper>
-											<ReadyTemplatesCards
-												hiddenTemplateRef={transformDifferenceBtwSmallTemplateAndPhoneTemplate.endRef}
-												hideScanLineInterpolation={iteration8.interpolations.closing
-													.to((value) => iterationControls.toRange(value, 0.95, 1))
-													.to((value) => 1 - value)}
-												showHiddenLayerInterpolation={iteration8.interpolations.closing}
-												shakeCardsInterpolation={iteration9.interpolations.opening}
-												templates={[
-													{ source: getRasterImageByName("CarTemplateSource") },
-													{
-														source: getRasterImageByName("BlueTemplateSource"),
-														visibleLayerSource: getRasterImageByName("BrightTemplateSource"),
-													},
-													{ source: getRasterImageByName("BrightTemplateSource") },
-													{ source: getRasterImageByName("BrightTemplateSource") },
-													{ source: getRasterImageByName("BrightTemplateSource") },
-												]}
-											/>
-										</S.PhoneReadyTemplatesCardsWrapper>
-										<S.PhoneButtonWrapper
-											$overlay
-											style={{
-												y: iteration9.interpolations.opening.to((value) => `${5 * (1 - value)}rem`),
-												opacity: iteration9.interpolations.opening,
-											}}>
-											<Button>Download</Button>
-										</S.PhoneButtonWrapper>
-									</Phone>
+									<PhoneTemplates
+										shiftedTemplateCardRef={transformDifferenceBtwSmallTemplateAndGridTemplate.startRef}
+										templateCardRef={transformDifferenceBtwSmallTemplateAndPhoneTemplate.endRef}
+									/>
 								</S.PhoneWrapper>
 							</VisibilitySwitch>
 						)}
@@ -221,137 +238,14 @@ export const Sandbox: React.FC = () => {
 						{() => (
 							<VisibilitySwitch visible={iteration3.started() && !iteration8.started()}>
 								<S.PhoneWrapper>
-									<Phone
-										openingInterpolation={iteration3.interpolations.opening}
-										backgroundZoomInterpolation={iteration4.interpolations.opening}>
-										<S.PhoneFace>
-											<S.PhoneFaceWrapper
-												ref={mergeRefs(
-													transformDifferenceBtwFaceAndPhoneFace.endRef,
-													transformDifferenceBtwPhoneFaceAndShiftedPhoneFace.startRef
-												)}
-											/>
-											<S.PhoneFaceWrapper
-												ref={transformDifferenceBtwPhoneFaceAndShiftedPhoneFace.endRef}
-												style={{ transform: "translateX(-40%)" }}
-											/>
-											<S.PhoneFaceWrapper
-												ref={transformDifferenceBtwExecutorFaceAndExecutorPhoneFace.endRef}
-												style={{ transform: "translateX(40%)" }}
-											/>
-										</S.PhoneFace>
-										<S.PhoneDescriptionWrapper>
-											<Observer>
-												{() => (
-													<VisibilitySwitch visible={iteration3.started() && !iteration4.ended()}>
-														<S.PhoneDescription>
-															<AnimatedSplitChars
-																content={["Choose a style", "from ready-made", "templates"]}
-																openingInterpolation={iteration3.interpolations.opening}
-																closingInterpolation={iteration4.interpolations.closing}
-																type={iteration3.visible() || iteration4.visible("opening") ? "opening" : "closing"}
-															/>
-														</S.PhoneDescription>
-													</VisibilitySwitch>
-												)}
-											</Observer>
-											<Observer>
-												{() => (
-													<VisibilitySwitch visible={iteration5.visible()}>
-														<S.PhoneDescription $overlay>
-															<AnimatedSplitChars
-																content={[
-																	"Our selected",
-																	"designers are on",
-																	"the mission to get",
-																	"your task done",
-																]}
-																openingInterpolation={iteration5.interpolations.opening}
-																closingInterpolation={iteration5.interpolations.closing}
-																type={iteration5.visible("opening") ? "opening" : "closing"}
-															/>
-														</S.PhoneDescription>
-													</VisibilitySwitch>
-												)}
-											</Observer>
-											<Observer>
-												{() => (
-													<VisibilitySwitch visible={iteration6.started()}>
-														<S.PhoneDescription $overlay $big>
-															<AnimatedSplitChars
-																content={["Slide it to", "make it"]}
-																openingInterpolation={iteration6.interpolations.opening}
-																closingInterpolation={iteration6.interpolations.closing.to((value) => 0)}
-																type={iteration6.visible("opening") ? "opening" : "closing"}
-															/>
-														</S.PhoneDescription>
-													</VisibilitySwitch>
-												)}
-											</Observer>
-										</S.PhoneDescriptionWrapper>
-										<Observer>
-											{() => (
-												<VisibilitySwitch visible={iteration3.started() && !iteration4.ended()}>
-													<S.PhoneCards
-														style={{
-															opacity: iteration4.interpolations.closing.to((value) => 1 - value),
-															y: iteration4.interpolations.closing.to((value) => `${2 * value}rem`),
-														}}>
-														<TemplatesCards
-															openingInterpolation={iteration3.interpolations.opening}
-															closingInterpolation={iteration3.interpolations.closing}
-															cardZoomInterpolation={iteration4.interpolations.opening}
-															type={iteration3.visible("opening") ? "opening" : "closing"}
-														/>
-													</S.PhoneCards>
-												</VisibilitySwitch>
-											)}
-										</Observer>
-										<S.PhoneButtonWrapper>
-											<Observer>
-												{() => (
-													<>
-														<VisibilitySwitch visible={iteration3.startClosed() && !iteration4.ended()}>
-															<a.div
-																style={{
-																	opacity: iteration3.visible()
-																		? iteration3.interpolations.closing
-																		: iteration4.interpolations.closing
-																				.to((value) => iterationControls.toRange(value, 0, 0.5))
-																				.to((value) => 1 - value),
-																}}>
-																<Button>Choose</Button>
-															</a.div>
-														</VisibilitySwitch>
-														<VisibilitySwitch visible={iteration4.startClosed() && !iteration5.ended()}>
-															<a.div
-																style={{
-																	opacity: iteration4.visible("closing")
-																		? iteration4.interpolations.closing.to((value) =>
-																				iterationControls.toRange(value, 0, 0.5)
-																		  )
-																		: iteration5.interpolations.closing.to((value) => 1 - value),
-																}}>
-																<Button theme='grey'>Searching the best...</Button>
-															</a.div>
-														</VisibilitySwitch>
-														<VisibilitySwitch visible={iteration6.started()}>
-															<a.div
-																style={{
-																	opacity: iteration6.started() ? iteration6.interpolations.opening : 1,
-																}}>
-																<S.PhoneSlide>
-																	<S.PhoneSlideContent
-																		style={{ x: iteration6.interpolations.closing.to((value) => `${value * 100}%`) }}
-																	/>
-																</S.PhoneSlide>
-															</a.div>
-														</VisibilitySwitch>
-													</>
-												)}
-											</Observer>
-										</S.PhoneButtonWrapper>
-									</Phone>
+									<PhoneAssistant
+										startAssistantFaceWrapperRef={mergeRefs(
+											transformDifferenceBtwFaceAndPhoneFace.endRef,
+											transformDifferenceBtwPhoneFaceAndShiftedPhoneFace.startRef
+										)}
+										shiftedAssistantFaceWrapperRef={transformDifferenceBtwPhoneFaceAndShiftedPhoneFace.endRef}
+										executorFaceWrapperRef={transformDifferenceBtwExecutorFaceAndExecutorPhoneFace.endRef}
+									/>
 								</S.PhoneWrapper>
 							</VisibilitySwitch>
 						)}
@@ -365,7 +259,7 @@ export const Sandbox: React.FC = () => {
 							)}
 						/>
 					</VisibilitySwitch>
-					<Observer>
+					{/* <Observer>
 						{() => (
 							<VisibilitySwitch visible={iteration7.started() && !iteration8.opened()}>
 								<S.CarTemplateWrapper
@@ -472,17 +366,14 @@ export const Sandbox: React.FC = () => {
 								</S.CarTemplateWrapper>
 							</VisibilitySwitch>
 						)}
-					</Observer>
+					</Observer> */}
 					<Observer>
 						{() => (
 							<VisibilitySwitch visible={iteration5.started() && !iteration8.started()}>
 								<S.ExecutorsWrapper>
 									<Executors
-										type={iteration5.visible("opening") ? "opening" : "closing"}
-										openingInterpolation={iteration5.interpolations.opening}
-										closingInterpolation={iteration5.interpolations.closing}
 										executorFaceRef={transformDifferenceBtwExecutorFaceAndExecutorPhoneFace.startRef}
-										renderExecutorFace={({ Component, data }) => (
+										renderFace={({ Component, data }) => (
 											<Observer>
 												{() => (
 													<Component
@@ -525,8 +416,9 @@ export const Sandbox: React.FC = () => {
 					<Observer>
 						{() => (
 							<VisibilitySwitch visible={iteration1.started() && !iteration7.startClosed()}>
-								<S.AssistantLayout>
-									<S.AssistantFaceWrapper ref={transformDifferenceBtwFaceAndPhoneFace.startRef}>
+								<Assistant
+									faceWrapperRef={transformDifferenceBtwFaceAndPhoneFace.startRef}
+									renderFace={() => (
 										<Observer>
 											{() => (
 												<S.AssistantFaceAnimatedWrapper
@@ -573,45 +465,8 @@ export const Sandbox: React.FC = () => {
 												</S.AssistantFaceAnimatedWrapper>
 											)}
 										</Observer>
-									</S.AssistantFaceWrapper>
-									<Observer>
-										{() => (
-											<VisibilitySwitch
-												visible={iteration0.visible("closing") || iteration1.visible() || iteration2.visible()}>
-												<S.AssistantDescriptionWrapper>
-													<Observer>
-														{() => (
-															<VisibilitySwitch visible={iteration1.visible()}>
-																<div>
-																	<AnimatedSplitChars
-																		content={["Let’s see how it works.", "Upload your content."]}
-																		openingInterpolation={iteration1.interpolations.opening}
-																		closingInterpolation={iteration1.interpolations.closing}
-																		type={iteration1.visible("opening") ? "opening" : "closing"}
-																	/>
-																</div>
-															</VisibilitySwitch>
-														)}
-													</Observer>
-													<Observer>
-														{() => (
-															<VisibilitySwitch visible={iteration2.visible()}>
-																<div style={{ top: 0, left: 0, width: "100%", position: "absolute" }}>
-																	<AnimatedSplitChars
-																		content={["I’m here to organize it all", "into a neat structure"]}
-																		openingInterpolation={iteration2.interpolations.opening}
-																		closingInterpolation={iteration2.interpolations.closing}
-																		type={iteration2.visible("opening") ? "opening" : "closing"}
-																	/>
-																</div>
-															</VisibilitySwitch>
-														)}
-													</Observer>
-												</S.AssistantDescriptionWrapper>
-											</VisibilitySwitch>
-										)}
-									</Observer>
-								</S.AssistantLayout>
+									)}
+								/>
 							</VisibilitySwitch>
 						)}
 					</Observer>

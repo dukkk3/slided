@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, memo } from "react";
 import { reaction } from "mobx";
 
 import { useLocalStore, useGlobalStore, useIterationControls } from "@core/hooks";
@@ -10,7 +10,7 @@ import * as S from "./styled";
 
 const iterations = [3.9, 8, 12, 17];
 
-export const TableBackground: React.FC = () => {
+export const TableBackground: React.FC = memo(() => {
 	const videoRef = useRef<HTMLVideoElement>(null!);
 	const localStore = useLocalStore({ currentTime: 0 });
 	const promoStore = useGlobalStore((store) => store.layout.promo);
@@ -81,4 +81,4 @@ export const TableBackground: React.FC = () => {
 			/>
 		</S.TableBackground>
 	);
-};
+});

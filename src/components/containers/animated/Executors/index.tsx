@@ -1,36 +1,28 @@
-import { Interpolation } from "react-spring";
 import { Observer } from "mobx-react-lite";
 
 import { VisibilitySwitch } from "@components/common/hoc/VisibilitySwitch";
 
-import { UserCard, Props as UserCardProps } from "@components/common/ordinary/UserCard";
+import { UserCard, Props as UserCardProps } from "@components/promo/UserCard";
 
-import { useIterationControls, useResizeObserver } from "@core/hooks";
+import { useIterationControls, useIteration, useResizeObserver } from "@core/hooks";
 import { mergeRefs } from "@core/utils";
 
 import * as S from "./styled";
 
 export interface Props {
-	renderExecutorFace: (payload: {
+	renderFace: (payload: {
 		Component: typeof S.ExecutorAvatar;
 		data: UserCardProps;
 	}) => React.ReactNode;
-	openingInterpolation: Interpolation<number, number>;
-	closingInterpolation: Interpolation<number, number>;
 	executorFaceRef?: React.ForwardedRef<any>;
-	type: "opening" | "closing";
 }
 
-export const Executors: React.FC<Props> = ({
-	renderExecutorFace,
-	executorFaceRef,
-	openingInterpolation,
-	closingInterpolation,
-	type,
-}) => {
+export const Executors: React.FC<Props> = ({ renderFace, executorFaceRef }) => {
 	const targetAvatarResizeObserver = useResizeObserver();
 	const targetCardResizeObserver = useResizeObserver();
 	const iterationControls = useIterationControls();
+
+	const iteration5 = useIteration(5);
 
 	return (
 		<S.Executors>
@@ -50,7 +42,7 @@ export const Executors: React.FC<Props> = ({
 			</VisibilitySwitch>
 			<Observer>
 				{() => (
-					<VisibilitySwitch visible={type === "closing"}>
+					<VisibilitySwitch visible={!iteration5.visible("opening")}>
 						<S.ExecutorAvatarWrapper
 							style={{
 								...targetAvatarResizeObserver.getSize(),
@@ -61,7 +53,7 @@ export const Executors: React.FC<Props> = ({
 									targetCardResizeObserver.getSize().width / 2
 								}px + 20px)`,
 							}}>
-							{renderExecutorFace({ Component: S.ExecutorAvatar, data: TARGET_USER.data })}
+							{renderFace({ Component: S.ExecutorAvatar, data: TARGET_USER.data })}
 						</S.ExecutorAvatarWrapper>
 					</VisibilitySwitch>
 				)}
@@ -79,24 +71,23 @@ export const Executors: React.FC<Props> = ({
 								}}>
 								<S.UserCardWrapper
 									style={{
-										scale:
-											type === "opening"
-												? openingInterpolation.to((value) =>
+										scale: iteration5.visible("opening")
+											? iteration5.interpolations.opening.to((value) =>
+													iterationControls.toRange(
+														value,
+														inQueueIndex / USERS.length,
+														(inQueueIndex + 1) / USERS.length
+													)
+											  )
+											: iteration5.interpolations.closing
+													.to((value) =>
 														iterationControls.toRange(
 															value,
 															inQueueIndex / USERS.length,
 															(inQueueIndex + 1) / USERS.length
 														)
-												  )
-												: closingInterpolation
-														.to((value) =>
-															iterationControls.toRange(
-																value,
-																inQueueIndex / USERS.length,
-																(inQueueIndex + 1) / USERS.length
-															)
-														)
-														.to((value) => 1 - value),
+													)
+													.to((value) => 1 - value),
 									}}>
 									<UserCard {...data} />
 								</S.UserCardWrapper>

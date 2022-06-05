@@ -8,7 +8,7 @@ export const layout = {
 		feedbackOpened: false,
 	}),
 	promo: schemaHelper.generateStoreSchema({
-		sequenceOpeningAnimationEnded: false,
+		sequenceOpeningAnimationEnded: true,
 		promoBannerOpeningAnimationEnded: false,
 		interactiveEnabled: function () {
 			return this.sequenceOpeningAnimationEnded && this.promoBannerOpeningAnimationEnded;

@@ -1,28 +1,26 @@
 import { useCallback, useEffect, memo } from "react";
-import { a, useSprings, useSpring, Interpolation } from "react-spring";
+import { a, useSprings, useSpring } from "react-spring";
 import { Observer } from "mobx-react-lite";
 
-import { AnimatedSplitWords } from "@components/containers/animated/AnimatedSplitWords";
+import { AnimatedSplitWords } from "@components/promo/AnimatedSplitWords";
 
 import { Button } from "@components/common/ui/Button";
 
-import { useGlobalStore } from "@core/hooks";
+import { useGlobalStore, useIteration } from "@core/hooks";
 import { splitRowsIntoWords } from "@core/utils";
 import { animationHelper } from "@core/helpers";
 
 import * as S from "./styled";
 
-export interface Props {
-	closingInterpolation: Interpolation<number, number>;
-}
-
-export const Promo: React.FC<Props> = memo(({ closingInterpolation }) => {
+export const Promo: React.FC = memo(() => {
 	const promoStore = useGlobalStore((store) => store.layout.promo);
 	const [titleWordsStyles, titleWordsApi] = useSprings(TITLE_WORDS_AMOUNT, () => ({ progress: 0 }));
 	const [subtitleWordsStyles, subtitleWordsApi] = useSprings(SUBTITLE_WORDS_AMOUNT, () => ({
 		progress: 0,
 	}));
 	const [buttonStyle, buttonStyleApi] = useSpring(() => ({ progress: 0 }));
+
+	const iteration0 = useIteration(0);
 
 	const animate = useCallback(async () => {
 		await Promise.all([
@@ -54,7 +52,7 @@ export const Promo: React.FC<Props> = memo(({ closingInterpolation }) => {
 								<AnimatedSplitWords
 									content={TITLE}
 									type={!promoStore.interactiveEnabled() ? "opening" : "closing"}
-									closingInterpolation={closingInterpolation}
+									closingInterpolation={iteration0.interpolations.closing}
 									getOpeningInterpolation={(index) => titleWordsStyles[index].progress}
 								/>
 							)}
@@ -66,7 +64,7 @@ export const Promo: React.FC<Props> = memo(({ closingInterpolation }) => {
 								<AnimatedSplitWords
 									content={SUBTITLE}
 									type={!promoStore.interactiveEnabled() ? "opening" : "closing"}
-									closingInterpolation={closingInterpolation}
+									closingInterpolation={iteration0.interpolations.closing}
 									getOpeningInterpolation={(index) => subtitleWordsStyles[index].progress}
 								/>
 							)}
@@ -78,11 +76,11 @@ export const Promo: React.FC<Props> = memo(({ closingInterpolation }) => {
 						<a.div
 							style={{
 								y: (promoStore.interactiveEnabled()
-									? closingInterpolation
+									? iteration0.interpolations.closing
 									: buttonStyle.progress.to((value) => 1 - value)
 								).to((value) => `-${2 * value}rem`),
 								opacity: promoStore.interactiveEnabled()
-									? closingInterpolation.to((value) => 1 - value)
+									? iteration0.interpolations.closing.to((value) => 1 - value)
 									: buttonStyle.progress,
 							}}>
 							<Button size='m'>Get started</Button>

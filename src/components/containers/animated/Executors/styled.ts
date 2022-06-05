@@ -1,6 +1,7 @@
-import { Image } from "@components/common/ui/Image/styled";
 import { a } from "react-spring";
 import styled from "styled-components";
+
+import { Image } from "@components/common/ui/Image/styled";
 
 export const Executors = styled.div`
 	width: 100%;
@@ -21,6 +22,7 @@ export const UserCardGroup = styled.div`
 
 export const UserCardWrapper = styled(a.div)`
 	transform-origin: center;
+	will-change: transform;
 `;
 
 const EXECUTOR_AVATAR_OUTSIDE_BORDER_SIZE = ".4rem";
@@ -34,6 +36,7 @@ export const ExecutorAvatar = styled(a.div)`
 	width: 100%;
 	height: 100%;
 	border-radius: 50%;
+	will-change: transform;
 
 	&:after {
 		content: "";

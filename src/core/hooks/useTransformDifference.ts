@@ -13,7 +13,12 @@ export function useTransformDifference({ debug, calculationPreset = "scale" }: O
 	const startResizeObserver = useResizeObserver();
 	const endResizeObserver = useResizeObserver();
 
-	const localStore = useLocalStore({ scale: { x: 1, y: 1 }, position: { x: 0, y: 0 } });
+	const localStore = useLocalStore({
+		scale: { x: 1, y: 1 },
+		position: { x: 0, y: 0 },
+		startOffset: { top: 0, left: 0 },
+		endOffset: { top: 0, left: 0 },
+	});
 
 	const calculate = useThrottle(
 		() => {
@@ -52,6 +57,8 @@ export function useTransformDifference({ debug, calculationPreset = "scale" }: O
 			transaction(() => {
 				localStore.setScale({ ...scale });
 				localStore.setPosition({ ...position });
+				localStore.setStartOffset(startOffset);
+				localStore.setEndOffset(endOffset);
 			});
 		},
 		200,
@@ -64,6 +71,14 @@ export function useTransformDifference({ debug, calculationPreset = "scale" }: O
 
 	const getPosition = useCallback(() => {
 		return localStore.position;
+	}, [localStore]);
+
+	const getStartOffset = useCallback(() => {
+		return localStore.startOffset;
+	}, [localStore]);
+
+	const getEndOffset = useCallback(() => {
+		return localStore.endOffset;
 	}, [localStore]);
 
 	const getDifference = useCallback(() => {
@@ -95,6 +110,8 @@ export function useTransformDifference({ debug, calculationPreset = "scale" }: O
 		endRef: endResizeObserver.ref,
 		startResizeObserver,
 		endResizeObserver,
+		getStartOffset,
+		getEndOffset,
 		getDifference,
 		getPosition,
 		getScale,

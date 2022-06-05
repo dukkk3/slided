@@ -145,6 +145,10 @@ export function safelyGetElementDOMRect(element: HTMLElement | SVGElement | null
 	);
 }
 
+export function step(value: number, edge: number) {
+	return value < edge ? 0 : 1;
+}
+
 export function calculateElementOffset(element: HTMLElement | SVGElement | null) {
 	const DOMRect = safelyGetElementDOMRect(element);
 
