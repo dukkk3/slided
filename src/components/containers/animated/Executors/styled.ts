@@ -6,7 +6,7 @@ import { Image } from "@components/common/ui/Image/styled";
 export const Executors = styled.div`
 	width: 100%;
 	height: 100%;
-	visibility: hidden;
+	visibility: hidden !important;
 
 	> * {
 		visibility: visible;

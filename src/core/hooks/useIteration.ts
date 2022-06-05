@@ -23,7 +23,7 @@ export function useIteration(
 		[iteration, iterationControls.iterations, startOffset]
 	);
 	const end = useMemo(
-		() => clamp(iteration + endOffset, 0, iterationControls.iterations),
+		() => clamp(iteration + endOffset, 0, iterationControls.iterations + endOffset),
 		[endOffset, iteration, iterationControls]
 	);
 

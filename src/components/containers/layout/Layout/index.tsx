@@ -8,6 +8,7 @@ import { Header } from "@components/containers/layout/Header";
 // import { Feedback } from "@components/containers/layout/Feedback";
 
 import { ScrollControls } from "@components/common/hoc/ScrollControls";
+import { IterationControls } from "@components/common/hoc/IterationControls";
 
 import { useGlobalStore, useResizeObserver } from "@core/hooks";
 
@@ -56,16 +57,14 @@ export const Layout: React.FC<Props> = ({ children }) => {
 			</S.HeaderWrapper>
 			{/* <Footer /> */}
 			{/* <Plans /> */}
-			<main>
-				<Observer>
-					{() => (
-						// <IterationControls iterations={10}>{children}</IterationControls>
-						<ScrollControls pages={20} enabled={promoStore.interactiveEnabled()}>
-							{children}
-						</ScrollControls>
-					)}
-				</Observer>
-			</main>
+			<Observer>
+				{() => (
+					// <IterationControls iterations={10}>{children}</IterationControls>
+					<IterationControls iterations={12} enabled={promoStore.interactiveEnabled()}>
+						{children}
+					</IterationControls>
+				)}
+			</Observer>
 		</S.Layout>
 	);
 };

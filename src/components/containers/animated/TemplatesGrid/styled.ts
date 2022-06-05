@@ -41,7 +41,6 @@ export const Template = styled(a.div)<TemplateProps>`
 	width: var(--template-card-width);
 	height: var(--template-card-height);
 	border-radius: 1rem;
-	background: yellow;
 	overflow: hidden;
 	transform-style: preserve-3d;
 	backface-visibility: none;

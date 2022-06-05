@@ -5,7 +5,7 @@ import { VisibilitySwitch } from "@components/common/hoc/VisibilitySwitch";
 
 import { Image } from "@components/common/ui/Image";
 
-import { clamp, step, createArray } from "@core/utils";
+import { clamp, step } from "@core/utils";
 import { useIteration, useIterationControls } from "@core/hooks";
 
 import { getRasterImageByName } from "@assets/images";
@@ -93,19 +93,27 @@ export const TemplatesGrid: React.FC<Props> = memo(({ centerTemplateRef, empty =
 });
 
 const ROWS = [
-	createArray(5)
-		.map(() => "")
-		.fill(getRasterImageByName("BlackTemplateSource")),
 	[
-		getRasterImageByName("BlueTemplateSource"),
-		getRasterImageByName("SilverTemplateSource"),
-		getRasterImageByName("CarTemplateSource"),
-		getRasterImageByName("BlueTemplateSource"),
-		getRasterImageByName("SilverTemplateSource"),
+		getRasterImageByName("CompiledTemplate4"),
+		getRasterImageByName("CompiledTemplate1"),
+		getRasterImageByName("CompiledTemplate10"),
+		getRasterImageByName("CompiledTemplate11"),
+		getRasterImageByName("CompiledTemplate2"),
 	],
-	createArray(5)
-		.map(() => "")
-		.fill(getRasterImageByName("GreenTemplateSource")),
+	[
+		getRasterImageByName("CompiledTemplate10"),
+		getRasterImageByName("CompiledTemplate5"),
+		getRasterImageByName("CarTemplateSource"),
+		getRasterImageByName("CompiledTemplate6"),
+		getRasterImageByName("CompiledTemplate3"),
+	],
+	[
+		getRasterImageByName("CompiledTemplate7"),
+		getRasterImageByName("CompiledTemplate9"),
+		getRasterImageByName("CompiledTemplate2"),
+		getRasterImageByName("CompiledTemplate8"),
+		getRasterImageByName("CompiledTemplate7"),
+	],
 ];
 
 const ROWS_AMOUNT = ROWS.length;

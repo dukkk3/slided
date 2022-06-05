@@ -60,40 +60,42 @@ export const Executors: React.FC<Props> = ({ renderFace, executorFaceRef }) => {
 			</Observer>
 			<Observer>
 				{() => (
-					<>
-						{USERS.map(({ position, data, inQueueIndex }, index) => (
-							<S.UserCardGroup
-								key={index}
-								style={{
-									top: `${(position.y / 2 + 0.5) * 100}%`,
-									left: `${(position.x / 2 + 0.5) * 100}%`,
-									transform: `translate3d(-50%, -50%, 0)`,
-								}}>
-								<S.UserCardWrapper
+					<VisibilitySwitch visible={iteration5.visible()}>
+						<div>
+							{USERS.map(({ position, data, inQueueIndex }, index) => (
+								<S.UserCardGroup
+									key={index}
 									style={{
-										scale: iteration5.visible("opening")
-											? iteration5.interpolations.opening.to((value) =>
-													iterationControls.toRange(
-														value,
-														inQueueIndex / USERS.length,
-														(inQueueIndex + 1) / USERS.length
-													)
-											  )
-											: iteration5.interpolations.closing
-													.to((value) =>
+										top: `${(position.y / 2 + 0.5) * 100}%`,
+										left: `${(position.x / 2 + 0.5) * 100}%`,
+										transform: `translate3d(-50%, -50%, 0)`,
+									}}>
+									<S.UserCardWrapper
+										style={{
+											scale: iteration5.visible("opening")
+												? iteration5.interpolations.opening.to((value) =>
 														iterationControls.toRange(
 															value,
 															inQueueIndex / USERS.length,
 															(inQueueIndex + 1) / USERS.length
 														)
-													)
-													.to((value) => 1 - value),
-									}}>
-									<UserCard {...data} />
-								</S.UserCardWrapper>
-							</S.UserCardGroup>
-						))}
-					</>
+												  )
+												: iteration5.interpolations.closing
+														.to((value) =>
+															iterationControls.toRange(
+																value,
+																inQueueIndex / USERS.length,
+																(inQueueIndex + 1) / USERS.length
+															)
+														)
+														.to((value) => 1 - value),
+										}}>
+										<UserCard {...data} />
+									</S.UserCardWrapper>
+								</S.UserCardGroup>
+							))}
+						</div>
+					</VisibilitySwitch>
 				)}
 			</Observer>
 		</S.Executors>

@@ -124,7 +124,7 @@ export const PhoneAssistant: React.FC<Props> = memo(
 															.to((value) => iterationControls.toRange(value, 0, 0.5))
 															.to((value) => 1 - value),
 											}}>
-											<Button>Choose</Button>
+											<Button onClick={iterationControls.next}>Choose</Button>
 										</a.div>
 									</VisibilitySwitch>
 									<VisibilitySwitch visible={iteration4.startClosed() && !iteration5.ended()}>
@@ -136,7 +136,9 @@ export const PhoneAssistant: React.FC<Props> = memo(
 													  )
 													: iteration5.interpolations.closing.to((value) => 1 - value),
 											}}>
-											<Button theme='grey'>Searching the best...</Button>
+											<Button theme='grey' style={{ cursor: "default" }}>
+												Searching the best...
+											</Button>
 										</a.div>
 									</VisibilitySwitch>
 									<VisibilitySwitch visible={iteration6.started()}>
@@ -144,7 +146,7 @@ export const PhoneAssistant: React.FC<Props> = memo(
 											style={{
 												opacity: iteration6.started() ? iteration6.interpolations.opening : 1,
 											}}>
-											<S.Slide>
+											<S.Slide onClick={iterationControls.next}>
 												<S.SlideContent
 													style={{ x: iteration6.interpolations.closing.to((value) => `${value * 100}%`) }}
 												/>

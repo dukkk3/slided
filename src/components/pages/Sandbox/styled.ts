@@ -18,9 +18,8 @@ export const Sandbox = styled(a.div)`
 	width: 100%;
 	height: 100vh;
 	position: absolute;
-	will-change: transform;
 	backface-visibility: hidden;
-	background: grey;
+	will-change: transform;
 `;
 
 interface LayerWrapperProps {
@@ -39,6 +38,7 @@ export const AssistantFaceAnimatedWrapper = styled(a.div)`
 	width: 100%;
 	height: 100%;
 	transform-origin: center;
+	will-change: transform;
 `;
 
 export const PromoWrapper = styled.div`
@@ -141,6 +141,7 @@ export const UserCursorWrapper = styled(a.div)`
 	height: 100%;
 	position: absolute;
 	transform-origin: left top;
+	will-change: transform;
 `;
 
 export const TemplateCard = styled(a.div)`
@@ -150,6 +151,7 @@ export const TemplateCard = styled(a.div)`
 	overflow: hidden;
 	border-radius: 1rem;
 	z-index: 9;
+	will-change: transform;
 
 	${Image} {
 		width: 100%;
@@ -190,4 +192,13 @@ export const TariffWrapper = styled.div`
 	height: 100%;
 	position: absolute;
 	z-index: 11;
+`;
+
+export const FooterWrapper = styled(a.div)`
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100vh;
+	z-index: 9999;
+	position: absolute;
 `;

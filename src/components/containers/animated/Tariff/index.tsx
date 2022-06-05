@@ -28,6 +28,7 @@ export const Tariff: React.FC = memo(() => {
 				<S.Ray>
 					{createArray(3).map((_, index) => (
 						<S.RayPiece
+							key={index}
 							style={{
 								scale: iteration11.interpolations.opening.to((value) =>
 									iterationControls.toRange(value, index / 3, 1)

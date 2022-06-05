@@ -28,6 +28,7 @@ export const Cards = styled(a.div)`
 export const Slide = styled.div`
 	width: 100%;
 	height: 100%;
+	cursor: pointer;
 	border-radius: inherit;
 	background: radial-gradient(100% 87.77% at 100% 0%, #acb3bf 0%, #dddee1 100%);
 `;
@@ -68,7 +69,6 @@ export const ButtonWrapper = styled.div`
 		left: 0;
 		width: 100%;
 		height: 100%;
-		cursor: default;
 		border-radius: 90rem;
 		position: absolute;
 		will-change: opacity;
@@ -84,7 +84,9 @@ export const PulseCircle = styled(a.div)<PulseCircleProps>`
 	left: calc(50% - var(--size) / 2);
 	position: absolute;
 	width: var(--size);
+	pointer-events: none;
 	height: var(--size);
+	z-index: 0;
 	border-radius: 50%;
 	background: ${(props) =>
 		props.$theme === "white"

@@ -6,7 +6,7 @@ import { clamp } from "@core/utils";
 
 interface Options {
 	iterations: number;
-	animationConfig: SpringConfig;
+	animationConfig?: SpringConfig;
 }
 
 export interface IterationContext {

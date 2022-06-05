@@ -15,6 +15,7 @@ export const Title = styled(a.p)`
 	line-height: 80%;
 	font-weight: 600;
 	margin-bottom: 6rem;
+	will-change: transform, opacity;
 `;
 
 export const Body = styled.div`
@@ -37,6 +38,7 @@ export const Price = styled(a.div)`
 	position: absolute;
 	font-size: 2rem;
 	font-weight: 600;
+	will-change: transform, opacity;
 `;
 
 export const PriceContent = styled.div`
@@ -49,6 +51,7 @@ export const RayPiece = styled(a.div)`
 	width: calc(30rem * var(--scale));
 	height: calc(34rem * var(--scale));
 	transform-origin: center;
+	will-change: transform;
 
 	--scale: 1;
 

@@ -3,7 +3,12 @@ import { Interpolation } from "react-spring";
 import { reaction } from "mobx";
 import useRefs from "react-use-refs";
 
-import { useResizeObserver, useIterationContextFactory, IterationContext } from "@core/hooks";
+import {
+	useLocalStore,
+	useResizeObserver,
+	IterationContext,
+	useIterationContextFactory,
+} from "@core/hooks";
 import { clamp } from "@core/utils";
 
 import * as S from "./styled";
@@ -128,7 +133,7 @@ export const ScrollControls: React.FC<Props> = ({
 						</S.Content>
 					</context.Provider>
 				</S.Fixed>
-				<S.Fill ref={fillRef} style={{ height: `${pages * 200}vh` }} />
+				<S.Fill ref={fillRef} style={{ height: `100vh` }} />
 			</S.Container>
 		</S.ScrollControls>
 	);
