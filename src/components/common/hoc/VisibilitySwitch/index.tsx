@@ -1,21 +1,28 @@
 import React, { memo } from "react";
 
-export interface Props extends React.PropsWithChildren<{}> {
+export interface Props {
 	visible?: boolean;
+	unmount?: boolean;
 }
 
-export const VisibilitySwitch: React.FC<Props> = memo(({ children, visible = true }) => {
-	if (!children) {
-		return null;
-	}
+export const VisibilitySwitch: React.FC<React.PropsWithChildren<Props>> = memo(
+	({ children, unmount = false, visible = true }) => {
+		if (!children || (unmount && !visible)) {
+			return null;
+		}
 
-	return (
-		<>
-			{visible
-				? children
-				: React.cloneElement(children as any, {
-						style: { ...((children as any).props?.style || {}), pointerEvents: "none", opacity: 0 },
-				  })}
-		</>
-	);
-});
+		if (unmount) return <>{children}</>;
+
+		return (
+			<div
+				key='div'
+				style={{
+					...(visible ? {} : { pointerEvents: "none", opacity: 0 }),
+					width: "100%",
+					height: "100%",
+				}}>
+				{children}
+			</div>
+		);
+	}
+);

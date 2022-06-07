@@ -25,3 +25,7 @@ export function getVectorImageByName<
 export function getRasterImageByName(name: RasterImageNameKind) {
 	return rasterImages[name];
 }
+
+export function getRasterImagesByNames<T extends RasterImageNameKind[]>(...names: T) {
+	return names.map((name) => rasterImages[name]);
+}

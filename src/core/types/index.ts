@@ -1,3 +1,5 @@
+import { Interpolation } from "react-spring";
+
 export namespace Schema {
 	type GetActionKeys<T extends object> = KeysMatching<T, (...args: any) => any>;
 	type GetNonMutableKeys<T extends object> = {
@@ -44,3 +46,10 @@ export type IfEquals<T, U, Y = true, N = false> = (<G>() => G extends T ? 1 : 2)
 >() => G extends U ? 1 : 2
 	? Y
 	: N;
+
+export interface ComplexInterpolationProp {
+	type: "opening" | "closing";
+	opening: Interpolation<number, number>;
+	closing: Interpolation<number, number>;
+	visible?: boolean;
+}

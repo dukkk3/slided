@@ -338,3 +338,34 @@ export function generateCircPoints(start: number, end: number, step: number = 0.
 
 	return points;
 }
+
+export function inRange(value: number, a: number, b?: number) {
+	if (!b) {
+		return Math.floor(value) === a;
+	}
+
+	return value >= a && value < b;
+}
+
+export function toRange(value: number, a: number, b: number) {
+	return value < a ? 0 : value >= b ? 1 : (value - a) / (b - a);
+}
+
+export type CompareOperatorKind = "gte" | "gt" | "lt" | "lte";
+
+export function compare(value: number, a: number, operator: CompareOperatorKind) {
+	switch (operator) {
+		case "gt":
+			return a > value;
+		case "gte":
+			return a >= value;
+		case "lt":
+			return a < value;
+		case "lte":
+			return a <= value;
+	}
+}
+
+export function inlineSwitch<T, U>(condition: boolean | undefined | null, a: T, b: U) {
+	return condition ? a : b;
+}

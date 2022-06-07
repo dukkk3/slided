@@ -4,12 +4,11 @@ import { Container as ContainerImpl } from "@components/common/ui/Container/styl
 
 export const PromoContainer = styled.div`
 	padding-top: var(--header-height);
+	padding-bottom: var(--container-gap);
 	height: 100vh;
 `;
 
 export const Container = styled(ContainerImpl)`
-	display: flex;
-	justify-content: center;
 	position: relative;
 	height: 100%;
 `;

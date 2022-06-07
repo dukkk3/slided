@@ -1,17 +1,24 @@
-import { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 
 import { useResizeObserver, useLocalStore, useThrottle } from "@core/hooks";
 import { calculateCoord, calculateScale, calculateElementOffset } from "@core/utils";
 import { reaction, transaction } from "mobx";
 
 interface Options {
-	debug?: boolean;
-	calculationPreset?: "scale" | "rect";
+	endRef?: React.RefObject<any>;
+	startRef?: React.RefObject<any>;
+	resizeType?: "scale" | "rect";
+	logging?: boolean;
 }
 
-export function useTransformDifference({ debug, calculationPreset = "scale" }: Options = {}) {
-	const startResizeObserver = useResizeObserver();
-	const endResizeObserver = useResizeObserver();
+export function useTransformDifference({
+	startRef,
+	endRef,
+	logging,
+	resizeType = "scale",
+}: Options = {}) {
+	const startResizeObserver = useResizeObserver({ ref: startRef });
+	const endResizeObserver = useResizeObserver({ ref: endRef });
 
 	const localStore = useLocalStore({
 		scale: { x: 1, y: 1 },
@@ -32,26 +39,19 @@ export function useTransformDifference({ debug, calculationPreset = "scale" }: O
 			const endOffset = calculateElementOffset(endResizeObserver.ref.current);
 
 			position.x =
-				calculationPreset === "scale"
+				resizeType === "scale"
 					? calculateCoord(startOffset.left, endOffset.left, startSize.width, endSize.width)
 					: endOffset.left - startOffset.left;
 			position.y =
-				calculationPreset === "scale"
+				resizeType === "scale"
 					? calculateCoord(startOffset.top, endOffset.top, startSize.height, endSize.height)
 					: endOffset.top - startOffset.top;
 
 			scale.x = calculateScale(endSize.width, startSize.width);
 			scale.y = calculateScale(endSize.height, startSize.height);
 
-			if (debug) {
-				console.log({
-					startOffset,
-					endOffset,
-					endSize: { ...endSize },
-					startSize: { ...startSize },
-					position,
-					scale,
-				});
+			if (logging) {
+				console.log({ position, scale, startSize: { ...startSize }, endSize: { ...endSize } });
 			}
 
 			transaction(() => {
@@ -62,7 +62,7 @@ export function useTransformDifference({ debug, calculationPreset = "scale" }: O
 			});
 		},
 		200,
-		[localStore, startResizeObserver, endResizeObserver]
+		[localStore, startResizeObserver, endResizeObserver, logging]
 	);
 
 	const getScale = useCallback(() => {
