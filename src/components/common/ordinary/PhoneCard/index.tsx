@@ -36,7 +36,7 @@ export const PhoneCard: React.FC<React.PropsWithChildren<Props>> = ({
 							scale: backgroundZoomInterpolation.to((value) => 1 + 2 * (1 - value)),
 							opacity: backgroundZoomInterpolation.to((value) => 0.2 * value),
 						}}>
-						<Image src={getRasterImageByName("Blue2TemplateSource")} lazy={false} />
+						<Image src={getRasterImageByName("Blue2Template")} lazy={false} />
 					</S.PlugImageWrapper>
 					<S.PlugImageWrapper
 						style={{
@@ -44,7 +44,7 @@ export const PhoneCard: React.FC<React.PropsWithChildren<Props>> = ({
 							scale: backgroundZoomInterpolation.to((value) => 1.8 + 8 * (1 - value)),
 							opacity: backgroundZoomInterpolation.to((value) => 0.3 * value),
 						}}>
-						<Image src={getRasterImageByName("Blue2TemplateSource")} lazy={false} />
+						<Image src={getRasterImageByName("Blue2Template")} lazy={false} />
 					</S.PlugImageWrapper>
 				</S.Plug>
 				<S.ContentWrapper>

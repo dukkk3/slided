@@ -42,7 +42,7 @@ export const MovedGridTemplate: React.FC<Props> = memo(
 										.closing.to((value) => transformBtwPhoneTemplateAndGridTemplate.getPosition().y * value),
 									opacity: iteration9.interpolations
 										.toEasing("easeInOutCubic")
-										.closing.to((value) => step(value, 0.999))
+										.closing.to((value) => step(value, 1))
 										.to((value) => 1 - value),
 								}}>
 								<Image src={templateSource} lazy={false} />

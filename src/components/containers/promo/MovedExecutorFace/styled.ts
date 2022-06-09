@@ -1,9 +1,9 @@
 import { a } from "react-spring";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
 import { Image } from "@components/common/ui/Image/styled";
 
-const EXECUTOR_AVATAR_OUTSIDE_BORDER_SIZE = ".4rem";
+import { generateOutsideBorderMixin } from "@styles/mixins";
 
 export const MovedExecutorFace = styled(a.div)`
 	top: 0;
@@ -14,13 +14,8 @@ export const MovedExecutorFace = styled(a.div)`
 
 	&:after {
 		content: "";
-		border-radius: 50%;
-		width: 100%;
-		height: 100%;
-		position: absolute;
-		left: -${EXECUTOR_AVATAR_OUTSIDE_BORDER_SIZE};
-		top: -${EXECUTOR_AVATAR_OUTSIDE_BORDER_SIZE};
-		border: ${EXECUTOR_AVATAR_OUTSIDE_BORDER_SIZE} solid white;
+		box-sizing: border-box;
+		${generateOutsideBorderMixin(".4rem")}
 	}
 
 	${Image} {

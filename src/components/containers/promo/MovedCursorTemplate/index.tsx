@@ -42,12 +42,13 @@ export const MovedCursorTemplate: React.FC<Props> = memo(
 							<Observer>
 								{() => (
 									<S.Card
+										className='safari-border-radius-overflow-bugfix'
 										style={{
 											opacity: inlineSwitch(
 												iteration8.started(),
 												iteration8.interpolations
 													.toEasing("easeInOutCubic")
-													.opening.to((value) => step(value, 0.99))
+													.opening.to((value) => step(value, 1))
 													.to((value) => 1 - value),
 												iteration7.interpolations
 													.toEasing("easeInOutCubic")
@@ -62,16 +63,23 @@ export const MovedCursorTemplate: React.FC<Props> = memo(
 											y: iteration8.interpolations
 												.toEasing("easeInOutCubic")
 												.opening.to((value) => transformBtwEndAndMinContainers.getPosition().y * value),
-											["--scale-x" as any]: iteration8.interpolations
+											transformOrigin: "left top",
+											width: iteration8.interpolations
 												.toEasing("easeInOutCubic")
-												.opening.to((value) => 1 - (1 - transformBtwEndAndMinContainers.getScale().x) * value),
-											["--scale-y" as any]: iteration8.interpolations
+												.opening.to((value) => 1 - (1 - transformBtwEndAndMinContainers.getScale().x) * value)
+												.to((value) => `${(value * 100).toFixed(2)}%`),
+											height: iteration8.interpolations
 												.toEasing("easeInOutCubic")
-												.opening.to((value) => 1 - (1 - transformBtwEndAndMinContainers.getScale().y) * value),
+												.opening.to((value) => 1 - (1 - transformBtwEndAndMinContainers.getScale().y) * value)
+												.to((value) => `${(value * 100).toFixed(2)}%`),
+											background: `url(${templateSource}) center center / cover`,
 										}}>
 										<S.CardImageGroup
 											$zoom={IMAGE_ZOOM}
 											style={{
+												opacity: iteration7.interpolations
+													.toEasing("easeInOutCubic")
+													.opening.to((value) => 1 - step(value, 0.999)),
 												scale: iteration7.interpolations
 													.toEasing("easeInOutCubic")
 													.opening.to((value) => 1 + (1 / IMAGE_ZOOM - 1) * value),

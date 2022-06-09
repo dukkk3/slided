@@ -58,21 +58,24 @@ export const PhoneAssistant: React.FC<Props> = memo(
 									</VisibilitySwitch>
 								)}
 							</Observer>
-							<Iteration iteration={5}>
-								{(iteration5) => (
-									<S.Description $overlay>
-										<Observer>
-											{() => (
-												<AnimatedSplitChars
-													content={["Our selected", "designers are on", "the mission to get", "your task done"]}
-													openingInterpolation={iteration5.interpolations.toEasing("easeInOutCubic").opening}
-													closingInterpolation={iteration5.interpolations.toEasing("easeInOutCubic").closing}
-													type={iteration5.currentType()}
-												/>
-											)}
-										</Observer>
-									</S.Description>
-								)}
+							<Iteration iteration={5} normalizeDuration>
+								{(iteration5) => {
+									console.log(iteration5);
+									return (
+										<S.Description $overlay>
+											<Observer>
+												{() => (
+													<AnimatedSplitChars
+														content={["Our selected", "designers are on", "the mission to get", "your task done"]}
+														openingInterpolation={iteration5.interpolations.toEasing("easeInOutCubic").opening}
+														closingInterpolation={iteration5.interpolations.toEasing("easeInOutCubic").closing}
+														type={iteration5.currentType()}
+													/>
+												)}
+											</Observer>
+										</S.Description>
+									);
+								}}
 							</Iteration>
 							<Iteration
 								iteration={[6, 7]}
@@ -189,7 +192,8 @@ export const PhoneAssistant: React.FC<Props> = memo(
 								iteration={[4, 5]}
 								visibleCondition={(iteration4, iteration5) =>
 									iteration4.startClosed() && !iteration5.ended()
-								}>
+								}
+								style={{ pointerEvents: "none" }}>
 								{(iteration4, iteration5) => (
 									<a.div
 										className='unit'

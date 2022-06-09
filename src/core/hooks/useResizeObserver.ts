@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useLayoutEffect, useMemo } from "react";
+import React, { useCallback, useEffect, useMemo } from "react";
 import ResizeObserver from "resize-observer-polyfill";
 
 import { useLocalStore, useSpareRef } from "@core/hooks";
@@ -64,7 +64,7 @@ export function useResizeObserver({ ref, calculateSizeWithPaddings = false }: Op
 		};
 	}, [localStore]);
 
-	useLayoutEffect(() => {
+	useEffect(() => {
 		const targetElement = spareRef.current;
 
 		if (targetElement) {

@@ -86,14 +86,14 @@ export const TemplatesGrid: React.FC<Props> = memo(
 																			rowIndex === centerRow,
 																		{
 																			opacity: iteration10.interpolations
-																				.toEasing("easeInOutCubic")
+																				.toEasing("easeInOutQuart")
 																				.opening.to((value) => 1 - 0.9 * value),
 																		},
 																		inlineSwitch(
 																			distance !== 0,
 																			{
 																				opacity: iteration9.interpolations
-																					.toEasing("easeInOutCubic")
+																					.toEasing("easeInOutQuart")
 																					.closing.to((value) =>
 																						toRange(
 																							value,
@@ -102,14 +102,14 @@ export const TemplatesGrid: React.FC<Props> = memo(
 																						)
 																					),
 																				z: iteration9.interpolations
-																					.toEasing("easeInOutCubic")
+																					.toEasing("easeInOutQuart")
 																					.closing.to((value) => toRange(value, normalizedInvertDistance, 1))
 																					.to((value) => `${PERSPECTIVE * 0.75 * (1 - value)}rem`),
 																			},
 																			{
 																				opacity: iteration9.interpolations
 																					.toEasing("easeInOutCubic")
-																					.closing.to((value) => step(value, 0.99))
+																					.closing.to((value) => step(value, 1))
 																					.to((value) => value),
 																			}
 																		)

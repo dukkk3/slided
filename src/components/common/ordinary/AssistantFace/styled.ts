@@ -50,7 +50,7 @@ export const Pulse = styled(a.div)`
 	will-change: transform;
 `;
 
-export const Circle = styled.div`
+export const Circle = styled(a.div)`
 	top: 0;
 	left: 0;
 	z-index: 1;

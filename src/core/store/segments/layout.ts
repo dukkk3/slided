@@ -7,8 +7,10 @@ export const layout = {
 		breakpoint: clientHelper.detectBreakpoint(),
 	}),
 	promo: schemaHelper.generateStoreSchema({
-		sequenceOpeningAnimationEnded: true,
+		sequenceOpeningAnimationEnded: false,
 		promoBannerOpeningAnimationEnded: false,
+		loaderHidden: true,
+		videoLoaded: true,
 		interactiveEnabled: function () {
 			return this.sequenceOpeningAnimationEnded && this.promoBannerOpeningAnimationEnded;
 		},

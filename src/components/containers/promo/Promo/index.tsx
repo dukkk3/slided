@@ -1,6 +1,7 @@
 import { useCallback, useEffect, memo } from "react";
 import { a, useSprings, useSpring } from "react-spring";
 import { Observer } from "mobx-react-lite";
+import { reaction } from "mobx";
 
 import { AnimatedSplitWords } from "@components/common/ordinary/AnimatedSplitWords";
 
@@ -23,6 +24,13 @@ export const Promo: React.FC = memo(() => {
 	const [buttonStyle, buttonStyleApi] = useSpring(() => ({ progress: 0 }));
 
 	const animate = useCallback(async () => {
+		if (
+			!promoStore.videoLoaded ||
+			!promoStore.loaderHidden ||
+			promoStore.promoBannerOpeningAnimationEnded
+		)
+			return;
+
 		await Promise.all([
 			animationHelper.resolveSpringAnimation(titleWordsApi, (index) => ({
 				progress: 1,
@@ -37,6 +45,15 @@ export const Promo: React.FC = memo(() => {
 
 		promoStore.setPromoBannerOpeningAnimationEnded(true);
 	}, [buttonStyleApi, promoStore, subtitleWordsApi, titleWordsApi]);
+
+	// useEffect(
+	// 	() =>
+	// 		reaction(
+	// 			() => [promoStore.videoLoaded, promoStore.loaderHidden] as const,
+	// 			() => animate()
+	// 		),
+	// 	[animate, promoStore]
+	// );
 
 	useEffect(() => {
 		animate();

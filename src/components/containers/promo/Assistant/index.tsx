@@ -21,20 +21,23 @@ export const Assistant: React.FC<Props> = memo(({ faceContainerRef, ...rest }) =
 				{() => (
 					<S.DescriptionWrapper>
 						<Iteration iteration={1}>
-							{(iteration1) => (
-								<S.Description>
-									<Observer>
-										{() => (
-											<AnimatedSplitChars
-												content={["Let’s see how it works.", "Upload your content."]}
-												openingInterpolation={iteration1.interpolations.toEasing("easeInOutCubic").opening}
-												closingInterpolation={iteration1.interpolations.toEasing("easeInOutCubic").closing}
-												type={iteration1.currentType()}
-											/>
-										)}
-									</Observer>
-								</S.Description>
-							)}
+							{(iteration1) => {
+								console.log("rerender");
+								return (
+									<S.Description>
+										<Observer>
+											{() => (
+												<AnimatedSplitChars
+													content={["Let’s see how it works.", "Upload your content."]}
+													openingInterpolation={iteration1.interpolations.toEasing("easeInOutCubic").opening}
+													closingInterpolation={iteration1.interpolations.toEasing("easeInOutCubic").closing}
+													type={iteration1.currentType()}
+												/>
+											)}
+										</Observer>
+									</S.Description>
+								);
+							}}
 						</Iteration>
 						<Iteration iteration={2}>
 							{(iteration2) => (

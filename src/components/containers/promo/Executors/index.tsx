@@ -1,3 +1,4 @@
+import { easings } from "react-spring";
 import { Observer } from "mobx-react-lite";
 
 import { Iteration } from "@components/common/hoc/Iteration";
@@ -6,7 +7,7 @@ import { VisibilitySwitch } from "@components/common/hoc/VisibilitySwitch";
 import { UserCard, Props as UserCardProps } from "@components/common/ordinary/UserCard";
 
 import { useResizeObserver } from "@core/hooks";
-import { mergeRefs, toRange, inlineSwitch } from "@core/utils";
+import { mergeRefs, toRange, inlineSwitch, step } from "@core/utils";
 
 import { getRasterImageByName } from "@assets/images";
 
@@ -59,28 +60,39 @@ export const Executors: React.FC<Props> = ({ faceContainerRef, ...rest }) => {
 															.to(
 																(value) => value
 																// toRange(value, inQueueIndex / USERS.length, (inQueueIndex + 1) / USERS.length)
-															),
+															)
+															.to({ easing: easings.easeInOutCubic, output: [0, 1], range: [0, 1] }),
 														iteration5.interpolations.closing
-															.to((value) => toRange(value, 0.5, 1)) // .toEasing("easeInOutCubic")
+															.to((value) => toRange(value, 0, 0.5)) // .toEasing("easeInOutCubic")
 															.to(
 																(value) => value
 																// toRange(value, inQueueIndex / USERS.length, (inQueueIndex + 1) / USERS.length)
 															)
 															.to((value) => 1 - value)
+															.to({ easing: easings.easeInOutCubic, output: [0, 1], range: [0, 1] })
 													),
 													scale: inlineSwitch(
 														iteration5.currentType() === "opening",
-														iteration5.interpolations.opening.to((value) =>
-															toRange(value, inQueueIndex / USERS.length, (inQueueIndex + 1) / USERS.length)
-														),
-														iteration5.interpolations.closing
+														iteration5.interpolations.opening
 															.to((value) =>
 																toRange(value, inQueueIndex / USERS.length, (inQueueIndex + 1) / USERS.length)
 															)
+															.to({ easing: easings.easeInOutCubic, output: [0, 1], range: [0, 1] }),
+														iteration5.interpolations.closing
+															.to({ easing: easings.easeInOutCubic, output: [0, 1], range: [0, 1] })
 															.to((value) => 1 - value)
 													),
 												}}>
-												<UserCard {...data} />
+												<UserCard
+													{...data}
+													avatarVisibleInterpolation={
+														index === TARGET_INDEX
+															? iteration5.interpolations
+																	.toEasing("easeInOutQuart")
+																	.closing.to((value) => 1 - step(value, 0.001))
+															: undefined
+													}
+												/>
 											</S.UserCardWrapper>
 										</S.UserCardGroup>
 									))}
@@ -94,20 +106,43 @@ export const Executors: React.FC<Props> = ({ faceContainerRef, ...rest }) => {
 	);
 };
 
-const DEFAULT_USER_DATA: UserCardProps = {
-	avatarSource: getRasterImageByName("CompiledTemplate1"),
-	name: "Nikita Osin",
-};
-
 const USERS: { inQueueIndex: number; data: UserCardProps; position: { x: number; y: number } }[] = [
-	{ inQueueIndex: 0, data: { ...DEFAULT_USER_DATA, rating: 4.5 }, position: { x: -0.7, y: 0.1 } },
-	{ inQueueIndex: 5, data: { ...DEFAULT_USER_DATA, size: "s" }, position: { x: -0.6, y: 0.7 } },
-	{ inQueueIndex: 2, data: { ...DEFAULT_USER_DATA, size: "s" }, position: { x: -0.5, y: -0.4 } },
-	{ inQueueIndex: 4, data: { ...DEFAULT_USER_DATA, size: "s" }, position: { x: -0.8, y: -0.65 } },
+	{
+		inQueueIndex: 0,
+		data: { avatarSource: getRasterImageByName("Man1"), name: "Mark", rating: 4.5 },
+		position: { x: -0.7, y: 0.1 },
+	},
+	{
+		inQueueIndex: 5,
+		data: { avatarSource: getRasterImageByName("Woman1"), name: "Limba", size: "s" },
+		position: { x: -0.6, y: 0.7 },
+	},
+	{
+		inQueueIndex: 2,
+		data: { avatarSource: getRasterImageByName("Man2"), name: "Piers", size: "s" },
+		position: { x: -0.5, y: -0.4 },
+	},
+	{
+		inQueueIndex: 4,
+		data: { avatarSource: getRasterImageByName("Man3"), name: "David", size: "s" },
+		position: { x: -0.8, y: -0.65 },
+	},
 	//
-	{ inQueueIndex: 6, data: { ...DEFAULT_USER_DATA, rating: 4.5 }, position: { x: 0.6, y: 0.4 } },
-	{ inQueueIndex: 1, data: { ...DEFAULT_USER_DATA, size: "s" }, position: { x: 0.8, y: -0.1 } },
-	{ inQueueIndex: 3, data: { ...DEFAULT_USER_DATA, rating: 4.5 }, position: { x: 0.65, y: -0.7 } },
+	{
+		inQueueIndex: 6,
+		data: { avatarSource: getRasterImageByName("Man4"), name: "Alex", rating: 4.7 },
+		position: { x: 0.6, y: 0.4 },
+	},
+	{
+		inQueueIndex: 1,
+		data: { avatarSource: getRasterImageByName("Woman3"), name: "Roza", size: "s" },
+		position: { x: 0.8, y: -0.1 },
+	},
+	{
+		inQueueIndex: 3,
+		data: { avatarSource: getRasterImageByName("Woman2"), name: "Margo", rating: 4.9 },
+		position: { x: 0.65, y: -0.7 },
+	},
 ];
 
 const TARGET_INDEX = 0;

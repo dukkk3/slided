@@ -11,7 +11,6 @@ export const Sandbox = styled(a.div)`
 	left: 0;
 	width: 100%;
 	height: 100vh;
-	background: grey;
 	position: absolute;
 	backface-visibility: hidden;
 `;
@@ -24,15 +23,14 @@ export const LayerWrapper = styled.div`
 	position: absolute;
 `;
 
-export const CarTemplateWrapper = styled(a.div)`
+export const LoaderGroup = styled(a.div)`
 	top: 0;
 	left: 0;
-	width: calc(100% * var(--scale-x));
-	height: calc((100% - var(--container-gap)) * var(--scale-y));
+	width: 100%;
+	height: 100%;
+	display: flex;
 	position: absolute;
-	z-index: 99;
-	will-change: width, height, transform;
-
-	--scale-x: 1;
-	--scale-y: 1;
+	align-items: center;
+	justify-content: center;
+	z-index: 9999;
 `;

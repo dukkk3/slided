@@ -10,16 +10,17 @@ import * as S from "./styled";
 export interface Props {
 	openingInterpolation: Interpolation<number, number>;
 	pulseInterpolation: Interpolation<number, number>;
+	backgroundOpacityInterpolation: Interpolation<number, number>;
 	swap?: boolean;
 }
 
 export const AssistantFace: React.FC<Props> = memo(
-	({ openingInterpolation, pulseInterpolation }) => {
+	({ openingInterpolation, pulseInterpolation, backgroundOpacityInterpolation }) => {
 		return (
 			<S.AssistantFace>
 				<S.Background>
-					<S.Pulse style={{ scale: pulseInterpolation }} />
-					<S.Circle>
+					<S.Pulse style={{ scale: pulseInterpolation, opacity: backgroundOpacityInterpolation }} />
+					<S.Circle style={{ opacity: backgroundOpacityInterpolation }}>
 						<svg viewBox={`0 0 ${CIRCLE_VIEW_BOX_SIZE} ${CIRCLE_VIEW_BOX_SIZE}`}>
 							<a.circle
 								cx={CIRCLE_CENTER}

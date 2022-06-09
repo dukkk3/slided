@@ -1,4 +1,5 @@
 import { memo, useMemo } from "react";
+import { Interpolation } from "react-spring";
 
 import { Icon } from "@components/common/ui/Icon";
 import { Image } from "@components/common/ui/Image";
@@ -13,15 +14,25 @@ export interface Props extends React.ComponentProps<"div"> {
 	size?: S.CardSizeKind;
 	avatarRef?: React.ForwardedRef<any>;
 	avatarSource: string;
+	avatarVisibleInterpolation?: Interpolation<any, number>;
 }
 
 export const UserCard: React.FC<Props> = memo(
-	({ children, avatarSource, name, rating, avatarRef, size = "m", ...rest }) => {
+	({
+		children,
+		avatarSource,
+		name,
+		rating,
+		avatarRef,
+		avatarVisibleInterpolation,
+		size = "m",
+		...rest
+	}) => {
 		const preparedRating = useMemo(() => (rating ? clamp(rating, 0, 5) : 0), [rating]);
 
 		return (
 			<S.UserCard $size={size} {...(rest as any)}>
-				<S.Avatar ref={avatarRef} $size={size}>
+				<S.Avatar ref={avatarRef} $size={size} style={{ opacity: avatarVisibleInterpolation }}>
 					<Image src={avatarSource} lazy={false} />
 				</S.Avatar>
 				<S.Content $size={size}>

@@ -144,11 +144,13 @@ export const PhoneTemplates: React.FC<Props> = memo(
 																			</S.OverlayCardImage>
 																			<S.Scan
 																				style={{
+																					y: "-50%",
+																					transformOrigin: "left center",
 																					opacity: iteration8.interpolations
 																						.toEasing("easeInOutCubic")
 																						.closing.to((value) => toRange(value, 0.95, 1))
 																						.to((value) => 1 - value),
-																					y: iteration8.interpolations
+																					top: iteration8.interpolations
 																						.toEasing("easeInOutCubic")
 																						.closing.to((value) => `${(1 - value) * 100}%`),
 																				}}

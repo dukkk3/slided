@@ -1,10 +1,16 @@
 import { createContext, useCallback, useEffect } from "react";
-import { useWheel } from "@use-gesture/react";
 import { easings } from "react-spring";
+import { useWheel } from "@use-gesture/react";
 import { reaction } from "mobx";
 
 import { useIterationsContextFactory, IterationsContext, useLocalStore } from "@core/hooks";
 import { clamp } from "@core/utils";
+
+interface RangeConfig {
+	from: number;
+	to: number;
+	duration: number;
+}
 
 export interface Props extends React.PropsWithChildren<{}> {
 	enabled?: boolean;
@@ -15,10 +21,16 @@ export type Context = IterationsContext & {
 	prev: () => void;
 	next: () => void;
 	change: (iteration: number) => void;
+	getDurationFactorOnRange: (from: number, to: number) => number;
 };
 
 const STEP = 0.5;
-const DURATION = 1150;
+const DURATION = 1200;
+
+const RANGES: RangeConfig[] = [
+	{ from: 9, to: 9.5, duration: 2000 },
+	{ from: 4.5, to: 5, duration: 2500 },
+];
 
 export const IterationControls: React.FC<Props> = ({ children, iterations, enabled = true }) => {
 	const localStore = useLocalStore({ iteration: 0 });
@@ -60,6 +72,26 @@ export const IterationControls: React.FC<Props> = ({ children, iterations, enabl
 		[enabled, next, prev]
 	);
 
+	const getCurrentRangeConfig = useCallback(
+		(iteration: number, bound: "left" | "right" = "left") => {
+			const { duration } =
+				RANGES.find(
+					(rangeConfig) =>
+						(bound === "left" ? rangeConfig.from < iteration : rangeConfig.from <= iteration) &&
+						(bound === "right" ? rangeConfig.to > iteration : rangeConfig.to >= iteration)
+				) || {};
+			return { ...(duration ? { duration } : { duration: DURATION }) };
+		},
+		[]
+	);
+
+	const getDurationFactorOnRange = useCallback((from: number, to: number) => {
+		const duration =
+			RANGES.find((rangeConfig) => rangeConfig.from <= from && rangeConfig.to >= to)?.duration ||
+			DURATION;
+		return duration / DURATION;
+	}, []);
+
 	useWheel(
 		({ wheeling, direction: [, dy], memo, elapsedTime, movement: [, my] }) => {
 			if (!enabled) return;
@@ -89,10 +121,17 @@ export const IterationControls: React.FC<Props> = ({ children, iterations, enabl
 	);
 
 	const handleAnimationRest = useCallback(() => {
-		if (Math.abs(iterationsContext.store.iteration - localStore.iteration) > 0) {
-			iterationsContext.animate(localStore.iteration);
+		const { iteration } = iterationsContext.store;
+		if (Math.abs(iteration - localStore.iteration) > 0) {
+			const sign = Math.sign(iteration - localStore.iteration);
+			const config = getCurrentRangeConfig(
+				iterationsContext.store.iteration,
+				sign === -1 ? "right" : "left"
+			);
+			console.log("CONTINUE DURATION:", config.duration);
+			iterationsContext.animate(localStore.iteration, config);
 		}
-	}, [iterationsContext, localStore]);
+	}, [getCurrentRangeConfig, iterationsContext, localStore]);
 
 	useEffect(
 		() => iterationsContext.addEventListener("rest", handleAnimationRest),
@@ -104,15 +143,16 @@ export const IterationControls: React.FC<Props> = ({ children, iterations, enabl
 			reaction(
 				() => localStore.iteration,
 				(iteration) => {
-					const targetIteration =
-						iteration + STEP * Math.sign(iterationsContext.store.iteration - localStore.iteration);
-					const durationFactor = Math.abs(iterationsContext.store.iteration - targetIteration) / STEP;
-					iterationsContext.animate(targetIteration, {
-						duration: DURATION * clamp(durationFactor, 0, 1),
-					});
+					const sign = Math.sign(iterationsContext.store.iteration - localStore.iteration);
+					const targetIteration = iteration + STEP * sign;
+					// const durationFactor = Math.abs(iterationsContext.store.iteration - targetIteration) / STEP;
+					const config = getCurrentRangeConfig(targetIteration, sign === -1 ? "left" : "right");
+					console.log("START DURATION:", config.duration);
+					iterationsContext.animate(targetIteration, config);
+					// duration: DURATION * clamp(durationFactor, 0, 1),
 				}
 			),
-		[iterationsContext, localStore]
+		[getCurrentRangeConfig, iterationsContext, localStore]
 	);
 
 	useEffect(() => {
@@ -124,7 +164,7 @@ export const IterationControls: React.FC<Props> = ({ children, iterations, enabl
 	}, [handleDocumentKeyDown]);
 
 	return (
-		<context.Provider value={{ ...iterationsContext, prev, next, change }}>
+		<context.Provider value={{ ...iterationsContext, prev, next, change, getDurationFactorOnRange }}>
 			{children}
 		</context.Provider>
 	);

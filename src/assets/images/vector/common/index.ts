@@ -6,3 +6,8 @@ export {
 	ReactComponent as LogoRayPiece,
 } from "./logo-ray-piece.svg";
 export { default as PlanContentSource, ReactComponent as PlanContent } from "./plan-content.svg";
+export {
+	default as LogoRayPieceMaskSource,
+	ReactComponent as LogoRayPieceMask,
+} from "./logo-ray-piece-mask.svg";
+export { default as SlidedSource, ReactComponent as Slided } from "./slided.svg";

@@ -369,3 +369,7 @@ export function compare(value: number, a: number, operator: CompareOperatorKind)
 export function inlineSwitch<T, U>(condition: boolean | undefined | null, a: T, b: U) {
 	return condition ? a : b;
 }
+
+export function sleep(ms: number) {
+	return new Promise((resolve) => setTimeout(resolve, ms));
+}

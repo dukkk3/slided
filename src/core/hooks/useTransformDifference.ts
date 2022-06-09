@@ -91,7 +91,12 @@ export function useTransformDifference({
 	useEffect(
 		() =>
 			reaction(
-				() => [startResizeObserver.getSize(), endResizeObserver.getSize()],
+				() => [
+					startResizeObserver.getSize(),
+					endResizeObserver.getSize(),
+					startResizeObserver.getPosition(),
+					endResizeObserver.getPosition(),
+				],
 				() => calculate()
 			),
 		[calculate, endResizeObserver, startResizeObserver]

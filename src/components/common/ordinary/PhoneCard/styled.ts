@@ -10,9 +10,8 @@ interface ContainerProps {
 
 export const Container = styled.div<ContainerProps>`
 	width: 100%;
-	max-height: 100%;
-	height: fit-content;
 	position: relative;
+	height: auto;
 	overflow: ${(props) => props.$hidden && "hidden"};
 `;
 
@@ -116,9 +115,9 @@ interface PhoneCardProps {
 
 export const PhoneCard = styled.div<PhoneCardProps>`
 	top: 0;
-	height: 100%;
+	width: 35rem;
 	display: flex;
-	width: 34rem;
+	max-height: 100%;
 	position: absolute;
 	justify-content: center;
 	left: calc(50% - 34rem / 2);

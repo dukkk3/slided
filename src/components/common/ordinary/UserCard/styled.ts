@@ -1,3 +1,4 @@
+import { a } from "react-spring";
 import styled from "styled-components";
 
 import { Image } from "@components/common/ui/Image/styled";
@@ -37,7 +38,7 @@ export const UserCard = styled.div<UserCardSizedProps>`
 	box-shadow: 5px 10px 20px rgba(0, 0, 0, 0.05);
 `;
 
-export const Avatar = styled.div<UserCardSizedProps>`
+export const Avatar = styled(a.div)<UserCardSizedProps>`
 	width: ${(props) => getCardSize(props.$size).avatarSize};
 	height: ${(props) => getCardSize(props.$size).avatarSize};
 	flex: 0 0 ${(props) => getCardSize(props.$size).avatarSize};

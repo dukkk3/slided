@@ -1,19 +1,20 @@
 import { useCallback, useMemo } from "react";
-import { EasingFunction, easings } from "react-spring";
+import { easings } from "react-spring";
 
 import { useIterationsContext } from "@core/hooks";
 import { clamp } from "@core/utils";
+import { useLocalStore } from "./useLocalStore";
 
 interface Options {
 	offsetAroundCenter?: number;
-	easing?: EasingFunction;
+	normalizeDuration?: boolean;
 	startOffset?: number;
 	endOffset?: number;
 }
 
 export function useIterationControls(
 	iteration: number,
-	{ startOffset = 0.5, endOffset = 0.5, offsetAroundCenter = 0, easing }: Options = {}
+	{ normalizeDuration, startOffset = 0.5, endOffset = 0.5, offsetAroundCenter = 0 }: Options = {}
 ) {
 	const iterationsContext = useIterationsContext();
 	const center = useMemo(
@@ -29,70 +30,99 @@ export function useIterationControls(
 		[endOffset, iteration, iterationsContext]
 	);
 
-	const visible = useCallback(
-		(type?: "opening" | "closing") => {
-			const a = type === "closing" ? center.toEnd : start;
-			const b = type === "opening" ? center.fromStart : end;
-			return iterationsContext.store.inRange(a, b);
-		},
-		[center.fromStart, center.toEnd, end, iterationsContext, start]
+	const toCenterDurationFactor = useMemo(() => {
+		return iterationsContext.getDurationFactorOnRange(start, center.fromStart);
+	}, [start, center, iterationsContext]);
+
+	const fromCenterDurationFactor = useMemo(() => {
+		return iterationsContext.getDurationFactorOnRange(center.toEnd, end);
+	}, [end, center, iterationsContext]);
+
+	const preparedCenter = useMemo<typeof center>(
+		() => ({
+			fromStart:
+				start +
+				Math.abs(center.fromStart - start) * (normalizeDuration ? 1 / toCenterDurationFactor : 1),
+			toEnd:
+				end - Math.abs(center.toEnd - end) * (normalizeDuration ? 1 / fromCenterDurationFactor : 1),
+		}),
+		[start, center, normalizeDuration, toCenterDurationFactor, end, fromCenterDurationFactor]
 	);
 
-	const visibleInterpolation = useCallback(
-		(type?: "opening" | "closing") => {
-			const a = type === "closing" ? center.toEnd : start;
-			const b = type === "opening" ? center.fromStart : end;
-			return iterationsContext.animated.inRange(a, b);
+	const localStore = useLocalStore({
+		get started() {
+			return iterationsContext.store.compare(start, "lte");
 		},
-		[center.fromStart, center.toEnd, end, iterationsContext, start]
+		get ended() {
+			return iterationsContext.store.compare(end, "lte");
+		},
+		get opened() {
+			return iterationsContext.store.compare(preparedCenter.fromStart, "lte");
+		},
+		get startClosed() {
+			return iterationsContext.store.compare(preparedCenter.toEnd, "lte");
+		},
+		get closed() {
+			return this.startClosed && this.ended;
+		},
+		get currentType() {
+			return this.visibleOpening ? "opening" : "closing";
+		},
+		get visibleOpening() {
+			return iterationsContext.store.inRange(start, preparedCenter.fromStart);
+		},
+		get visibleClosing() {
+			return iterationsContext.store.inRange(preparedCenter.toEnd, end);
+		},
+		get visible() {
+			return iterationsContext.store.inRange(start, end);
+		},
+	});
+
+	const visible = useCallback(
+		(type?: "opening" | "closing") => {
+			switch (type) {
+				case "opening":
+					return localStore.visibleOpening;
+				case "closing":
+					return localStore.visibleClosing;
+				default:
+					return localStore.visible;
+			}
+		},
+		[localStore]
 	);
 
 	const started = useCallback(() => {
-		return iterationsContext.store.compare(start, "lte");
-	}, [iterationsContext, start]);
-
-	const startedInterpolation = useCallback(() => {
-		return iterationsContext.animated.compare(start, "lte");
-	}, [iterationsContext, start]);
+		return localStore.started;
+	}, [localStore]);
 
 	const ended = useCallback(() => {
-		return iterationsContext.store.compare(end, "lte");
-	}, [end, iterationsContext]);
-
-	const endedInterpolation = useCallback(() => {
-		return iterationsContext.animated.compare(end, "lte");
-	}, [end, iterationsContext]);
+		return localStore.ended;
+	}, [localStore]);
 
 	const opened = useCallback(() => {
-		return iterationsContext.store.compare(center.fromStart, "lte");
-	}, [center, iterationsContext]);
-
-	const openedInterpolation = useCallback(() => {
-		return iterationsContext.animated.compare(center.fromStart, "lte");
-	}, [center, iterationsContext]);
+		return localStore.opened;
+	}, [localStore]);
 
 	const startClosed = useCallback(() => {
-		return iterationsContext.store.compare(center.toEnd, "lte");
-	}, [center.toEnd, iterationsContext.store]);
-
-	const startClosedInterpolation = useCallback(() => {
-		return iterationsContext.animated.compare(center.toEnd, "lte");
-	}, [center, iterationsContext]);
+		return localStore.startClosed;
+	}, [localStore]);
 
 	const closed = useCallback(() => {
-		return startClosed() && ended();
-	}, [ended, startClosed]);
+		return localStore.closed;
+	}, [localStore]);
 
 	const currentType = useCallback(() => {
-		return visible("opening") ? "opening" : "closing";
-	}, [visible]);
+		return localStore.currentType;
+	}, [localStore]);
 
 	const interpolations = useMemo(
 		() => ({
-			opening: iterationsContext.animated.toRange(start, center.fromStart),
-			closing: iterationsContext.animated.toRange(center.toEnd, end),
+			opening: iterationsContext.animated.toRange(start, preparedCenter.fromStart),
+			closing: iterationsContext.animated.toRange(preparedCenter.toEnd, end),
 		}),
-		[center.fromStart, center.toEnd, end, iterationsContext, start]
+		[preparedCenter.fromStart, preparedCenter.toEnd, end, iterationsContext, start]
 	);
 
 	const toEasing = useCallback(
@@ -113,17 +143,16 @@ export function useIterationControls(
 
 	const ranges = useMemo(
 		() => ({
-			opening: () => iterationsContext.store.toRange(start, center.fromStart),
-			closing: () => iterationsContext.store.toRange(center.toEnd, end),
+			opening: () => iterationsContext.store.toRange(start, preparedCenter.fromStart),
+			closing: () => iterationsContext.store.toRange(preparedCenter.toEnd, end),
 		}),
-		[center.fromStart, center.toEnd, end, iterationsContext, start]
+		[preparedCenter.fromStart, preparedCenter.toEnd, end, iterationsContext, start]
 	);
 
 	return {
 		end,
 		start,
 		started,
-		center,
 		ended,
 		opened,
 		closed,
@@ -132,11 +161,7 @@ export function useIterationControls(
 		iteration,
 		currentType,
 		startClosed,
-		endedInterpolation,
-		openedInterpolation,
-		visibleInterpolation,
-		startedInterpolation,
-		startClosedInterpolation,
+		center: preparedCenter,
 		interpolations: {
 			...interpolations,
 			toEasing,

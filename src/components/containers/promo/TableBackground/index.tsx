@@ -35,10 +35,20 @@ export const TableBackground: React.FC = memo(() => {
 			const diff = Math.abs(startIteration - endIteration);
 			const frameIndex = startIteration + diff * progress;
 
-			video.currentTime = clamp(frameIndex, 0, video.duration - 0.01);
+			requestAnimationFrame(() => (video.currentTime = clamp(frameIndex, 0, video.duration - 0.01)));
 		},
 		[iterationsContext]
 	);
+
+	const handleVideoLoad = useCallback(() => {
+		const video = videoRef.current!;
+		promoStore.setVideoLoaded(true);
+
+		console.log(video, promoStore.sequenceOpeningAnimationEnded);
+		if (!promoStore.sequenceOpeningAnimationEnded) {
+			video.play();
+		}
+	}, [promoStore]);
 
 	useEffect(
 		() =>
@@ -76,8 +86,8 @@ export const TableBackground: React.FC = memo(() => {
 				src={getVideoByName("TableSource")}
 				playsInline
 				muted
-				autoPlay
 				onTimeUpdate={handleVideoTimeUpdate}
+				onCanPlayThrough={handleVideoLoad}
 			/>
 		</S.TableBackground>
 	);

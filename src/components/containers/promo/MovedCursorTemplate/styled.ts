@@ -16,14 +16,11 @@ export const Card = styled(a.div)`
 	overflow: hidden;
 	position: absolute;
 	border-radius: 1rem;
-	width: calc(100% * var(--scale-x));
-	height: calc(100% * var(--scale-y));
-	will-change: width, height, transform;
+	width: 100%;
+	height: 100%;
 	backface-visibility: none;
 	transform-style: preserve-3d;
-
-	--scale-x: 1;
-	--scale-y: 1;
+	will-change: transform, width, height;
 `;
 
 interface CardImageGroupProps {

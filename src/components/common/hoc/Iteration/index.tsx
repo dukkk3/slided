@@ -1,6 +1,5 @@
-import { memo, useMemo } from "react";
+import { memo, useCallback, useMemo } from "react";
 import { Observer } from "mobx-react-lite";
-import isEqual from "react-fast-compare";
 
 import {
 	VisibilitySwitch,
@@ -14,6 +13,7 @@ export interface Props extends VisibilitySwitchProps {
 	switchVisibility?: boolean;
 	visibleCondition?: (...iterationControls: ReturnType<typeof useIterationControls>[]) => boolean;
 	children: (...iterationControls: ReturnType<typeof useIterationControls>[]) => JSX.Element;
+	normalizeDuration?: boolean;
 	forceChildrenRerender?: boolean;
 }
 
@@ -21,8 +21,8 @@ export const Iteration: React.FC<Props> = memo(
 	({
 		children,
 		iteration,
-		forceChildrenRerender,
 		visibleCondition,
+		normalizeDuration,
 		switchVisibility = true,
 		...rest
 	}) => {
@@ -32,15 +32,19 @@ export const Iteration: React.FC<Props> = memo(
 		);
 		const iterations = useMultipleHooks(
 			useIterationControls,
-			...iterationsAsArray.map((iteration) => [iteration] as [number])
+			...iterationsAsArray.map(
+				(iteration) => [iteration, { normalizeDuration }] as Parameters<typeof useIterationControls>
+			)
 		);
+
+		const isVisible = useCallback(() => {
+			return visibleCondition ? visibleCondition(...iterations) : iterations[0].visible();
+		}, [iterations, visibleCondition]);
+
 		return switchVisibility && (iterationsAsArray.length === 1 || visibleCondition) ? (
 			<Observer>
 				{() => (
-					<VisibilitySwitch
-						key='visibility'
-						visible={visibleCondition ? visibleCondition(...iterations) : iterations[0].visible()}
-						{...rest}>
+					<VisibilitySwitch key='visibility' visible={isVisible()} {...rest}>
 						{children(...iterations)}
 					</VisibilitySwitch>
 				)}
@@ -48,23 +52,23 @@ export const Iteration: React.FC<Props> = memo(
 		) : (
 			children(...iterations)
 		);
-	},
-	(
-		{
-			children: childrenA,
-			forceChildrenRerender: forceChildrenRerenderA,
-			visibleCondition: visibleConditionA,
-			...prevProps
-		},
-		{
-			children: childrenB,
-			forceChildrenRerender: forceChildrenRerenderB,
-			visibleCondition: visibleConditionB,
-			...nextProps
-		}
-	) => {
-		return forceChildrenRerenderB
-			? isEqual({ ...prevProps, children: childrenA }, { ...nextProps, children: childrenB })
-			: isEqual(nextProps, prevProps);
 	}
+	// (
+	// 	{
+	// 		children: childrenA,
+	// 		forceChildrenRerender: forceChildrenRerenderA,
+	// 		visibleCondition: visibleConditionA,
+	// 		...prevProps
+	// 	},
+	// 	{
+	// 		children: childrenB,
+	// 		forceChildrenRerender: forceChildrenRerenderB,
+	// 		visibleCondition: visibleConditionB,
+	// 		...nextProps
+	// 	}
+	// ) => {
+	// 	return forceChildrenRerenderB
+	// 		? isEqual({ ...prevProps, children: childrenA }, { ...nextProps, children: childrenB })
+	// 		: isEqual(nextProps, prevProps);
+	// }
 );
