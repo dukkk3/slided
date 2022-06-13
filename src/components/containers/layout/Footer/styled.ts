@@ -11,6 +11,7 @@ export const Footer = styled.div`
 	z-index: 9999;
 
 	${FillingContainer} {
+		touch-action: none;
 		/* overflow: initial; */
 
 		${ContentImpl} {

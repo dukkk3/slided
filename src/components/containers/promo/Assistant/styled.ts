@@ -1,6 +1,7 @@
 import styled from "styled-components";
 
 import { descriptionMixin } from "@styles";
+import { breakpoint } from "@styles/breakpoint";
 
 export const Assistant = styled.div`
 	top: 0;
@@ -15,9 +16,17 @@ export const Assistant = styled.div`
 `;
 
 export const FaceWrapper = styled.div`
-	width: 15rem;
-	height: 15rem;
-	flex: 0 0 15rem;
+	width: var(--size);
+	height: var(--size);
+	flex: 0 0 var(--size);
+
+	--size: 15rem;
+
+	${breakpoint("mobile", "tablet")`
+		margin-top: 4rem;
+
+		--size: 10rem;
+	`}
 `;
 
 export const DescriptionWrapper = styled.div`
@@ -27,6 +36,10 @@ export const DescriptionWrapper = styled.div`
 	height: 1px;
 	width: 100%;
 	${descriptionMixin}
+
+	${breakpoint("mobile", "tablet")`
+		font-size: 2.4rem;
+	`}
 `;
 
 interface DescriptionProps {

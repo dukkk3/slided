@@ -3,6 +3,8 @@ import styled from "styled-components";
 
 import { Image } from "@components/common/ui/Image/styled";
 
+import { breakpoint } from "@styles/breakpoint";
+
 function generateCardSize() {
 	return {
 		s: {
@@ -36,14 +38,21 @@ export const UserCard = styled.div<UserCardSizedProps>`
 	align-items: center;
 	border-radius: 90rem;
 	box-shadow: 5px 10px 20px rgba(0, 0, 0, 0.05);
+
+	${breakpoint("mobile", "tablet")`
+		padding: 1rem 2rem 1rem 1rem;
+		border-radius: 90rem;
+	`}
 `;
 
 export const Avatar = styled(a.div)<UserCardSizedProps>`
-	width: ${(props) => getCardSize(props.$size).avatarSize};
-	height: ${(props) => getCardSize(props.$size).avatarSize};
-	flex: 0 0 ${(props) => getCardSize(props.$size).avatarSize};
+	width: var(--size);
+	height: var(--size);
+	flex: 0 0 var(--size);
 	border-radius: 50%;
 	overflow: hidden;
+
+	--size: ${(props) => getCardSize(props.$size).avatarSize};
 
 	${Image} {
 		width: 100%;
@@ -55,10 +64,23 @@ export const Avatar = styled(a.div)<UserCardSizedProps>`
 			object-fit: cover;
 		}
 	}
+
+	${breakpoint("mobile", "tablet")`
+		--size: 4rem;
+	`}
 `;
 
 export const Content = styled.div<UserCardSizedProps>`
 	margin-left: ${(props) => getCardSize(props.$size).fontSize};
+
+	${breakpoint("mobile", "tablet")`
+		width: 100%;
+		display: flex;
+		align-items: center;
+		flex-direction: row;
+		justify-content: space-between;
+		margin-left: 1.4rem;
+	`}
 `;
 
 export const Name = styled.p<UserCardSizedProps>`
@@ -72,12 +94,23 @@ export const Rating = styled.div`
 	display: flex;
 	margin-top: 0.5rem;
 	align-items: center;
+
+	${breakpoint("mobile", "tablet")`
+		margin-top: 0;
+		flex-direction: row-reverse;
+	`}
 `;
 
 export const RatingIcon = styled.div`
 	fill: black;
-	width: 2rem;
-	height: 2rem;
+	width: var(--size);
+	height: var(--size);
+
+	--size: 2rem;
+
+	${breakpoint("mobile", "tablet")`
+		--size: 1.6rem;
+	`}
 `;
 
 export const RatingLabel = styled.p`
@@ -85,4 +118,10 @@ export const RatingLabel = styled.p`
 	font-weight: 600;
 	font-size: 2rem;
 	margin-bottom: -0.3em;
+
+	${breakpoint("mobile", "tablet")`
+	    margin-right: 0.6rem;
+		 font-size: 1.6rem;
+		 margin-bottom: -0.4em;
+	`}
 `;

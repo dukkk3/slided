@@ -27,12 +27,14 @@ export function createImagesSequence(
 
 	return {
 		getSequence: () => sequence,
-		preload: () => {
+		preload: (onLoad?: (index: number) => void) => {
+			if (sequence.length > 0) return;
 			sequence = optimizedSources.map((source, index) => {
 				const image = new Image();
 				image.src = source;
 				image.onload = () => {
 					if (!sequence[index]) return;
+					if (onLoad) onLoad(index);
 					sequence[index].loaded = true;
 				};
 				return { image, loaded: false };

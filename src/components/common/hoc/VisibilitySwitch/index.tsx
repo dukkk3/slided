@@ -1,29 +1,30 @@
 import React, { memo } from "react";
 
-export interface Props extends Partial<Pick<React.ComponentProps<"div">, "style">> {
+export interface Props {
 	visible?: boolean;
-	unmount?: boolean;
+	interactive?: boolean;
 }
 
 export const VisibilitySwitch: React.FC<React.PropsWithChildren<Props>> = memo(
-	({ children, unmount = false, visible = true, style, ...rest }) => {
-		if (!children || (unmount && !visible)) {
+	({ children, visible = true, interactive = true }) => {
+		if (!children) {
 			return null;
 		}
 
-		if (unmount) return <>{children}</>;
-
 		return (
-			<div
-				{...rest}
-				style={{
-					...(style || {}),
-					...(visible ? {} : { pointerEvents: "none", opacity: 0 }),
-					width: "100%",
-					height: "100%",
-				}}>
-				{children}
-			</div>
+			<>
+				{React.Children.toArray(children).map((child: any) => {
+					const { props } = child;
+					const { style } = props || {};
+					return React.cloneElement(child as any, {
+						style: {
+							...(style || {}),
+							visibility: !visible && "hidden",
+							pointerEvents: (!visible || !interactive) && "none",
+						},
+					});
+				})}
+			</>
 		);
 	}
 );

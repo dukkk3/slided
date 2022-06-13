@@ -7,12 +7,21 @@ export const layout = {
 		breakpoint: clientHelper.detectBreakpoint(),
 	}),
 	promo: schemaHelper.generateStoreSchema({
-		sequenceOpeningAnimationEnded: false,
+		backgroundType: null as "frame" | "sequence" | null,
 		promoBannerOpeningAnimationEnded: false,
-		loaderHidden: true,
-		videoLoaded: true,
-		interactiveEnabled: function () {
-			return this.sequenceOpeningAnimationEnded && this.promoBannerOpeningAnimationEnded;
+		sequenceOpeningAnimationEnded: false,
+		sequenceLoaded: false,
+		loaderHidden: false,
+		sequenceProgress: 0,
+		sequenceFrame: 0,
+		get canShowContent() {
+			return (this.sequenceLoaded && this.loaderHidden) || this.backgroundType === "frame";
+		},
+		get interactiveEnabled() {
+			return (
+				(this.sequenceOpeningAnimationEnded || this.backgroundType === "frame") &&
+				this.promoBannerOpeningAnimationEnded
+			);
 		},
 	}),
 };

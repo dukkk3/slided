@@ -38,8 +38,8 @@ export const Pulses: React.FC = memo(() => {
 
 	return (
 		<S.Pulses>
-			<Iteration iteration={6} visibleCondition={(iteration6) => iteration6.visible("closing")}>
-				{(iteration6) => (
+			<Iteration iterations={6} checkForVisible={([iteration6]) => iteration6.visible("closing")}>
+				{([iteration6]) => (
 					<S.PulseCircle
 						style={{
 							scale: iteration6.interpolations.closing,
@@ -48,40 +48,46 @@ export const Pulses: React.FC = memo(() => {
 					/>
 				)}
 			</Iteration>
-			<Iteration iteration={5} normalizeDuration>
-				{(iteration5) => (
-					<Observer>
-						{() => (
-							<a.div
-								style={{
-									opacity: iteration5.visible("opening")
-										? iteration5.interpolations.opening
-										: iteration5.interpolations.closing.to((value) => 1 - value),
-								}}>
-								<S.PulseCircle
-									$theme='white'
+			<Iteration iterations={5}>
+				{([iteration5], interpolations) => (
+					<div>
+						<Observer>
+							{() => (
+								<a.div
 									style={{
-										scale: locatorPulse[0].value,
-										opacity: locatorPulse[0].value.to((value) => 1 - value),
-									}}
-								/>
-								<S.PulseCircle
-									$theme='white'
-									style={{
-										scale: locatorPulse[1].value,
-										opacity: locatorPulse[1].value.to((value) => 1 - value),
-									}}
-								/>
-								<S.PulseCircle
-									$theme='white'
-									style={{
-										scale: locatorPulse[2].value,
-										opacity: locatorPulse[2].value.to((value) => 1 - value),
-									}}
-								/>
-							</a.div>
-						)}
-					</Observer>
+										opacity: iteration5.visible("opening")
+											? iteration5.interpolations.opening.to(
+													interpolations.defaultDuration(iteration5.durationFactorOpening)
+											  )
+											: iteration5.interpolations.closing
+													.to(interpolations.defaultDuration(iteration5.durationFactorClosing, "out"))
+													.to(interpolations.invert),
+									}}>
+									<S.PulseCircle
+										$theme='white'
+										style={{
+											scale: locatorPulse[0].value,
+											opacity: locatorPulse[0].value.to((value) => 1 - value),
+										}}
+									/>
+									<S.PulseCircle
+										$theme='white'
+										style={{
+											scale: locatorPulse[1].value,
+											opacity: locatorPulse[1].value.to((value) => 1 - value),
+										}}
+									/>
+									<S.PulseCircle
+										$theme='white'
+										style={{
+											scale: locatorPulse[2].value,
+											opacity: locatorPulse[2].value.to((value) => 1 - value),
+										}}
+									/>
+								</a.div>
+							)}
+						</Observer>
+					</div>
 				)}
 			</Iteration>
 		</S.Pulses>

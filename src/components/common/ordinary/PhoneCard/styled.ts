@@ -1,19 +1,10 @@
 import { a } from "react-spring";
 import styled, { css } from "styled-components";
-import { descriptionMixin } from "@styles";
 
 import { Image } from "@components/common/ui/Image/styled";
 
-interface ContainerProps {
-	$hidden?: boolean;
-}
-
-export const Container = styled.div<ContainerProps>`
-	width: 100%;
-	position: relative;
-	height: auto;
-	overflow: ${(props) => props.$hidden && "hidden"};
-`;
+import { descriptionMixin } from "@styles";
+import { breakpoint } from "@styles/breakpoint";
 
 export const Plug = styled(a.div)`
 	top: 0;
@@ -63,12 +54,7 @@ export const PlugImageWrapper = styled(a.div)`
 		width: 100%;
 		height: 100%;
 
-		/* transform: scale(1.2);
-    	mix-blend-mode: overlay;
-    	opacity: .2; */
-
 		img {
-			/* object-position: 20% center; */
 			object-fit: cover;
 		}
 	}
@@ -84,7 +70,6 @@ export const ContentWrapper = styled.div`
 
 export const Content = styled.div`
 	width: 100%;
-	/* position: relative; */
 `;
 
 export const DescriptionWrapper = styled.div`
@@ -93,6 +78,11 @@ export const DescriptionWrapper = styled.div`
 	font-size: 2.8rem;
 	width: 100%;
 	${descriptionMixin}
+
+	${breakpoint("mobile", "tablet")`
+		font-size: 2.4rem;
+		line-height: 95%;
+	`}
 `;
 
 interface DescriptionProps {
@@ -107,20 +97,26 @@ export const Description = styled.div<DescriptionProps>`
 	font-size: ${(props) => props.$big && "4.8rem"};
 	line-height: ${(props) => props.$big && "70%"};
 	position: ${(props) => props.$overlay && "absolute"};
+
+	${breakpoint("mobile", "tablet")`
+		top: ${(props: DescriptionProps) => props.$overlay && 0};
+	`}
 `;
 
 interface PhoneCardProps {
 	$alternative?: boolean;
+	$hidden?: boolean;
 }
+
+const PHONE_WIDTH = "35rem";
 
 export const PhoneCard = styled.div<PhoneCardProps>`
 	top: 0;
-	width: 35rem;
-	display: flex;
-	max-height: 100%;
 	position: absolute;
-	justify-content: center;
-	left: calc(50% - 34rem / 2);
+	width: ${PHONE_WIDTH};
+	left: calc(50% - ${PHONE_WIDTH} / 2);
+	max-height: ${(props) => props.$hidden && "100%"};
+	overflow: ${(props) => props.$hidden && "hidden"};
 
 	${(props) =>
 		props.$alternative &&
@@ -133,4 +129,11 @@ export const PhoneCard = styled.div<PhoneCardProps>`
 				}
 			}
 		`}
+
+	${breakpoint("mobile", "tablet")`
+		left: 0;
+		width: 100%;
+		height: 100%;
+		max-height: 100%;
+	`}
 `;

@@ -1,13 +1,13 @@
 import React, { useCallback, useEffect } from "react";
 import { useSpring } from "react-spring";
 import { Observer } from "mobx-react-lite";
-import { reaction } from "mobx";
+import { reaction, when } from "mobx";
 
 import { Header } from "@components/containers/layout/Header";
 // import { Footer } from "@components/containers/layout/Footer";
 // import { Feedback } from "@components/containers/layout/Feedback";
 
-import { IterationControls } from "@components/common/hoc/IterationControls";
+import { IterationsControls } from "@components/common/hoc/IterationsControls";
 
 import { useGlobalStore, useResizeObserver } from "@core/hooks";
 
@@ -20,6 +20,7 @@ export const Layout: React.FC<Props> = ({ children }) => {
 	const layoutStore = useGlobalStore((store) => store.layout);
 	const headerResizeObserver = useResizeObserver({ calculateSizeWithPaddings: true });
 	const [feedbackStyle, feedbackApi] = useSpring(() => ({ y: "100%" }));
+	const [headerStyle, headerApi] = useSpring(() => ({ opacity: 0 }));
 
 	const updateCSSProperties = useCallback(() => {
 		const { height: headerHeight, width: headerWidth } = headerResizeObserver.getSize();
@@ -32,9 +33,7 @@ export const Layout: React.FC<Props> = ({ children }) => {
 		() =>
 			reaction(
 				() => layoutStore.feedbackOpened,
-				(opened) => {
-					feedbackApi.start({ y: opened ? "0%" : "100%" });
-				}
+				(opened) => feedbackApi.start({ y: opened ? "0%" : "100%" })
 			),
 		[feedbackApi, layoutStore]
 	);
@@ -48,10 +47,19 @@ export const Layout: React.FC<Props> = ({ children }) => {
 		[headerResizeObserver, updateCSSProperties]
 	);
 
+	useEffect(
+		() =>
+			when(
+				() => promoStore.canShowContent,
+				() => headerApi.start({ opacity: 1 })
+			),
+		[headerApi, promoStore]
+	);
+
 	return (
 		<S.Layout>
 			<S.FeedbackWrapper style={feedbackStyle}>{/* <Feedback /> */}</S.FeedbackWrapper>
-			<S.HeaderWrapper ref={headerResizeObserver.ref}>
+			<S.HeaderWrapper ref={headerResizeObserver.ref} style={headerStyle}>
 				<Header />
 			</S.HeaderWrapper>
 			{/* <Footer /> */}
@@ -59,9 +67,9 @@ export const Layout: React.FC<Props> = ({ children }) => {
 			<Observer>
 				{() => (
 					// <IterationControls iterations={10}>{children}</IterationControls>
-					<IterationControls iterations={12} enabled={promoStore.interactiveEnabled()}>
+					<IterationsControls iterations={12} enabled={promoStore.interactiveEnabled}>
 						{children}
-					</IterationControls>
+					</IterationsControls>
 				)}
 			</Observer>
 		</S.Layout>

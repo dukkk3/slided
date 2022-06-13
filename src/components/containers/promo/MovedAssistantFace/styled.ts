@@ -16,5 +16,5 @@ export const OverlayBorderGroup = styled(a.div)`
 `;
 
 export const Border = styled.div`
-	${generateOutsideBorderMixin(".5rem")}
+	${generateOutsideBorderMixin(".4rem")}
 `;

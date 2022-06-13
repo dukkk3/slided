@@ -4,7 +4,7 @@ import classNames from "classnames";
 
 import { splitIntoWords, splitIntoChars, calculateCurrentIndex3D } from "@core/utils";
 
-export interface Props {
+export interface Props extends React.ComponentProps<"p"> {
 	animated?: boolean;
 	swap?: boolean;
 	content: string | string[];
@@ -18,7 +18,7 @@ export interface Props {
 }
 
 export const SplitChars: React.FC<Props> = memo(
-	({ content, renderChar, swap, animated = true }) => {
+	({ content, renderChar, swap, animated = true, ...rest }) => {
 		const array = useMemo(
 			() =>
 				(Array.isArray(content) ? content : [content]).map((row) =>
@@ -31,7 +31,10 @@ export const SplitChars: React.FC<Props> = memo(
 		return (
 			<>
 				{array.map((row, rowIndex) => (
-					<p key={rowIndex} className={animated ? classNames("animated-row", "chars") : undefined}>
+					<p
+						key={rowIndex}
+						className={animated ? classNames("animated-row", "chars") : undefined}
+						{...rest}>
 						{row.map((word, wordIndex) => (
 							<span key={wordIndex}>
 								{word.map((char, charIndex) => (

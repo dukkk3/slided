@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef, memo } from "react";
 import { reaction } from "mobx";
 
-import { useLocalStore, useGlobalStore, useIterationsContext } from "@core/hooks";
+import { useGlobalStore, useIterationsControls, useQueryParam } from "@core/hooks";
 import { clamp } from "@core/utils";
 
 import { getVideoByName } from "@assets/videos";
@@ -12,22 +12,22 @@ const iterations = [3.9, 8, 12, 17];
 
 export const TableBackground: React.FC = memo(() => {
 	const videoRef = useRef<HTMLVideoElement>(null!);
-	const localStore = useLocalStore({ currentTime: 0 });
 	const promoStore = useGlobalStore((store) => store.layout.promo);
-	const iterationsContext = useIterationsContext();
+	const iterationsControls = useIterationsControls();
+	const minified = useQueryParam("minified");
 
 	const handleVideoTimeUpdate = useCallback(() => {
 		const video = videoRef.current;
-		localStore.setCurrentTime(video.currentTime);
-	}, [localStore]);
+		promoStore.setSequenceProgress(video.currentTime / video.duration);
+	}, [promoStore]);
 
 	const drawIterationSequence = useCallback(
 		(iteration: number) => {
-			if (!iterationsContext.store.inRange(iteration - 1, iteration)) return;
+			if (!iterationsControls.store.inRange(iteration - 1, iteration)) return;
 
 			const video = videoRef.current;
 			const [startIteration, endIteration] = [iterations[iteration - 1], iterations[iteration]];
-			const progress = iterationsContext.store.toRange(
+			const progress = iterationsControls.store.toRange(
 				iteration - 1,
 				iteration === 3 ? 2.5 : iteration
 			);
@@ -35,40 +35,78 @@ export const TableBackground: React.FC = memo(() => {
 			const diff = Math.abs(startIteration - endIteration);
 			const frameIndex = startIteration + diff * progress;
 
-			requestAnimationFrame(() => (video.currentTime = clamp(frameIndex, 0, video.duration - 0.01)));
+			video.currentTime = clamp(frameIndex, 0, video.duration - 0.5);
 		},
-		[iterationsContext]
+		[iterationsControls]
 	);
 
 	const handleVideoLoad = useCallback(() => {
-		const video = videoRef.current!;
-		promoStore.setVideoLoaded(true);
+		// const video = videoRef.current!;
+		promoStore.setSequenceLoaded(true);
 
-		console.log(video, promoStore.sequenceOpeningAnimationEnded);
-		if (!promoStore.sequenceOpeningAnimationEnded) {
-			video.play();
-		}
+		// if (!promoStore.sequenceOpeningAnimationEnded) {
+		// 	// video.play();
+		// 	// video.pause();
+		// }
 	}, [promoStore]);
+
+	const handleDocumentKeyDown = useCallback(
+		(event: KeyboardEvent) => {
+			const video = videoRef.current;
+
+			if (promoStore.sequenceOpeningAnimationEnded || !video) return;
+
+			switch (event.key) {
+				case "ArrowLeft":
+					video.play();
+			}
+		},
+		[promoStore]
+	);
+
+	useEffect(() => {
+		document.addEventListener("keydown", handleDocumentKeyDown);
+
+		return () => {
+			document.removeEventListener("keydown", handleDocumentKeyDown);
+		};
+	}, [handleDocumentKeyDown]);
 
 	useEffect(
 		() =>
 			reaction(
-				() => iterationsContext.store.toRange(0, iterations.length - 1),
+				() => iterationsControls.store.toRange(0, iterations.length - 1),
 				(progress) => {
-					if (!promoStore.interactiveEnabled()) return;
+					if (!promoStore.interactiveEnabled) return;
 
 					drawIterationSequence(1);
 					drawIterationSequence(2);
 					drawIterationSequence(3);
 				}
 			),
-		[drawIterationSequence, iterationsContext, localStore, promoStore]
+		[drawIterationSequence, iterationsControls, promoStore]
 	);
 
 	useEffect(
 		() =>
 			reaction(
-				() => localStore.currentTime >= 3.5 && !promoStore.sequenceOpeningAnimationEnded,
+				() => promoStore.canShowContent,
+				(canShowContent) => {
+					if (canShowContent) {
+						const video = videoRef.current!;
+						video.play();
+					}
+				}
+			),
+		[promoStore]
+	);
+
+	useEffect(
+		() =>
+			reaction(
+				() =>
+					promoStore.sequenceProgress * videoRef.current.duration >= 3.5 &&
+					!promoStore.sequenceOpeningAnimationEnded,
 				(opened) => {
 					if (!opened) return;
 					const video = videoRef.current;
@@ -76,14 +114,14 @@ export const TableBackground: React.FC = memo(() => {
 					video.pause();
 				}
 			),
-		[localStore, promoStore]
+		[promoStore]
 	);
 
 	return (
 		<S.TableBackground>
 			<S.Video
 				ref={videoRef}
-				src={getVideoByName("TableSource")}
+				src={getVideoByName(minified ? "TableMin" : "Table")}
 				playsInline
 				muted
 				onTimeUpdate={handleVideoTimeUpdate}

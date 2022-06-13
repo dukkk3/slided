@@ -6,7 +6,7 @@ import { SplitChars, Props as SplitCharsProps } from "@components/common/ordinar
 
 import { toRange, inlineSwitch } from "@core/utils";
 
-export interface Props extends Pick<SplitCharsProps, "content"> {
+export interface Props extends Pick<SplitCharsProps, "content">, React.ComponentProps<"p"> {
 	logging?: boolean;
 	openingInterpolation: Interpolation<number, number>;
 	closingInterpolation: Interpolation<number, number>;

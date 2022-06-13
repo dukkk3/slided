@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { forwardRef } from "react";
 import { a } from "react-spring";
 import { Observer } from "mobx-react-lite";
 
@@ -11,8 +11,8 @@ import { VisibilitySwitch } from "@components/common/hoc/VisibilitySwitch";
 import { Button } from "@components/common/ui/Button";
 import { Image } from "@components/common/ui/Image";
 
-import { useResizeObserver } from "@core/hooks";
-import { toRange, mergeRefs, inlineSwitch } from "@core/utils";
+import { useBreakpoint, useLocalStore, useResizeObserver } from "@core/hooks";
+import { mergeRefs, inlineSwitch } from "@core/utils";
 
 import * as S from "./styled";
 
@@ -27,57 +27,73 @@ export interface Props {
 	shiftedTemplateContainerRef?: React.ForwardedRef<any>;
 }
 
-export const PhoneTemplates: React.FC<Props> = memo(
-	({ templates, templateContainerRef, shiftedTemplateContainerRef }) => {
+export const PhoneTemplates = forwardRef<HTMLDivElement, Props>(
+	({ templates, templateContainerRef, shiftedTemplateContainerRef }, ref) => {
 		const cardResizeObserver = useResizeObserver();
+		const breakpoint = useBreakpoint();
+
+		const localStore = useLocalStore({
+			get cardOffset() {
+				return breakpoint.range("mobile", "tablet") ? 40 : 20;
+			},
+		});
 
 		return (
 			<Iteration
-				iteration={[7, 9]}
-				visibleCondition={(iteration7, iteration9) => iteration7.startClosed() && !iteration9.ended()}>
-				{(iteration7, iteration9) => (
+				iterations={[7, 9]}
+				checkForVisible={([iteration7, iteration9]) => iteration7.startClosed() && !iteration9.ended()}>
+				{([iteration7, iteration9], interpolations) => (
 					<a.div
 						style={{
-							opacity: iteration9.interpolations
-								.toEasing("easeInOutCubic")
-								.closing.to((value) => 1 - value),
+							opacity: iteration9.interpolations.closing
+								.to(interpolations.easing("easeInOutCubic"))
+								.to(interpolations.invert),
 						}}>
 						<PhoneCard
-							openingInterpolation={iteration7.interpolations
-								.toEasing("easeInOutCubic")
-								.closing.to((value) => toRange(value, 0.99, 1))}
-							backgroundZoomInterpolation={iteration7.interpolations
-								.toEasing("easeInOutCubic")
-								.closing.to((value) => toRange(value, 0.99, 1))}
+							ref={ref}
+							openingInterpolation={iteration7.interpolations.closing
+								.to(interpolations.easing("easeInOutCubic"))
+								.to(interpolations.range(0.99, 1))}
+							backgroundZoomInterpolation={iteration7.interpolations.closing
+								.to(interpolations.easing("easeInOutCubic"))
+								.to(interpolations.range(0.99, 1))}
 							hiddenContent
 							alternative>
 							<S.DescriptionWrapper>
-								<Iteration iteration={8}>
-									{(iteration8) => (
+								<Iteration iterations={8}>
+									{([iteration8]) => (
 										<S.Description>
 											<Observer>
 												{() => (
 													<AnimatedSplitChars
 														content={["You can", "track progress", "in real time on your phone"]}
-														openingInterpolation={iteration8.interpolations.toEasing("easeInOutCubic").opening}
-														closingInterpolation={iteration8.interpolations.toEasing("easeInOutCubic").closing}
-														type={iteration8.currentType()}
+														openingInterpolation={iteration8.interpolations.opening.to(
+															interpolations.easing("easeInOutCubic")
+														)}
+														closingInterpolation={iteration8.interpolations.closing.to(
+															interpolations.easing("easeInOutCubic")
+														)}
+														type={iteration8.currentState()}
 													/>
 												)}
 											</Observer>
 										</S.Description>
 									)}
 								</Iteration>
-								<Iteration iteration={9}>
-									{(iteration9) => (
+								<Iteration iterations={[9]}>
+									{([iteration9]) => (
 										<S.Description $overlay>
 											<Observer>
 												{() => (
 													<AnimatedSplitChars
 														content={["Your", "presentation", "is done!"]}
-														openingInterpolation={iteration9.interpolations.toEasing("easeInOutCubic").opening}
-														closingInterpolation={iteration9.interpolations.toEasing("easeInOutCubic").closing}
-														type={iteration9.currentType()}
+														openingInterpolation={iteration9.interpolations.opening.to(
+															interpolations.easing("easeInOutCubic")
+														)}
+														closingInterpolation={iteration9.interpolations.closing.to(
+															interpolations.easing("easeInOutCubic")
+														)}
+														type={iteration9.currentState()}
 													/>
 												)}
 											</Observer>
@@ -85,8 +101,8 @@ export const PhoneTemplates: React.FC<Props> = memo(
 									)}
 								</Iteration>
 							</S.DescriptionWrapper>
-							<Iteration iteration={[8, 9]} visibleCondition={(_, iteration9) => !iteration9.ended()}>
-								{(iteration8, iteration9) => (
+							<Iteration iterations={[8, 9]} checkForVisible={([, iteration9]) => !iteration9.ended()}>
+								{([iteration8, iteration9], interpolations) => (
 									<S.CardsWrapper>
 										<S.ReadyTemplatesCards>
 											<VisibilitySwitch visible={false}>
@@ -98,7 +114,7 @@ export const PhoneTemplates: React.FC<Props> = memo(
 											</VisibilitySwitch>
 											<VisibilitySwitch visible={false}>
 												<S.CardWrapper $overlay>
-													<S.Card style={{ y: getCardTranslate(1, 0) }}>
+													<S.Card style={{ y: getCardTranslate(1, 0, localStore.cardOffset) }}>
 														<S.CardImage ref={shiftedTemplateContainerRef} />
 													</S.Card>
 												</S.CardWrapper>
@@ -110,21 +126,21 @@ export const PhoneTemplates: React.FC<Props> = memo(
 															<S.CardWrapper key={index} style={{ zIndex: templates.length - index }}>
 																<S.Card
 																	style={{
-																		y: iteration9.interpolations
-																			.toEasing("easeInOutCubic")
-																			.opening.to((value) => getCardTranslate(value, index)),
-																		scale: iteration9.interpolations
-																			.toEasing("easeInOutCubic")
-																			.opening.to((value) => 1 - 0.1 * index * value),
+																		y: iteration9.interpolations.opening
+																			.to(interpolations.easing("easeInOutCubic"))
+																			.to((value) => getCardTranslate(value, index, localStore.cardOffset)),
+																		scale: iteration9.interpolations.opening
+																			.to(interpolations.easing("easeInOutCubic"))
+																			.to((value) => 1 - 0.1 * index * value),
 																		opacity: inlineSwitch(
 																			index === 0 && iteration9.startClosed(),
-																			iteration9.interpolations
-																				.toEasing("easeInOutCubic")
-																				.closing.to((value) => toRange(value, 0, 0.01))
-																				.to((value) => 1 - value),
-																			iteration9.interpolations
-																				.toEasing("easeInOutCubic")
-																				.opening.to((value) => 1 - (index / templates.length) * value)
+																			iteration9.interpolations.closing
+																				.to(interpolations.easing("easeInOutCubic"))
+																				.to(interpolations.range(0, 0.01))
+																				.to(interpolations.invert),
+																			iteration9.interpolations.opening
+																				.to(interpolations.easing("easeInOutCubic"))
+																				.to((value) => 1 - (index / templates.length) * value)
 																		),
 																	}}>
 																	<S.CardImage style={{ height: cardResizeObserver.getSize().height }}>
@@ -134,9 +150,10 @@ export const PhoneTemplates: React.FC<Props> = memo(
 																		<S.OverlayCardContent>
 																			<S.OverlayCardImage
 																				style={{
-																					height: iteration8.interpolations
-																						.toEasing("easeInOutCubic")
-																						.closing.to((value) => `${(1 - value) * 100}%`),
+																					height: iteration8.interpolations.closing
+																						.to(interpolations.easing("easeInOutCubic"))
+																						.to(interpolations.invert)
+																						.to((value) => `${value * 100}%`),
 																				}}>
 																				<S.CardImage style={{ height: cardResizeObserver.getSize().height }}>
 																					<Image src={template.overlaySource} />
@@ -146,13 +163,14 @@ export const PhoneTemplates: React.FC<Props> = memo(
 																				style={{
 																					y: "-50%",
 																					transformOrigin: "left center",
-																					opacity: iteration8.interpolations
-																						.toEasing("easeInOutCubic")
-																						.closing.to((value) => toRange(value, 0.95, 1))
-																						.to((value) => 1 - value),
-																					top: iteration8.interpolations
-																						.toEasing("easeInOutCubic")
-																						.closing.to((value) => `${(1 - value) * 100}%`),
+																					opacity: iteration8.interpolations.closing
+																						.to(interpolations.easing("easeInOutCubic"))
+																						.to(interpolations.range(0.95, 1))
+																						.to(interpolations.invert),
+																					top: iteration8.interpolations.closing
+																						.to(interpolations.easing("easeInOutCubic"))
+																						.to(interpolations.invert)
+																						.to((value) => `${value * 100}%`),
 																				}}
 																			/>
 																		</S.OverlayCardContent>
@@ -167,14 +185,15 @@ export const PhoneTemplates: React.FC<Props> = memo(
 									</S.CardsWrapper>
 								)}
 							</Iteration>
-							<Iteration iteration={9} visibleCondition={(iteration9) => iteration9.started()}>
-								{(iteration9) => (
+							<Iteration iterations={9} checkForVisible={([iteration9]) => iteration9.started()}>
+								{([iteration9]) => (
 									<S.ButtonWrapper
 										style={{
-											y: iteration9.interpolations
-												.toEasing("easeInOutCubic")
-												.opening.to((value) => `${5 * (1 - value)}rem`),
-											opacity: iteration9.interpolations.toEasing("easeInOutCubic").opening,
+											y: iteration9.interpolations.opening
+												.to(interpolations.easing("easeInOutCubic"))
+												.to(interpolations.invert)
+												.to((value) => `${5 * value}rem`),
+											opacity: iteration9.interpolations.opening.to(interpolations.easing("easeInOutCubic")),
 										}}>
 										<Button>Download</Button>
 									</S.ButtonWrapper>
@@ -188,6 +207,6 @@ export const PhoneTemplates: React.FC<Props> = memo(
 	}
 );
 
-function getCardTranslate(value: number, index: number) {
-	return index === 0 ? `${20 * value}%` : `-${index * 117.5 * value - 20 * value}%`;
+function getCardTranslate(value: number, index: number, offset: number) {
+	return index === 0 ? `${offset * value}%` : `-${index * 115 * value - offset * value}%`;
 }

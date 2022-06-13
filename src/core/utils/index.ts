@@ -285,18 +285,17 @@ export function generateRandomInteger(min: number, max: number) {
 }
 
 export function debounce<T extends any[]>(callback: (...args: T) => void, time: number) {
-	let isCooldown = false;
+	let timeout: any;
 
-	return (...args: T) => {
-		if (isCooldown) {
-			return;
-		}
+	return function (this: any, ...args: any[]) {
+		const effect = () => {
+			timeout = null;
+			return callback.apply(this, args as unknown as any);
+		};
 
-		callback(...args);
+		clearTimeout(timeout);
 
-		isCooldown = true;
-
-		setTimeout(() => (isCooldown = false), time);
+		timeout = setTimeout(effect, time);
 	};
 }
 

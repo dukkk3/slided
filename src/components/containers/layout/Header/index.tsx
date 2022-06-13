@@ -33,6 +33,7 @@ export const Header: React.FC = () => {
 						<Button onClick={handleButtonClick}>Get started</Button>
 					</S.NavItem>
 				</S.Navbar>
+				<S.Burger />
 			</S.Container>
 		</S.Header>
 	);

@@ -4,13 +4,19 @@ import styled from "styled-components";
 import { Button } from "@components/common/ui/Button/styled";
 import { Image } from "@components/common/ui/Image/styled";
 
+import { breakpoint } from "@styles/breakpoint";
+
 export { Description, DescriptionWrapper } from "@components/common/ordinary/PhoneCard/styled";
 
 export const Face = styled.div`
 	width: 10rem;
 	height: 10rem;
-	margin: 5rem auto 0;
+	margin: 0 auto;
 	position: relative;
+`;
+
+export const Content = styled.div`
+	padding-top: calc(var(--phone-padding) * 2);
 `;
 
 export const FaceWrapper = styled.div`
@@ -24,6 +30,10 @@ export const FaceWrapper = styled.div`
 export const Cards = styled(a.div)`
 	margin: 2.4rem 0;
 	will-change: transform, opacity;
+
+	${breakpoint("mobile", "tablet")`
+		margin: 2.4rem 0;
+	`}
 `;
 
 export const Slide = styled.div`
@@ -78,6 +88,13 @@ export const ButtonWrapper = styled.div`
 		border-radius: 90rem;
 		will-change: opacity;
 	}
+
+	${breakpoint("mobile", "tablet")`
+		position: absolute;
+		bottom: var(--phone-padding);
+		left: var(--phone-padding);
+		width: calc(100% - var(--phone-padding) * 2);
+	`}
 `;
 
 interface PulseCircleProps {
@@ -124,6 +141,7 @@ export const Card = styled(a.div)`
 	border: 1px solid rgba(255, 255, 255, 0.3);
 	transform-origin: center;
 	transform-style: preserve-3d;
+	backface-visibility: hidden;
 	will-change: transform, opacity;
 
 	${Image} {

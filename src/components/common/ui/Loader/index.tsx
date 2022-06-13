@@ -10,7 +10,11 @@ import { toRange } from "@core/utils";
 
 import * as S from "./styled";
 
-export const Loader: React.FC = memo(() => {
+export interface Props {
+	onAnimationEnded?: () => void;
+}
+
+export const Loader: React.FC<Props> = memo(({ onAnimationEnded }) => {
 	const [{ scale, opacity }, api] = useSpring(() => ({ scale: 0, opacity: 0 }));
 
 	const animate = useCallback(async () => {
@@ -18,15 +22,20 @@ export const Loader: React.FC = memo(() => {
 
 		await animationHelper.resolveSpringAnimation(api, {
 			scale: 1,
-			config: { duration: 1900 },
+			config: { duration: 1650 },
 			// config: { friction: 50, tension: 150 },
 		});
+
+		if (onAnimationEnded) {
+			onAnimationEnded();
+		}
+
 		await animationHelper.resolveSpringAnimation(api, { opacity: 0, config: config.slow });
 
 		api.set({ scale: 0 });
 
 		animate();
-	}, [api]);
+	}, [api, onAnimationEnded]);
 
 	useEffect(() => {
 		animate();

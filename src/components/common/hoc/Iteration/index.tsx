@@ -6,69 +6,59 @@ import {
 	Props as VisibilitySwitchProps,
 } from "@components/common/hoc/VisibilitySwitch";
 
-import { useIterationControls, useMultipleHooks } from "@core/hooks";
+import { useIteration, useMultipleHooks } from "@core/hooks";
+import { iterationHelper } from "@core/helpers";
 
-export interface Props extends VisibilitySwitchProps {
-	iteration: number | number[];
-	switchVisibility?: boolean;
-	visibleCondition?: (...iterationControls: ReturnType<typeof useIterationControls>[]) => boolean;
-	children: (...iterationControls: ReturnType<typeof useIterationControls>[]) => JSX.Element;
-	normalizeDuration?: boolean;
-	forceChildrenRerender?: boolean;
+type UseIterationParams = Parameters<typeof useIteration>;
+type UseIterationReturnType = ReturnType<typeof useIteration>;
+
+export interface Props {
+	switchVisibility?: boolean | VisibilitySwitchProps;
+	iterations: number | (number | UseIterationParams)[];
+	checkForVisible?: (iterations: UseIterationReturnType[]) => boolean;
+	children: (
+		iteration: UseIterationReturnType[],
+		interpolator: typeof iterationHelper.interpolations
+	) => JSX.Element;
 }
 
 export const Iteration: React.FC<Props> = memo(
-	({
-		children,
-		iteration,
-		visibleCondition,
-		normalizeDuration,
-		switchVisibility = true,
-		...rest
-	}) => {
-		const iterationsAsArray = useMemo(
-			() => (Array.isArray(iteration) ? iteration : [iteration]),
-			[iteration]
-		);
-		const iterations = useMultipleHooks(
-			useIterationControls,
-			...iterationsAsArray.map(
-				(iteration) => [iteration, { normalizeDuration }] as Parameters<typeof useIterationControls>
-			)
+	({ children, iterations, checkForVisible, switchVisibility = true }) => {
+		const asUseIterationParams = useMemo(() => {
+			switch (true) {
+				case typeof iterations === "number":
+					return [[iterations]];
+				case Array.isArray(iterations):
+					return (iterations as any[]).map((iteration) => {
+						const isArray = Array.isArray(iteration);
+						return isArray ? iteration : [iteration];
+					});
+				default:
+					return [];
+			}
+		}, [iterations]);
+
+		const iterationInstances = useMultipleHooks(
+			useIteration,
+			...(asUseIterationParams as UseIterationParams[])
 		);
 
-		const isVisible = useCallback(() => {
-			return visibleCondition ? visibleCondition(...iterations) : iterations[0].visible();
-		}, [iterations, visibleCondition]);
+		const visible = useCallback(() => {
+			return checkForVisible ? checkForVisible(iterationInstances) : iterationInstances[0].visible();
+		}, [iterationInstances, checkForVisible]);
 
-		return switchVisibility && (iterationsAsArray.length === 1 || visibleCondition) ? (
+		return switchVisibility && (asUseIterationParams.length === 1 || checkForVisible) ? (
 			<Observer>
 				{() => (
-					<VisibilitySwitch key='visibility' visible={isVisible()} {...rest}>
-						{children(...iterations)}
+					<VisibilitySwitch
+						visible={visible()}
+						{...(typeof switchVisibility === "object" ? switchVisibility : {})}>
+						{children(iterationInstances, iterationHelper.interpolations)}
 					</VisibilitySwitch>
 				)}
 			</Observer>
 		) : (
-			children(...iterations)
+			children(iterationInstances, iterationHelper.interpolations)
 		);
 	}
-	// (
-	// 	{
-	// 		children: childrenA,
-	// 		forceChildrenRerender: forceChildrenRerenderA,
-	// 		visibleCondition: visibleConditionA,
-	// 		...prevProps
-	// 	},
-	// 	{
-	// 		children: childrenB,
-	// 		forceChildrenRerender: forceChildrenRerenderB,
-	// 		visibleCondition: visibleConditionB,
-	// 		...nextProps
-	// 	}
-	// ) => {
-	// 	return forceChildrenRerenderB
-	// 		? isEqual({ ...prevProps, children: childrenA }, { ...nextProps, children: childrenB })
-	// 		: isEqual(nextProps, prevProps);
-	// }
 );

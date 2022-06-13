@@ -1,7 +1,7 @@
 import { useCallback, useEffect, memo } from "react";
 import { a, useSprings, useSpring } from "react-spring";
 import { Observer } from "mobx-react-lite";
-import { reaction } from "mobx";
+import { when } from "mobx";
 
 import { AnimatedSplitWords } from "@components/common/ordinary/AnimatedSplitWords";
 
@@ -9,7 +9,7 @@ import { Iteration } from "@components/common/hoc/Iteration";
 
 import { Button } from "@components/common/ui/Button";
 
-import { useGlobalStore } from "@core/hooks";
+import { useBreakpoint, useGlobalStore } from "@core/hooks";
 import { inlineSwitch, splitRowsIntoWords } from "@core/utils";
 import { animationHelper } from "@core/helpers";
 
@@ -22,15 +22,9 @@ export const Promo: React.FC = memo(() => {
 		progress: 0,
 	}));
 	const [buttonStyle, buttonStyleApi] = useSpring(() => ({ progress: 0 }));
+	const breakpoint = useBreakpoint();
 
 	const animate = useCallback(async () => {
-		if (
-			!promoStore.videoLoaded ||
-			!promoStore.loaderHidden ||
-			promoStore.promoBannerOpeningAnimationEnded
-		)
-			return;
-
 		await Promise.all([
 			animationHelper.resolveSpringAnimation(titleWordsApi, (index) => ({
 				progress: 1,
@@ -46,22 +40,22 @@ export const Promo: React.FC = memo(() => {
 		promoStore.setPromoBannerOpeningAnimationEnded(true);
 	}, [buttonStyleApi, promoStore, subtitleWordsApi, titleWordsApi]);
 
-	// useEffect(
-	// 	() =>
-	// 		reaction(
-	// 			() => [promoStore.videoLoaded, promoStore.loaderHidden] as const,
-	// 			() => animate()
-	// 		),
-	// 	[animate, promoStore]
-	// );
+	useEffect(
+		() =>
+			when(
+				() => promoStore.canShowContent,
+				() => animate()
+			),
+		[animate, promoStore]
+	);
 
-	useEffect(() => {
-		animate();
-	}, [animate]);
+	// useEffect(() => {
+	// 	animate();
+	// }, [animate]);
 
 	return (
-		<Iteration iteration={0}>
-			{(iteration0) => (
+		<Iteration iterations={0}>
+			{([iteration0], interpolations) => (
 				<S.Promo>
 					<Observer>
 						{() => (
@@ -70,30 +64,40 @@ export const Promo: React.FC = memo(() => {
 									<S.TitleWrapper>
 										<AnimatedSplitWords
 											content={TITLE}
-											type={inlineSwitch(promoStore.interactiveEnabled(), "closing", "opening")}
-											closingInterpolation={iteration0.interpolations.toEasing("easeInOutCubic").closing}
+											type={inlineSwitch(promoStore.interactiveEnabled, "closing", "opening")}
+											closingInterpolation={iteration0.interpolations.closing.to(
+												interpolations.easing("easeInOutCubic")
+											)}
 											getOpeningInterpolation={(index) => titleWordsStyles[index].progress}
 										/>
 									</S.TitleWrapper>
 									<S.SubtitleWrapper>
-										<AnimatedSplitWords
-											content={SUBTITLE}
-											type={inlineSwitch(promoStore.interactiveEnabled(), "closing", "opening")}
-											closingInterpolation={iteration0.interpolations.toEasing("easeInOutCubic").closing}
-											getOpeningInterpolation={(index) => subtitleWordsStyles[index].progress}
-										/>
+										<Observer>
+											{() => (
+												<AnimatedSplitWords
+													content={breakpoint.range("mobile", "tablet") ? SUBTITLE_MOBILE : SUBTITLE}
+													type={inlineSwitch(promoStore.interactiveEnabled, "closing", "opening")}
+													closingInterpolation={iteration0.interpolations.closing.to(
+														interpolations.easing("easeInOutCubic")
+													)}
+													getOpeningInterpolation={(index) => subtitleWordsStyles[index].progress}
+												/>
+											)}
+										</Observer>
 									</S.SubtitleWrapper>
 								</S.Head>
 								<a.div
 									style={{
 										y: inlineSwitch(
-											promoStore.interactiveEnabled(),
-											iteration0.interpolations.toEasing("easeInOutCubic").closing,
-											buttonStyle.progress.to((value) => 1 - value)
+											promoStore.interactiveEnabled,
+											iteration0.interpolations.closing.to(interpolations.easing("easeInOutCubic")),
+											buttonStyle.progress.to(interpolations.invert)
 										).to((value) => `-${2 * value}rem`),
 										opacity: inlineSwitch(
-											promoStore.interactiveEnabled(),
-											iteration0.interpolations.toEasing("easeInOutCubic").closing.to((value) => 1 - value),
+											promoStore.interactiveEnabled,
+											iteration0.interpolations.closing
+												.to(interpolations.easing("easeInOutCubic"))
+												.to(interpolations.invert),
 											buttonStyle.progress
 										),
 									}}>
@@ -110,6 +114,7 @@ export const Promo: React.FC = memo(() => {
 
 const TITLE = ["Professionally", "designed presentations", "without effort"];
 const SUBTITLE = ["For the price of a coffee cup & croissant"];
+const SUBTITLE_MOBILE = ["For the price of", "a coffee cup & croissant"];
 
 const TITLE_WORDS_AMOUNT = splitRowsIntoWords(TITLE).flat(Infinity).length;
 const SUBTITLE_WORDS_AMOUNT = splitRowsIntoWords(SUBTITLE).flat(Infinity).length;

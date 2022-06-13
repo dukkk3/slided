@@ -50,7 +50,7 @@ export const CardWrapper = styled.div<CardWrapperProps>`
 	top: 0;
 	left: 0;
 	width: 100%;
-	padding: 0.75rem 0;
+	padding: 0.5rem 0;
 	position: ${(props) => (props.$overlay ? "absolute" : "relative")};
 `;
 

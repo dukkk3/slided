@@ -22,8 +22,6 @@ export const GlobalStyle = createGlobalStyle`
         font-weight: 400;
         font-stretch: normal;
         font-family: ${(props) => props.theme.font.primary};
-        overflow: hidden;
-        height: 100vh;
 
         --container-gap: 4rem;
         --container-bigger-gap: 10vw;
@@ -34,6 +32,11 @@ export const GlobalStyle = createGlobalStyle`
         ${breakpoint("mobile", "tablet")`
             --container-gap: 4.5vw;
         `}
+    }
+
+    html, body {
+        height: 100vh;
+        overflow: hidden;
     }
 
     * {

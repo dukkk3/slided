@@ -39,7 +39,7 @@ export const AssistantFace: React.FC<Props> = memo(
 						className='safari-border-radius-overflow-bugfix'
 						style={{ scale: openingInterpolation }}>
 						<a.video
-							src={getVideoByName("BasicGirlSource")}
+							src={getVideoByName("BasicGirl")}
 							muted
 							loop
 							autoPlay

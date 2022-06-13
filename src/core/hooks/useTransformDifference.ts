@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect } from "react";
 
-import { useResizeObserver, useLocalStore, useThrottle } from "@core/hooks";
+import { useResizeObserver, useLocalStore, useThrottle, useDebounce } from "@core/hooks";
 import { calculateCoord, calculateScale, calculateElementOffset } from "@core/utils";
 import { reaction, transaction } from "mobx";
 
@@ -27,7 +27,7 @@ export function useTransformDifference({
 		endOffset: { top: 0, left: 0 },
 	});
 
-	const calculate = useThrottle(
+	const calculate = useDebounce(
 		() => {
 			const scale = { x: 1, y: 1 };
 			const position = { x: 0, y: 0 };
@@ -51,7 +51,14 @@ export function useTransformDifference({
 			scale.y = calculateScale(endSize.height, startSize.height);
 
 			if (logging) {
-				console.log({ position, scale, startSize: { ...startSize }, endSize: { ...endSize } });
+				console.log({
+					position,
+					scale,
+					startSize: { ...startSize },
+					endSize: { ...endSize },
+					startOffset,
+					endOffset,
+				});
 			}
 
 			transaction(() => {

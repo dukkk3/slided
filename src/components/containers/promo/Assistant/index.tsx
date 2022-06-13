@@ -13,42 +13,47 @@ export interface Props extends React.ComponentProps<"div"> {
 
 export const Assistant: React.FC<Props> = memo(({ faceContainerRef, ...rest }) => {
 	return (
-		<S.Assistant {...(rest as any)}>
-			<S.FaceWrapper ref={faceContainerRef} />
-			<Iteration
-				iteration={[1, 2]}
-				visibleCondition={(iteration1, iteration2) => iteration1.started() && !iteration2.ended()}>
-				{() => (
+		<Iteration
+			iterations={[1, 2]}
+			checkForVisible={([iteration1, iteration2]) => iteration1.started() && !iteration2.ended()}>
+			{() => (
+				<S.Assistant {...(rest as any)}>
+					<S.FaceWrapper ref={faceContainerRef} />
 					<S.DescriptionWrapper>
-						<Iteration iteration={1}>
-							{(iteration1) => {
-								console.log("rerender");
-								return (
-									<S.Description>
-										<Observer>
-											{() => (
-												<AnimatedSplitChars
-													content={["Let’s see how it works.", "Upload your content."]}
-													openingInterpolation={iteration1.interpolations.toEasing("easeInOutCubic").opening}
-													closingInterpolation={iteration1.interpolations.toEasing("easeInOutCubic").closing}
-													type={iteration1.currentType()}
-												/>
-											)}
-										</Observer>
-									</S.Description>
-								);
-							}}
+						<Iteration iterations={1}>
+							{([iteration1], interpolations) => (
+								<S.Description>
+									<Observer>
+										{() => (
+											<AnimatedSplitChars
+												content={["Let’s see how it works.", "Upload your content."]}
+												openingInterpolation={iteration1.interpolations.opening.to(
+													interpolations.easing("easeInOutCubic")
+												)}
+												closingInterpolation={iteration1.interpolations.closing.to(
+													interpolations.easing("easeInOutCubic")
+												)}
+												type={iteration1.currentState()}
+											/>
+										)}
+									</Observer>
+								</S.Description>
+							)}
 						</Iteration>
-						<Iteration iteration={2}>
-							{(iteration2) => (
+						<Iteration iterations={2}>
+							{([iteration2], interpolations) => (
 								<S.Description $overlay>
 									<Observer>
 										{() => (
 											<AnimatedSplitChars
 												content={["I’m here to organize it all", "into a neat structure"]}
-												openingInterpolation={iteration2.interpolations.toEasing("easeInOutCubic").opening}
-												closingInterpolation={iteration2.interpolations.toEasing("easeInOutCubic").closing}
-												type={iteration2.currentType()}
+												openingInterpolation={iteration2.interpolations.opening.to(
+													interpolations.easing("easeInOutCubic")
+												)}
+												closingInterpolation={iteration2.interpolations.closing.to(
+													interpolations.easing("easeInOutCubic")
+												)}
+												type={iteration2.currentState()}
 											/>
 										)}
 									</Observer>
@@ -56,8 +61,8 @@ export const Assistant: React.FC<Props> = memo(({ faceContainerRef, ...rest }) =
 							)}
 						</Iteration>
 					</S.DescriptionWrapper>
-				)}
-			</Iteration>
-		</S.Assistant>
+				</S.Assistant>
+			)}
+		</Iteration>
 	);
 });

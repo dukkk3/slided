@@ -8,7 +8,7 @@ import { AnimatedSplitChars } from "@components/common/ordinary/AnimatedSplitCha
 
 import { Image } from "@components/common/ui/Image";
 
-import { clamp, inlineSwitch, toRange, step } from "@core/utils";
+import { clamp, inlineSwitch } from "@core/utils";
 
 import * as S from "./styled";
 
@@ -30,21 +30,21 @@ export const TemplatesGrid: React.FC<Props> = memo(
 
 		return (
 			<Iteration
-				iteration={[9, 10]}
-				visibleCondition={(iteration9, iteration10) =>
+				iterations={[9, 10]}
+				checkForVisible={([iteration9, iteration10]) =>
 					hidden ? false : iteration9.startClosed() && !iteration10.ended()
 				}>
-				{(iteration9, iteration10) => (
+				{([iteration9, iteration10], interpolations) => (
 					<S.TemplatesGrid
 						style={inlineSwitch(
 							!hidden,
 							{
-								y: iteration10.interpolations
-									.toEasing("easeInOutCubic")
-									.closing.to((value) => `${-50 * value}%`),
-								opacity: iteration10.interpolations
-									.toEasing("easeInOutCubic")
-									.closing.to((value) => 1 - value),
+								y: iteration10.interpolations.closing
+									.to(interpolations.easing("easeInOutCubic"))
+									.to((value) => `${-50 * value}%`),
+								opacity: iteration10.interpolations.closing
+									.to(interpolations.easing("easeInOutCubic"))
+									.to(interpolations.invert),
 							},
 							{}
 						)}>
@@ -85,32 +85,31 @@ export const TemplatesGrid: React.FC<Props> = memo(
 																			(distance === 0 || distance === 1) &&
 																			rowIndex === centerRow,
 																		{
-																			opacity: iteration10.interpolations
-																				.toEasing("easeInOutQuart")
-																				.opening.to((value) => 1 - 0.9 * value),
+																			opacity: iteration10.interpolations.opening
+																				.to(interpolations.easing("easeInOutQuart"))
+																				.to((value) => 1 - 0.9 * value),
 																		},
 																		inlineSwitch(
 																			distance !== 0,
 																			{
-																				opacity: iteration9.interpolations
-																					.toEasing("easeInOutQuart")
-																					.closing.to((value) =>
-																						toRange(
-																							value,
+																				opacity: iteration9.interpolations.closing
+																					.to(interpolations.easing("easeInOutQuart"))
+																					.to(
+																						interpolations.range(
 																							normalizedInvertDistance,
 																							clamp(normalizedInvertDistance + 0.15, 0, 1)
 																						)
 																					),
-																				z: iteration9.interpolations
-																					.toEasing("easeInOutQuart")
-																					.closing.to((value) => toRange(value, normalizedInvertDistance, 1))
-																					.to((value) => `${PERSPECTIVE * 0.75 * (1 - value)}rem`),
+																				z: iteration9.interpolations.closing
+																					.to(interpolations.easing("easeInOutQuart"))
+																					.to(interpolations.range(normalizedInvertDistance, 1))
+																					.to(interpolations.invert)
+																					.to((value) => `${PERSPECTIVE * 0.75 * value}rem`),
 																			},
 																			{
-																				opacity: iteration9.interpolations
-																					.toEasing("easeInOutCubic")
-																					.closing.to((value) => step(value, 1))
-																					.to((value) => value),
+																				opacity: iteration9.interpolations.closing
+																					.to(interpolations.easing("easeInOutCubic"))
+																					.to(interpolations.step(1)),
 																			}
 																		)
 																	),
@@ -136,8 +135,12 @@ export const TemplatesGrid: React.FC<Props> = memo(
 												<AnimatedSplitChars
 													type={iteration10.visible("opening") ? "opening" : "closing"}
 													content={["We have thousands", "of slides behind"]}
-													openingInterpolation={iteration10.interpolations.toEasing("easeInOutCubic").opening}
-													closingInterpolation={iteration10.interpolations.toEasing("easeInOutCubic").closing}
+													openingInterpolation={iteration10.interpolations.opening.to(
+														interpolations.easing("easeInOutCubic")
+													)}
+													closingInterpolation={iteration10.interpolations.closing.to(
+														interpolations.easing("easeInOutCubic")
+													)}
 												/>
 											</VisibilitySwitch>
 										)}

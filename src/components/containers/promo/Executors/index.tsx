@@ -1,4 +1,4 @@
-import { easings } from "react-spring";
+import { useEffect, useRef } from "react";
 import { Observer } from "mobx-react-lite";
 
 import { Iteration } from "@components/common/hoc/Iteration";
@@ -6,8 +6,13 @@ import { VisibilitySwitch } from "@components/common/hoc/VisibilitySwitch";
 
 import { UserCard, Props as UserCardProps } from "@components/common/ordinary/UserCard";
 
-import { useResizeObserver } from "@core/hooks";
-import { mergeRefs, toRange, inlineSwitch, step } from "@core/utils";
+import {
+	useBreakpoint,
+	useLocalStore,
+	useResizeObserver,
+	useTransformDifference,
+} from "@core/hooks";
+import { inlineSwitch } from "@core/utils";
 
 import { getRasterImageByName } from "@assets/images";
 
@@ -15,94 +20,184 @@ import * as S from "./styled";
 
 export interface Props extends React.ComponentProps<"div"> {
 	faceContainerRef?: React.ForwardedRef<any>;
+	phoneCardsContainerRef?: React.RefObject<any>;
 }
 
-export const Executors: React.FC<Props> = ({ faceContainerRef, ...rest }) => {
-	const targetAvatarResizeObserver = useResizeObserver();
-	const targetCardResizeObserver = useResizeObserver();
+export const Executors: React.FC<Props> = ({
+	phoneCardsContainerRef,
+	faceContainerRef,
+	...rest
+}) => {
+	const breakpoint = useBreakpoint();
+	const phoneCardsTransformDifference = useTransformDifference({ startRef: phoneCardsContainerRef });
+
+	const localStore = useLocalStore({
+		get mobile() {
+			return breakpoint.range("mobile", "tablet");
+		},
+	});
+
+	const mobileHiddenExecutor = (
+		<VisibilitySwitch visible={false}>
+			<S.UserCardGroup
+				style={{
+					top: 0,
+					left: 0,
+					position: "absolute",
+				}}>
+				<UserCard {...TARGET_USER.data} avatarRef={faceContainerRef} />
+			</S.UserCardGroup>
+		</VisibilitySwitch>
+	);
 
 	return (
-		<S.Executors {...(rest as any)}>
-			<VisibilitySwitch visible={false}>
-				<S.UserCardGroup
-					ref={targetCardResizeObserver.ref}
-					style={{
-						top: `${normalize(TARGET_USER.position.y) * 100}%`,
-						left: `${normalize(TARGET_USER.position.x) * 100}%`,
-						transform: `translate3d(-50%, -50%, 0)`,
-					}}>
-					<UserCard
-						{...TARGET_USER.data}
-						avatarRef={mergeRefs(faceContainerRef, targetAvatarResizeObserver.ref)}
-					/>
-				</S.UserCardGroup>
-			</VisibilitySwitch>
-			<Iteration iteration={5}>
-				{(iteration5) => (
-					<div>
-						<Observer>
-							{() => (
-								<>
-									{USERS.map(({ position, data, inQueueIndex }, index) => (
-										<S.UserCardGroup
-											key={index}
-											style={{
-												top: `${(position.y / 2 + 0.5) * 100}%`,
-												left: `${(position.x / 2 + 0.5) * 100}%`,
-												transform: `translate3d(-50%, -50%, 0)`,
-											}}>
-											<S.UserCardWrapper
-												style={{
-													opacity: inlineSwitch(
-														iteration5.currentType() === "opening",
-														iteration5.interpolations.opening
-															.to((value) => toRange(value, 0, 0.5)) // .toEasing("easeInOutCubic")
-															.to(
-																(value) => value
-																// toRange(value, inQueueIndex / USERS.length, (inQueueIndex + 1) / USERS.length)
-															)
-															.to({ easing: easings.easeInOutCubic, output: [0, 1], range: [0, 1] }),
-														iteration5.interpolations.closing
-															.to((value) => toRange(value, 0, 0.5)) // .toEasing("easeInOutCubic")
-															.to(
-																(value) => value
-																// toRange(value, inQueueIndex / USERS.length, (inQueueIndex + 1) / USERS.length)
-															)
-															.to((value) => 1 - value)
-															.to({ easing: easings.easeInOutCubic, output: [0, 1], range: [0, 1] })
-													),
-													scale: inlineSwitch(
-														iteration5.currentType() === "opening",
-														iteration5.interpolations.opening
-															.to((value) =>
-																toRange(value, inQueueIndex / USERS.length, (inQueueIndex + 1) / USERS.length)
-															)
-															.to({ easing: easings.easeInOutCubic, output: [0, 1], range: [0, 1] }),
-														iteration5.interpolations.closing
-															.to({ easing: easings.easeInOutCubic, output: [0, 1], range: [0, 1] })
-															.to((value) => 1 - value)
-													),
-												}}>
-												<UserCard
-													{...data}
-													avatarVisibleInterpolation={
-														index === TARGET_INDEX
-															? iteration5.interpolations
-																	.toEasing("easeInOutQuart")
-																	.closing.to((value) => 1 - step(value, 0.001))
-															: undefined
-													}
-												/>
-											</S.UserCardWrapper>
-										</S.UserCardGroup>
-									))}
-								</>
+		<Observer>
+			{() =>
+				localStore.mobile ? (
+					<S.Executors
+						{...(rest as any)}
+						style={{
+							...phoneCardsTransformDifference.startResizeObserver.getSize(),
+							...phoneCardsTransformDifference.getStartOffset(),
+						}}>
+						<S.ExecutorsContent>
+							{mobileHiddenExecutor}
+							<Iteration iterations={5}>
+								{([iteration5], interpolations) => (
+									<div>
+										<Observer>
+											{() => (
+												<>
+													{USERS_MOBILE.map(({ data }, index) => (
+														<S.UserCardGroup key={index}>
+															<S.UserCardWrapper
+																style={{
+																	y: iteration5.interpolations.opening
+																		.to(
+																			interpolations.range(
+																				index / USERS_MOBILE.length,
+																				(index + 1) / USERS_MOBILE.length
+																			)
+																		)
+																		.to(interpolations.easing("easeInOutCubic"))
+																		.to(interpolations.invert)
+																		.to((value) => `${-20 * value}%`),
+																	opacity: inlineSwitch(
+																		iteration5.currentState() === "opening",
+																		iteration5.interpolations.opening
+																			.to(
+																				interpolations.range(
+																					index / USERS_MOBILE.length,
+																					(index + 1) / USERS_MOBILE.length
+																				)
+																			)
+																			.to(interpolations.easing("easeInOutCubic"))
+																			.to((value) => (1 - (1 / USERS_MOBILE.length) * index) * value),
+																		iteration5.interpolations.closing
+																			.to(interpolations.easing("easeInOutCubic"))
+																			.to(interpolations.invert)
+																			.to((value) => (1 - (1 / USERS_MOBILE.length) * index) * value)
+																	),
+																}}>
+																<UserCard
+																	{...data}
+																	avatarVisibleInterpolation={
+																		index === TARGET_INDEX
+																			? iteration5.interpolations.closing
+																					.to(interpolations.easing("easeInOutQuart"))
+																					.to(interpolations.step(0.001))
+																					.to(interpolations.invert)
+																			: undefined
+																	}
+																/>
+															</S.UserCardWrapper>
+														</S.UserCardGroup>
+													))}
+												</>
+											)}
+										</Observer>
+									</div>
+								)}
+							</Iteration>
+						</S.ExecutorsContent>
+					</S.Executors>
+				) : (
+					<S.Executors {...(rest as any)}>
+						<VisibilitySwitch visible={false}>
+							<S.UserCardGroup
+								style={{
+									top: `${normalize(TARGET_USER.position.y) * 100}%`,
+									left: `${normalize(TARGET_USER.position.x) * 100}%`,
+									transform: `translate3d(-50%, -50%, 0)`,
+								}}>
+								<UserCard {...TARGET_USER.data} avatarRef={faceContainerRef} />
+							</S.UserCardGroup>
+						</VisibilitySwitch>
+						<Iteration iterations={5}>
+							{([iteration5], interpolations) => (
+								<div>
+									<Observer>
+										{() => (
+											<>
+												{USERS.map(({ position, data, inQueueIndex }, index) => (
+													<S.UserCardGroup
+														key={index}
+														style={{
+															top: `${(position.y / 2 + 0.5) * 100}%`,
+															left: `${(position.x / 2 + 0.5) * 100}%`,
+															transform: `translate3d(-50%, -50%, 0)`,
+														}}>
+														<S.UserCardWrapper
+															style={{
+																opacity: inlineSwitch(
+																	iteration5.currentState() === "opening",
+																	iteration5.interpolations.opening
+																		.to(interpolations.range(0, 0.5))
+																		.to(interpolations.easing("easeInOutCubic")),
+																	iteration5.interpolations.closing
+																		.to(interpolations.range(0, 0.5))
+																		.to(interpolations.easing("easeInOutCubic"))
+																		.to(interpolations.invert)
+																),
+																scale: inlineSwitch(
+																	iteration5.currentState() === "opening",
+																	iteration5.interpolations.opening
+																		.to(
+																			interpolations.range(
+																				inQueueIndex / USERS.length,
+																				(inQueueIndex + 1) / USERS.length
+																			)
+																		)
+																		.to(interpolations.easing("easeInOutCubic")),
+																	iteration5.interpolations.closing
+																		.to(interpolations.invert)
+																		.to(interpolations.easing("easeInOutCubic"))
+																),
+															}}>
+															<UserCard
+																{...data}
+																avatarVisibleInterpolation={
+																	index === TARGET_INDEX
+																		? iteration5.interpolations.closing
+																				.to(interpolations.easing("easeInOutQuart"))
+																				.to(interpolations.step(0.001))
+																				.to(interpolations.invert)
+																		: undefined
+																}
+															/>
+														</S.UserCardWrapper>
+													</S.UserCardGroup>
+												))}
+											</>
+										)}
+									</Observer>
+								</div>
 							)}
-						</Observer>
-					</div>
-				)}
-			</Iteration>
-		</S.Executors>
+						</Iteration>
+					</S.Executors>
+				)
+			}
+		</Observer>
 	);
 };
 
@@ -144,6 +239,7 @@ const USERS: { inQueueIndex: number; data: UserCardProps; position: { x: number;
 		position: { x: 0.65, y: -0.7 },
 	},
 ];
+const USERS_MOBILE = USERS.slice(0, Math.min(4, USERS.length));
 
 const TARGET_INDEX = 0;
 const TARGET_USER = USERS[TARGET_INDEX];

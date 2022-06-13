@@ -6,7 +6,7 @@ import { SplitWords, Props as SplitWordsProps } from "@components/common/ordinar
 
 import { toRange, inlineSwitch } from "@core/utils";
 
-export interface Props extends Pick<SplitWordsProps, "content"> {
+export interface Props extends Pick<SplitWordsProps, "content">, React.ComponentProps<"p"> {
 	type: "opening" | "closing";
 	getOpeningInterpolation: (index: number) => SpringValue<number> | Interpolation<number, number>;
 	closingInterpolation: Interpolation<number, number>;

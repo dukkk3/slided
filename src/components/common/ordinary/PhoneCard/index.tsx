@@ -1,3 +1,4 @@
+import { forwardRef } from "react";
 import { Interpolation } from "react-spring";
 
 import { Image } from "@components/common/ui/Image";
@@ -13,17 +14,20 @@ export interface Props extends React.ComponentProps<"div"> {
 	backgroundZoomInterpolation: Interpolation<number, number>;
 }
 
-export const PhoneCard: React.FC<React.PropsWithChildren<Props>> = ({
-	children,
-	alternative,
-	openingInterpolation,
-	hiddenContent = false,
-	backgroundZoomInterpolation,
-	...rest
-}) => {
-	return (
-		<S.PhoneCard {...(rest as any)} $alternative={alternative}>
-			<S.Container $hidden={hiddenContent}>
+export const PhoneCard = forwardRef<HTMLDivElement, React.PropsWithChildren<Props>>(
+	(
+		{
+			children,
+			alternative,
+			openingInterpolation,
+			hiddenContent = false,
+			backgroundZoomInterpolation,
+			...rest
+		},
+		ref
+	) => {
+		return (
+			<S.PhoneCard {...(rest as any)} ref={ref} $alternative={alternative} $hidden={hiddenContent}>
 				<S.Plug
 					className='safari-border-radius-overflow-bugfix'
 					style={{
@@ -50,7 +54,7 @@ export const PhoneCard: React.FC<React.PropsWithChildren<Props>> = ({
 				<S.ContentWrapper>
 					<S.Content>{children}</S.Content>
 				</S.ContentWrapper>
-			</S.Container>
-		</S.PhoneCard>
-	);
-};
+			</S.PhoneCard>
+		);
+	}
+);
