@@ -1,6 +1,5 @@
 import { createContext, useCallback, useEffect } from "react";
 import { easings } from "react-spring";
-import { useWheel } from "@use-gesture/react";
 import { reaction } from "mobx";
 
 import { useIterationsContextFactory, IterationsContext, useLocalStore } from "@core/hooks";
@@ -30,6 +29,7 @@ export type Context = IterationsContext & {
 const RANGES: RangeConfig[] = [
 	{ from: 9, to: 9.5, duration: 2000 },
 	{ from: 4.5, to: 5, duration: 2500 },
+	{ from: 7, to: 7.5, duration: 5000 },
 ];
 
 export const IterationsControls: React.FC<Props> = ({
@@ -153,9 +153,13 @@ export const IterationsControls: React.FC<Props> = ({
 				(iteration) => {
 					const sign = Math.sign(iterationsContext.store.iteration - localStore.iteration);
 					const targetIteration = iteration + stepBetweenIterations * sign;
-					// const durationFactor = Math.abs(iterationsContext.store.iteration - targetIteration) / STEP;
+					const durationFactor =
+						Math.abs(iterationsContext.store.iteration - targetIteration) / stepBetweenIterations;
 					const config = getCurrentRangeConfig(targetIteration, sign === -1 ? "left" : "right");
-					iterationsContext.animate(targetIteration, config);
+					iterationsContext.animate(targetIteration, {
+						...config,
+						duration: config.duration * clamp(durationFactor, 0, 1),
+					});
 					// duration: DURATION * clamp(durationFactor, 0, 1),
 				}
 			),

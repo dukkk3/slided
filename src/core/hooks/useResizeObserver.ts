@@ -2,16 +2,22 @@ import React, { useCallback, useEffect, useMemo } from "react";
 import ResizeObserver from "resize-observer-polyfill";
 
 import { useLocalStore, useSpareRef } from "@core/hooks";
+import { debounce as debounceHof } from "@core/utils";
 
 interface Options {
 	ref?: React.RefObject<any>;
+	debounce?: number;
 	calculateSizeWithPaddings?: boolean;
 }
 
 type Position = { top: number; left: number; right: number; bottom: number };
 type Size = { width: number; height: number };
 
-export function useResizeObserver({ ref, calculateSizeWithPaddings = false }: Options = {}) {
+export function useResizeObserver({
+	ref,
+	debounce,
+	calculateSizeWithPaddings = false,
+}: Options = {}) {
 	const spareRef = useSpareRef(ref);
 	const localStore = useLocalStore({
 		DOMRect: { width: 0, height: 0, top: 0, left: 0, right: 0, bottom: 0 },
@@ -43,10 +49,12 @@ export function useResizeObserver({ ref, calculateSizeWithPaddings = false }: Op
 		[calculateSizeWithPaddings, localStore]
 	);
 
-	const resizeObserver = useMemo(
-		() => new ResizeObserver(resizeObserverCallback),
-		[resizeObserverCallback]
-	);
+	const resizeObserver = useMemo(() => {
+		const callback = debounce
+			? debounceHof(resizeObserverCallback, debounce)
+			: resizeObserverCallback;
+		return new ResizeObserver(callback);
+	}, [debounce, resizeObserverCallback]);
 
 	const getSize = useCallback((): Size => {
 		return {

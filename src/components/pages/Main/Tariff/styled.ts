@@ -1,6 +1,8 @@
 import { a } from "react-spring";
 import styled from "styled-components";
 
+import { breakpoint } from "@styles/breakpoint";
+
 export const Tariff = styled.div`
 	top: 0;
 	left: 0;
@@ -18,12 +20,33 @@ export const Tariff = styled.div`
 	}
 `;
 
-export const Title = styled(a.p)`
+export const Head = styled(a.div)`
+	margin-bottom: 6rem;
+	will-change: transform;
+
+	${breakpoint("mobile", "tablet")`
+		margin-bottom: 4rem;
+	`}
+`;
+
+export const Title = styled.p`
 	font-size: 8rem;
 	line-height: 80%;
 	font-weight: 600;
-	margin-bottom: 6rem;
-	will-change: transform, opacity;
+	text-align: center;
+
+	${breakpoint("mobile", "tablet")`
+		font-weight: 700;
+		line-height: 100%;
+		font-size: 3.6rem;
+	`}
+`;
+
+export const Subtitle = styled.p`
+	font-weight: 400;
+	font-size: 1.6rem;
+	text-align: center;
+	margin-top: 1rem;
 `;
 
 export const Body = styled.div`
@@ -41,12 +64,15 @@ export const Price = styled(a.div)`
 	width: 100%;
 	height: 100%;
 	display: flex;
+	position: absolute;
 	align-items: center;
 	justify-content: center;
-	position: absolute;
-	font-size: 2rem;
-	font-weight: 600;
 	will-change: transform, opacity;
+
+	${breakpoint("mobile", "tablet")`
+		width: 80%;
+		margin: 0 10%;
+	`}
 `;
 
 export const PriceContent = styled.div`
@@ -74,4 +100,9 @@ export const RayPiece = styled(a.div)`
 	&:not(:nth-last-child(1)) {
 		margin-right: -5rem;
 	}
+
+	${breakpoint("mobile", "tablet")`
+		width: calc(17rem * var(--scale));
+		height: calc(20rem * var(--scale));
+	`}
 `;

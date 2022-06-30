@@ -1,6 +1,6 @@
 import { Routes as RoutesImpl, Route } from "react-router-dom";
 
-import { Sandbox } from "@components/pages/Sandbox";
+import { Main } from "@components/pages/Main";
 
 import { Layout } from "@components/containers/layout/Layout";
 
@@ -11,7 +11,7 @@ export const Routes: React.FC = () => {
 				path='*'
 				element={
 					<Layout>
-						<Sandbox />
+						<Main />
 					</Layout>
 				}
 			/>

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect } from "react";
 
-import { useResizeObserver, useLocalStore, useThrottle, useDebounce } from "@core/hooks";
-import { calculateCoord, calculateScale, calculateElementOffset } from "@core/utils";
+import { useResizeObserver, useLocalStore, useDebounce } from "@core/hooks";
+import { calculateCoord, calculateScale, getOffset } from "@core/utils";
 import { reaction, transaction } from "mobx";
 
 interface Options {
@@ -35,8 +35,8 @@ export function useTransformDifference({
 			const startSize = startResizeObserver.getSize();
 			const endSize = endResizeObserver.getSize();
 
-			const startOffset = calculateElementOffset(startResizeObserver.ref.current);
-			const endOffset = calculateElementOffset(endResizeObserver.ref.current);
+			const startOffset = getOffset(startResizeObserver.ref.current);
+			const endOffset = getOffset(endResizeObserver.ref.current);
 
 			position.x =
 				resizeType === "scale"

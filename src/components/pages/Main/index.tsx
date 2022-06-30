@@ -4,38 +4,33 @@ import { Observer } from "mobx-react-lite";
 import { useCallback, useEffect, useRef } from "react";
 import { FullGestureState, useGesture } from "@use-gesture/react";
 
-import { Promo } from "@components/containers/promo/Promo";
-import { Tariff } from "@components/containers/promo/Tariff";
-import { Assistant } from "@components/containers/promo/Assistant";
-import { Executors } from "@components/containers/promo/Executors";
-import { TemplatesGrid } from "@components/containers/promo/TemplatesGrid";
-import { PhoneAssistant } from "@components/containers/promo/PhoneAssistant";
-import { PhoneTemplates } from "@components/containers/promo/PhoneTemplates";
-// import { TableBackground } from "@components/containers/promo/TableBackground";
-import {
-	BackgroundSequence,
-	BackgroundFrame,
-} from "@components/containers/promo/BackgroundSequence";
-// import { TableSequence } from "@components/containers/promo/TableSequence";
-import { Pulses } from "@components/containers/promo/Pulses";
-import { SlidingFooter } from "@components/containers/promo/SlidingFooter";
+import { Promo } from "./Promo";
+import { Tariff } from "./Tariff";
+import { Pulses } from "./Pulses";
+import { Assistant } from "./Assistant";
+import { Executors } from "./Executors";
+import { SlidingFooter } from "./SlidingFooter";
+import { TemplatesGrid } from "./TemplatesGrid";
+import { PhoneAssistant } from "./PhoneAssistant";
+import { PhoneTemplates } from "./PhoneTemplates";
+import { BackgroundSequence, BackgroundFrame } from "./BackgroundSequence";
 
-import { MovedGridTemplate } from "@components/containers/promo/MovedGridTemplate";
-import { MovedExecutorFace } from "@components/containers/promo/MovedExecutorFace";
-import { MovedAssistantFace } from "@components/containers/promo/MovedAssistantFace";
-import { MovedCursorTemplate } from "@components/containers/promo/MovedCursorTemplate";
+import { MovedGridTemplate } from "./MovedGridTemplate";
+import { MovedExecutorFace } from "./MovedExecutorFace";
+import { MovedAssistantFace } from "./MovedAssistantFace";
+import { MovedCursorTemplate } from "./MovedCursorTemplate";
 
-import { DebugIterationControls } from "@components/common/smart/DebugIterationControls";
+import { DebugIterationControls } from "@components/common/ui/DebugIterationControls";
 
 import { Loader } from "@components/common/ui/Loader";
 import { PromoContainer } from "@components/common/ui/PromoContainer";
 
 import {
 	useBreakpoint,
-	useGlobalStore,
 	useIteration,
-	useIterationsControls,
+	useGlobalStore,
 	useResizeObserver,
+	useIterationsControls,
 } from "@core/hooks";
 import { animationHelper } from "@core/helpers";
 
@@ -43,7 +38,7 @@ import { getRasterImageByName, getRasterImagesByNames } from "@assets/images";
 
 import * as S from "./styled";
 
-export const Sandbox: React.FC = () => {
+export const Main: React.FC = () => {
 	const [loaderStyle, loaderApi] = useSpring(() => ({ opacity: 1 }));
 
 	const sandboxRef = useRef<HTMLDivElement>(null);
@@ -254,18 +249,19 @@ export const Sandbox: React.FC = () => {
 							faceContainerRef={executorContainerRef}
 						/>
 						<MovedCursorTemplate
-							templateSource={getRasterImageByName("Car")}
+							templateSource={CAR_TEMPLATE_SOURCE}
 							cursorAvatarSource={getRasterImageByName("Man1")}
 							endContainerRef={phoneTemplateContainerRef}
 						/>
 						<PhoneTemplates
 							ref={phoneTemplatesRef}
-							templates={getRasterImagesByNames("Car", "ColaCharts", "Plug", "Plug", "Plug").map(
-								(source, index) => ({
-									source,
-									overlaySource: index === 1 ? getRasterImageByName("Plug") : undefined,
-								})
-							)}
+							templates={[
+								CAR_TEMPLATE_SOURCE,
+								...getRasterImagesByNames("ColaCharts", "Plug", "Plug", "Plug"),
+							].map((source, index) => ({
+								source,
+								overlaySource: index === 1 ? getRasterImageByName("Plug") : undefined,
+							}))}
 							templateContainerRef={phoneTemplateContainerRef}
 							shiftedTemplateContainerRef={phoneShiftedTemplateContainerRef}
 						/>
@@ -278,7 +274,7 @@ export const Sandbox: React.FC = () => {
 						<Tariff />
 					</PromoContainer>
 					<MovedGridTemplate
-						templateSource={getRasterImageByName("Car")}
+						templateSource={CAR_TEMPLATE_SOURCE}
 						startContainerRef={phoneShiftedTemplateContainerRef}
 						endContainerRef={gridTemplateContainerRef}
 					/>
@@ -318,6 +314,10 @@ const PromoLoader: React.FC<PromoLoaderProps> = ({ onCanHide }) => {
 	return <Loader onAnimationEnded={handleAnimationEnded} />;
 };
 
+const CAR_TEMPLATE_SOURCE = `https://ik.imagekit.io/64nah4dsw/slided/present_sequence/${String(
+	126
+).padStart(3, "0")}.jpg`;
+
 const GRID_TEMPLATES = [
 	[
 		getRasterImageByName("Work4"),
@@ -329,7 +329,7 @@ const GRID_TEMPLATES = [
 	[
 		getRasterImageByName("Work10"),
 		getRasterImageByName("Work5"),
-		getRasterImageByName("Car"),
+		CAR_TEMPLATE_SOURCE,
 		getRasterImageByName("Work6"),
 		getRasterImageByName("Work3"),
 	],

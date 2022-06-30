@@ -1,18 +1,22 @@
 import { memo, useEffect } from "react";
 import { Observer } from "mobx-react-lite";
+import { reaction } from "mobx";
 
 import { Iteration } from "@components/common/hoc/Iteration";
 import { VisibilitySwitch } from "@components/common/hoc/VisibilitySwitch";
 
-import { UserCursor } from "@components/common/ordinary/UserCursor";
-
 import { Image } from "@components/common/ui/Image";
 
-import { useIteration, useTransformDifference } from "@core/hooks";
+import {
+	useBreakpoint,
+	useCanvasSequence,
+	useIteration,
+	useTransformDifference,
+} from "@core/hooks";
 import { inlineSwitch, step } from "@core/utils";
+import { Sequence } from "@core/classes";
 
 import * as S from "./styled";
-import { reaction } from "mobx";
 
 export interface Props {
 	templateSource: string;
@@ -22,11 +26,43 @@ export interface Props {
 
 export const MovedCursorTemplate: React.FC<Props> = memo(
 	({ templateSource, cursorAvatarSource, endContainerRef }) => {
+		const iteration5 = useIteration(5);
 		const iteration7 = useIteration(7);
+
+		const breakpoint = useBreakpoint();
+
+		const canvasSequence = useCanvasSequence(SEQUENCE, { resizeObserverDebounce: 100 });
 		const transformBtwEndAndMinContainers = useTransformDifference({
 			resizeType: "rect",
 			endRef: endContainerRef,
 		});
+
+		useEffect(
+			() =>
+				reaction(
+					() => [iteration7.ranges.closing(), breakpoint.range("mobile", "tablet")] as const,
+					([value, mobile]) => {
+						if (mobile) return;
+						const currentFrame = Math.floor((SEQUENCE.amount - 1) * value);
+						canvasSequence.setCurrentFrame(currentFrame);
+						canvasSequence.drawCurrentFrame();
+					}
+				),
+			[breakpoint, canvasSequence, iteration7]
+		);
+
+		useEffect(
+			() =>
+				reaction(
+					() => [iteration5.started(), breakpoint.range("mobile", "tablet")] as const,
+					async ([started, mobile]) => {
+						if (!started || mobile) return;
+						await SEQUENCE.preloadAll();
+						canvasSequence.drawCurrentFrame(true);
+					}
+				),
+			[breakpoint, canvasSequence, iteration5]
+		);
 
 		useEffect(
 			() =>
@@ -89,45 +125,25 @@ export const MovedCursorTemplate: React.FC<Props> = memo(
 										<S.CardImageGroup
 											$zoom={IMAGE_ZOOM}
 											style={{
-												opacity: iteration7.interpolations.opening
-													.to(interpolations.easing("easeInOutCubic"))
-													.to(interpolations.step(0.999))
-													.to(interpolations.invert),
 												scale: iteration7.interpolations.opening
 													.to(interpolations.easing("easeInOutCubic"))
 													.to((value) => 1 + (1 / IMAGE_ZOOM - 1) * value),
+												opacity: iteration7.interpolations.closing
+													.to(interpolations.easing("easeInOutCubic"))
+													.to(interpolations.step(0.999))
+													.to(interpolations.invert),
 											}}>
-											<Image src={templateSource} lazy={false} />
+											{breakpoint.range("mobile", "laptop") ? (
+												<Image src={templateSource} lazy={false} />
+											) : (
+												<S.Canvas ref={canvasSequence.ref} />
+											)}
+											<S.Canvas ref={canvasSequence.ref} />
 										</S.CardImageGroup>
 									</S.Card>
 								)}
 							</Observer>
 						</S.EndContainer>
-						<Observer>
-							{() => (
-								<S.CursorGroup
-									style={{
-										x: iteration7.interpolations.closing
-											.to({ range: [0, 1], output: [0.85, 0.45] })
-											.to((value) => `${value * 100}%`),
-										y: iteration7.interpolations.closing
-											.to({ range: [0, 1], output: [0.75, 0.1] })
-											.to((value) => `${value * 100}%`),
-										opacity: inlineSwitch(
-											iteration7.visible(),
-											iteration7.interpolations.closing
-												.to(interpolations.easing("easeInOutCubic"))
-												.to(interpolations.range(0, 0.1)),
-											iteration8.interpolations.opening
-												.to(interpolations.easing("easeInOutCubic"))
-												.to(interpolations.range(0, 0.1))
-												.to(interpolations.invert)
-										),
-									}}>
-									<UserCursor avatarSource={cursorAvatarSource} />
-								</S.CursorGroup>
-							)}
-						</Observer>
 					</div>
 				)}
 			</Iteration>
@@ -137,3 +153,11 @@ export const MovedCursorTemplate: React.FC<Props> = memo(
 
 const PERSPECTIVE = 1;
 const IMAGE_ZOOM = 2;
+const SEQUENCE = new Sequence(
+	125,
+	(index) =>
+		`https://ik.imagekit.io/64nah4dsw/slided/present_sequence/${String(index + 1).padStart(
+			3,
+			"0"
+		)}.jpg`
+);

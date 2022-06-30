@@ -1,4 +1,3 @@
-import { useEffect, useRef } from "react";
 import { Observer } from "mobx-react-lite";
 
 import { Iteration } from "@components/common/hoc/Iteration";
@@ -6,12 +5,7 @@ import { VisibilitySwitch } from "@components/common/hoc/VisibilitySwitch";
 
 import { UserCard, Props as UserCardProps } from "@components/common/ordinary/UserCard";
 
-import {
-	useBreakpoint,
-	useLocalStore,
-	useResizeObserver,
-	useTransformDifference,
-} from "@core/hooks";
+import { useBreakpoint, useLocalStore, useTransformDifference } from "@core/hooks";
 import { inlineSwitch } from "@core/utils";
 
 import { getRasterImageByName } from "@assets/images";

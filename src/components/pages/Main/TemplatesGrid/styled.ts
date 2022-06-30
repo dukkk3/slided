@@ -1,7 +1,9 @@
 import { a } from "react-spring";
-import styled from "styled-components";
+import styled, { css } from "styled-components";
 
 import { Image } from "@components/common/ui/Image/styled";
+
+import { breakpoint } from "@styles/breakpoint";
 
 export const TemplatesGrid = styled(a.div)`
 	top: 0;
@@ -34,6 +36,10 @@ export const Row = styled.div`
 export const TemplateGroup = styled.div`
 	padding: 1.5rem 1.5rem;
 	position: relative;
+
+	${breakpoint("mobile", "tablet")`
+		padding: .5rem;
+	`}
 `;
 
 export const TemplateWrapper = styled.div`
@@ -43,7 +49,19 @@ export const TemplateWrapper = styled.div`
 
 interface TemplateProps {
 	$overlay?: boolean;
+	$containsText?: boolean;
 }
+
+const templateContainsTextMixin = css`
+	display: flex;
+	text-align: center;
+	align-items: center;
+	justify-content: center;
+	border: 1px solid black;
+	line-height: 120%;
+	font-weight: 700;
+	font-size: 2.4rem;
+`;
 
 export const Template = styled(a.div)<TemplateProps>`
 	top: 0;
@@ -56,6 +74,8 @@ export const Template = styled(a.div)<TemplateProps>`
 	transform-style: preserve-3d;
 	backface-visibility: none;
 	will-change: transform;
+
+	${(props) => props.$containsText && templateContainsTextMixin};
 
 	${Image} {
 		width: 100%;

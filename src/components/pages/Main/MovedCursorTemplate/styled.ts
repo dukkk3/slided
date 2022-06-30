@@ -12,6 +12,11 @@ export const EndContainer = styled.div`
 	position: absolute;
 `;
 
+export const Canvas = styled(a.canvas)`
+	width: 100%;
+	height: 100%;
+`;
+
 export const Card = styled(a.div)`
 	overflow: hidden;
 	position: absolute;

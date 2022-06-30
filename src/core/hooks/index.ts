@@ -9,6 +9,7 @@ export * from "./useGlobalStore";
 export * from "./useMultipleHooks";
 export * from "./useOnClickOutside";
 export * from "./useResizeObserver";
+export * from "./useCanvasSequence";
 export * from "./useIterationsControls";
 export * from "./useTransformDifference";
 export * from "./useIterationsContextFactory";

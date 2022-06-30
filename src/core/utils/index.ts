@@ -149,7 +149,7 @@ export function step(value: number, edge: number) {
 	return value < edge ? 0 : 1;
 }
 
-export function calculateElementOffset(element: HTMLElement | SVGElement | null) {
+export function getOffset(element: HTMLElement | SVGElement | null) {
 	const DOMRect = safelyGetElementDOMRect(element);
 
 	const body = document.body;
@@ -171,8 +171,7 @@ export function calculateMousePositionInsideElement(
 	element: HTMLElement | SVGElement | Document | null,
 	mousePosition: { x: number; y: number }
 ) {
-	const offset =
-		element === document ? { top: 0, left: 0 } : calculateElementOffset(element as HTMLElement);
+	const offset = element === document ? { top: 0, left: 0 } : getOffset(element as HTMLElement);
 
 	return {
 		x: mousePosition.x - offset.left || 0,

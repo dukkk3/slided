@@ -136,7 +136,7 @@ export const PhoneTemplates = forwardRef<HTMLDivElement, Props>(
 																			index === 0 && iteration9.startClosed(),
 																			iteration9.interpolations.closing
 																				.to(interpolations.easing("easeInOutCubic"))
-																				.to(interpolations.range(0, 0.01))
+																				.to(interpolations.step(0.001))
 																				.to(interpolations.invert),
 																			iteration9.interpolations.opening
 																				.to(interpolations.easing("easeInOutCubic"))

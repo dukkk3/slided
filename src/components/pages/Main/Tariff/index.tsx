@@ -2,6 +2,7 @@ import { memo } from "react";
 
 import { Iteration } from "@components/common/hoc/Iteration";
 
+import { useBreakpoint } from "@core/hooks";
 import { createArray } from "@core/utils";
 
 import { getVectorImageByName } from "@assets/images";
@@ -9,11 +10,13 @@ import { getVectorImageByName } from "@assets/images";
 import * as S from "./styled";
 
 export const Tariff: React.FC = memo(() => {
+	const breakpoint = useBreakpoint();
+
 	return (
 		<Iteration iterations={11}>
 			{([iteration11], interpolations) => (
 				<S.Tariff>
-					<S.Title
+					<S.Head
 						style={{
 							opacity: iteration11.interpolations.opening.to(interpolations.easing("easeInOutCubic")),
 							y: iteration11.interpolations.opening
@@ -21,8 +24,22 @@ export const Tariff: React.FC = memo(() => {
 								.to(interpolations.invert)
 								.to((value) => `${10 * value}rem`),
 						}}>
-						One subscription
-					</S.Title>
+						{breakpoint.range("mobile", "tablet") ? (
+							<S.Title>
+								One
+								<br /> subscription
+							</S.Title>
+						) : (
+							<S.Title>One subscription</S.Title>
+						)}
+						{breakpoint.range("mobile", "tablet") && (
+							<S.Subtitle>
+								Up to 40 slides,
+								<br />
+								PDF and source file included
+							</S.Subtitle>
+						)}
+					</S.Head>
 					<S.Body>
 						<S.Ray>
 							{createArray(3).map((_, index) => (

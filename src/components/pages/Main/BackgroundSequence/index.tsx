@@ -1,5 +1,5 @@
-import { useRef, useCallback, useEffect } from "react";
-import { reaction, when } from "mobx";
+import { useCallback, useEffect } from "react";
+import { reaction, transaction, when } from "mobx";
 import { a } from "react-spring";
 import useAnimationFrame from "@phntms/use-animation-frame";
 
@@ -8,106 +8,57 @@ import { Iteration } from "@components/common/hoc/Iteration";
 import { Image } from "@components/common/ui/Image";
 
 import {
-	useDebounce,
 	useLocalStore,
 	useGlobalStore,
-	useResizeObserver,
+	useCanvasSequence,
 	useIterationsControls,
 } from "@core/hooks";
-import { mergeRefs, drawImageCover } from "@core/utils";
 import { Sequence } from "@core/classes";
 
-import * as S from "./styled";
 import { getRasterImageByName } from "@assets/images";
 
-export const BackgroundSequence: React.FC = () => {
-	const canvasRef = useRef<HTMLCanvasElement>(null!);
-	const containerRef = useRef<HTMLDivElement>(null!);
-	const contextRef = useRef<CanvasRenderingContext2D>(null!);
-	const previousFrameRef = useRef<number>(null!);
+import * as S from "./styled";
 
-	const canvasResizeObserver = useResizeObserver();
+export const BackgroundSequence: React.FC = () => {
 	const iterationsControls = useIterationsControls();
 	const promoStore = useGlobalStore((store) => store.layout.promo);
+	const canvasSequence = useCanvasSequence(SEQUENCE, { resizeObserverDebounce: 100 });
 
 	const localStore = useLocalStore({
-		currentFrame: 0,
 		openingAnimationEnded: false,
 		neededFrame: null as number | null,
 	});
 
-	const handleCanvasRef = useCallback((element: HTMLCanvasElement | null) => {
-		if (!element) return;
-
-		canvasRef.current = element;
-		contextRef.current = element.getContext("2d", { alpha: null }) as CanvasRenderingContext2D;
-	}, []);
-
-	const drawFrame = useCallback(
-		(index: number, rerenderEnabled = false) => {
-			const context = contextRef.current;
-			const sequenceItem = SEQUENCE.items[index];
-			const { width, height } = canvasResizeObserver.getSize();
-
-			if (previousFrameRef.current === index && !rerenderEnabled && !sequenceItem.loaded) return;
-
-			requestAnimationFrame(() =>
-				drawImageCover(context, sequenceItem.image, 0, 0, width, height, 0.5, 0.5)
-			);
-			previousFrameRef.current = index;
-		},
-		[canvasResizeObserver]
-	);
-
-	const drawCurrentFrame = useCallback(
-		(rerenderEnabled?: boolean) => {
-			drawFrame(localStore.currentFrame, rerenderEnabled);
-		},
-		[drawFrame, localStore]
-	);
-
 	const updateNeededFrame = useCallback(
 		(index: number) => {
-			if (localStore.currentFrame === index) return;
+			if (canvasSequence.getCurrentFrame() === index) return;
 			localStore.setNeededFrame(index);
 		},
-		[localStore]
+		[canvasSequence, localStore]
 	);
 
 	const updateCurrentFrame = useCallback(
 		(index: number) => {
-			localStore.setCurrentFrame(index);
-			promoStore.setSequenceFrame(index);
-			promoStore.setSequenceProgress(index / SEQUENCE.amount);
-			drawCurrentFrame();
+			transaction(() => {
+				promoStore.setSequenceFrame(index);
+				canvasSequence.setCurrentFrame(index);
+				promoStore.setSequenceProgress(index / SEQUENCE.amount);
+			});
+			canvasSequence.drawCurrentFrame();
 		},
-		[drawCurrentFrame, localStore, promoStore]
+		[canvasSequence, promoStore]
 	);
-
-	const updateCanvasSize = useDebounce(() => {
-		const { width, height } = canvasResizeObserver.getSize();
-		const dpr = window.devicePixelRatio;
-		const canvas = canvasRef.current;
-		const context = contextRef.current;
-
-		canvas.width = width * dpr;
-		canvas.height = height * dpr;
-
-		context.scale(dpr, dpr);
-
-		drawCurrentFrame(true);
-	}, 100);
 
 	const preloadSequence = useCallback(async () => {
 		if (localStore.openingAnimationEnded) return;
 		await SEQUENCE.preloadOne(0);
-		drawCurrentFrame(true);
+		canvasSequence.drawCurrentFrame(true);
 		await SEQUENCE.preload(0, ITERATIONS[0]);
 		promoStore.setSequenceLoaded(true);
-	}, [drawCurrentFrame, localStore, promoStore]);
+	}, [canvasSequence, localStore, promoStore]);
 
-	const preloadSequenceIteration = useCallback(async () => {
-		const { currentFrame } = localStore;
+	const preloadSequenceIteration = useCallback(() => {
+		const currentFrame = canvasSequence.getCurrentFrame();
 		const currentIteration = ITERATIONS.reduce(
 			(acc, iteration, index) =>
 				iteration - Math.min(2 * FPS, iteration / 2) <= currentFrame ? index : acc,
@@ -116,7 +67,7 @@ export const BackgroundSequence: React.FC = () => {
 		const nextIteration = Math.min(currentIteration + 1, ITERATIONS.length - 1);
 
 		SEQUENCE.preload(ITERATIONS[currentIteration], ITERATIONS[nextIteration]);
-	}, [localStore]);
+	}, [canvasSequence]);
 
 	const updateFrameRelativeCurrentIteration = useCallback(() => {
 		if (iterationsControls.store.iteration > ITERATIONS.length - 1) return;
@@ -138,13 +89,13 @@ export const BackgroundSequence: React.FC = () => {
 	}, [iterationsControls, updateCurrentFrame]);
 
 	useAnimationFrame(() => {
-		const { currentFrame, neededFrame } = localStore;
+		const currentFrame = canvasSequence.getCurrentFrame();
+		const { neededFrame } = localStore;
 
 		if (neededFrame === null) return;
 		if (neededFrame !== currentFrame) {
 			const sign = Math.sign(neededFrame - currentFrame);
 			const nextFrame = currentFrame + sign;
-
 			updateCurrentFrame(nextFrame);
 		}
 
@@ -152,7 +103,7 @@ export const BackgroundSequence: React.FC = () => {
 			localStore.setNeededFrame(null);
 		}
 
-		drawCurrentFrame();
+		canvasSequence.drawCurrentFrame();
 	}, FPS);
 
 	useEffect(
@@ -167,16 +118,7 @@ export const BackgroundSequence: React.FC = () => {
 	useEffect(
 		() =>
 			reaction(
-				() => canvasResizeObserver.getSize(),
-				() => updateCanvasSize()
-			),
-		[canvasResizeObserver, drawCurrentFrame, updateCanvasSize]
-	);
-
-	useEffect(
-		() =>
-			reaction(
-				() => localStore.currentFrame,
+				() => canvasSequence.getCurrentFrame(),
 				(currentFrame) => {
 					// const roundedFrame = Math.floor(currentFrame);
 					// SEQUENCE.preload(roundedFrame, roundedFrame + 15);
@@ -187,7 +129,7 @@ export const BackgroundSequence: React.FC = () => {
 					}
 				}
 			),
-		[localStore, preloadSequenceIteration, promoStore]
+		[canvasSequence, localStore, preloadSequenceIteration, promoStore]
 	);
 
 	useEffect(
@@ -204,8 +146,8 @@ export const BackgroundSequence: React.FC = () => {
 	}, [preloadSequence]);
 
 	return (
-		<S.BackgroundSequence ref={containerRef}>
-			<S.Canvas ref={mergeRefs(canvasResizeObserver.ref, handleCanvasRef)} />
+		<S.BackgroundSequence>
+			<S.Canvas ref={canvasSequence.ref} />
 		</S.BackgroundSequence>
 	);
 };

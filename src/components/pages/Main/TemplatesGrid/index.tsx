@@ -8,6 +8,7 @@ import { AnimatedSplitChars } from "@components/common/ordinary/AnimatedSplitCha
 
 import { Image } from "@components/common/ui/Image";
 
+import { useBreakpoint } from "@core/hooks";
 import { clamp, inlineSwitch } from "@core/utils";
 
 import * as S from "./styled";
@@ -20,6 +21,7 @@ export interface Props {
 
 export const TemplatesGrid: React.FC<Props> = memo(
 	({ templates, templateContainerRef, hidden }) => {
+		const breakpoint = useBreakpoint();
 		const cellsAmount = useMemo(() => templates.flat(Infinity).length, [templates]);
 		const centerColumn = useMemo(() => (templates[0].length - 1) / 2, [templates]);
 		const centerRow = useMemo(() => (templates.length - 1) / 2, [templates]);
@@ -63,6 +65,8 @@ export const TemplatesGrid: React.FC<Props> = memo(
 												const origin = getOrigin(rowIndex, templateIndex, centerColumn, centerRow);
 												const invertDistance = maxDistance - distance;
 												const normalizedInvertDistance = invertDistance / maxDistance;
+												const containsText =
+													!hidden && breakpoint.range("mobile", "tablet") && rowIndex === 0 && distance === 1;
 
 												return (
 													<S.TemplateGroup
@@ -78,16 +82,18 @@ export const TemplatesGrid: React.FC<Props> = memo(
 																</VisibilitySwitch>
 															)}
 															<S.Template
+																$containsText={containsText}
 																style={inlineSwitch(
 																	!hidden,
 																	inlineSwitch(
 																		iteration10.started() &&
 																			(distance === 0 || distance === 1) &&
+																			!breakpoint.range("mobile", "tablet") &&
 																			rowIndex === centerRow,
 																		{
 																			opacity: iteration10.interpolations.opening
 																				.to(interpolations.easing("easeInOutQuart"))
-																				.to((value) => 1 - 0.9 * value),
+																				.to((value) => 1 - 0.96 * value),
 																		},
 																		inlineSwitch(
 																			distance !== 0,
@@ -109,13 +115,22 @@ export const TemplatesGrid: React.FC<Props> = memo(
 																			{
 																				opacity: iteration9.interpolations.closing
 																					.to(interpolations.easing("easeInOutCubic"))
-																					.to(interpolations.step(1)),
+																					.to(interpolations.step(0.999)),
 																			}
 																		)
 																	),
 																	undefined
 																)}>
-																{!hidden && <Image src={templateSource} lazy={false} />}
+																{!hidden && !containsText && <Image src={templateSource} lazy={false} />}
+																{containsText && (
+																	<p>
+																		We have
+																		<br />
+																		thousands of slides
+																		<br />
+																		behind
+																	</p>
+																)}
 															</S.Template>
 														</S.TemplateWrapper>
 													</S.TemplateGroup>
@@ -126,28 +141,34 @@ export const TemplatesGrid: React.FC<Props> = memo(
 								</S.Layer>
 							)}
 						</Observer>
-						{!hidden && (
-							<S.Layer>
-								<S.Title>
-									<Observer>
-										{() => (
-											<VisibilitySwitch visible={iteration10.visible()}>
-												<AnimatedSplitChars
-													type={iteration10.visible("opening") ? "opening" : "closing"}
-													content={["We have thousands", "of slides behind"]}
-													openingInterpolation={iteration10.interpolations.opening.to(
-														interpolations.easing("easeInOutCubic")
+						<Observer>
+							{() => (
+								<>
+									{!hidden && !breakpoint.range("mobile", "tablet") && (
+										<S.Layer>
+											<S.Title>
+												<Observer>
+													{() => (
+														<VisibilitySwitch visible={iteration10.visible()}>
+															<AnimatedSplitChars
+																type={iteration10.visible("opening") ? "opening" : "closing"}
+																content={["We have thousands", "of slides behind"]}
+																openingInterpolation={iteration10.interpolations.opening.to(
+																	interpolations.easing("easeInOutCubic")
+																)}
+																closingInterpolation={iteration10.interpolations.closing.to(
+																	interpolations.easing("easeInOutCubic")
+																)}
+															/>
+														</VisibilitySwitch>
 													)}
-													closingInterpolation={iteration10.interpolations.closing.to(
-														interpolations.easing("easeInOutCubic")
-													)}
-												/>
-											</VisibilitySwitch>
-										)}
-									</Observer>
-								</S.Title>
-							</S.Layer>
-						)}
+												</Observer>
+											</S.Title>
+										</S.Layer>
+									)}
+								</>
+							)}
+						</Observer>
 					</S.TemplatesGrid>
 				)}
 			</Iteration>

@@ -34,7 +34,7 @@ export const PhoneCard = forwardRef<HTMLDivElement, React.PropsWithChildren<Prop
 						y: openingInterpolation.to((value) => `-${50 * (1 - value)}%`),
 						opacity: openingInterpolation,
 					}}>
-					<S.PlugImageWrapper
+					{/* <S.PlugImageWrapper
 						style={{
 							translateX: "-35%",
 							scale: backgroundZoomInterpolation.to((value) => 1 + 2 * (1 - value)),
@@ -49,7 +49,7 @@ export const PhoneCard = forwardRef<HTMLDivElement, React.PropsWithChildren<Prop
 							opacity: backgroundZoomInterpolation.to((value) => 0.3 * value),
 						}}>
 						<Image src={getRasterImageByName("Blue2Template")} lazy={false} />
-					</S.PlugImageWrapper>
+					</S.PlugImageWrapper> */}
 				</S.Plug>
 				<S.ContentWrapper>
 					<S.Content>{children}</S.Content>
