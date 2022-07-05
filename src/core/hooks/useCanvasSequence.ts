@@ -1,17 +1,23 @@
 import { useCallback, useRef, useEffect } from "react";
 import { reaction } from "mobx";
 
-import { Sequence } from "@core/classes";
-import { mergeRefs, clamp, drawImageCover } from "@core/utils";
+import { mergeRefs, drawImageCover } from "@core/utils/common.utils";
+import { Sequence } from "@core/classes/Sequence";
+import { clamp } from "@core/utils/math.utils";
 
 import { useLocalStore } from "./useLocalStore";
 import { useResizeObserver } from "./useResizeObserver";
 
-interface Options {
-	resizeObserverDebounce?: number;
+export declare namespace useCanvasSequence {
+	interface Options {
+		resizeObserverDebounce?: number;
+	}
 }
 
-export function useCanvasSequence(sequence: Sequence, { resizeObserverDebounce }: Options = {}) {
+export function useCanvasSequence(
+	sequence: Sequence,
+	{ resizeObserverDebounce }: useCanvasSequence.Options = {}
+) {
 	const canvasRef = useRef<HTMLCanvasElement>(null!);
 	const contextRef = useRef<CanvasRenderingContext2D>(null!);
 	const previousFrameRef = useRef<number>(null!);

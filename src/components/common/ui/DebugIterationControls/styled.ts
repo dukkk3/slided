@@ -1,6 +1,6 @@
 import styled from "styled-components";
 
-import { breakpoint } from "@styles/breakpoint";
+import { mobile } from "@styles/breakpoint";
 
 export const DebugIterationControls = styled.div`
 	flex-direction: column;
@@ -21,7 +21,7 @@ export const DebugIterationControls = styled.div`
 		vertical-align: initial;
 	}
 
-	${breakpoint("mobile", "tablet")`
+	${mobile`
 		display: none;
 	`}
 `;

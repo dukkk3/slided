@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 
-import { debounce } from "@core/utils";
+import { debounce } from "@core/utils/common.utils";
 
 export function useDebounce<T extends any[]>(
 	callback: (...args: T) => void,

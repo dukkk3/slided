@@ -1,13 +1,14 @@
 import { memo } from "react";
 import { a, Interpolation } from "react-spring";
 
-import { clamp } from "@core/utils";
+import { clamp } from "@core/utils/math.utils";
 
 import { getVideoByName } from "@assets/videos";
 
 import * as S from "./styled";
 
 export interface Props {
+	videoRef?: React.Ref<any>;
 	openingInterpolation: Interpolation<number, number>;
 	pulseInterpolation: Interpolation<number, number>;
 	backgroundOpacityInterpolation: Interpolation<number, number>;
@@ -15,7 +16,7 @@ export interface Props {
 }
 
 export const AssistantFace: React.FC<Props> = memo(
-	({ openingInterpolation, pulseInterpolation, backgroundOpacityInterpolation }) => {
+	({ videoRef, openingInterpolation, pulseInterpolation, backgroundOpacityInterpolation }) => {
 		return (
 			<S.AssistantFace>
 				<S.Background>
@@ -39,6 +40,7 @@ export const AssistantFace: React.FC<Props> = memo(
 						className='safari-border-radius-overflow-bugfix'
 						style={{ scale: openingInterpolation }}>
 						<a.video
+							ref={videoRef}
 							src={getVideoByName("BasicGirl")}
 							muted
 							loop

@@ -3,7 +3,7 @@ import styled from "styled-components";
 import { Container as ContainerImpl } from "@components/common/ui/Container/styled";
 import { Image } from "@components/common/ui/Image/styled";
 
-import { breakpoint } from "@styles/breakpoint";
+import { mobile } from "@styles/breakpoint";
 
 export const Header = styled.div`
 	width: 100%;
@@ -16,7 +16,7 @@ export const Container = styled(ContainerImpl)`
 	justify-content: space-between;
 	padding: calc(var(--container-gap) * 0.75) 0;
 
-	${breakpoint("mobile", "tablet")`
+	${mobile`
 		padding: var(--container-gap) 0;
 	`}
 `;
@@ -33,7 +33,7 @@ export const Logo = styled.div`
 		}
 	}
 
-	${breakpoint("mobile", "tablet")`
+	${mobile`
 		height: 4rem;
 	`}
 `;
@@ -46,7 +46,7 @@ export const Navbar = styled.div`
 	align-items: center;
 	margin: 0 -${NAV_ITEM_GAP};
 
-	${breakpoint("mobile", "tablet")`
+	${mobile`
 		display: none;
 	`}
 `;
@@ -75,7 +75,7 @@ export const Burger = styled.div`
 		bottom: 0;
 	}
 
-	${breakpoint("mobile", "tablet")`
+	${mobile`
 		display: block;
 	`}
 `;
@@ -86,6 +86,5 @@ export const NavItem = styled.div`
 
 export const NavLink = styled.p`
 	font-size: 1.6rem;
-	font-weight: 700;
-	text-decoration: underline;
+	font-weight: 600;
 `;

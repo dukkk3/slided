@@ -4,7 +4,7 @@ import { Interpolation } from "react-spring";
 import { Icon } from "@components/common/ui/Icon";
 import { Image } from "@components/common/ui/Image";
 
-import { clamp } from "@core/utils";
+import { clamp } from "@core/utils/math.utils";
 
 import * as S from "./styled";
 

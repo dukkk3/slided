@@ -3,7 +3,7 @@ import { useCallback } from "react";
 import { Image } from "@components/common/ui/Image";
 import { Button } from "@components/common/ui/Button";
 
-import { useGlobalStore } from "@core/hooks";
+import { useGlobalStore } from "@core/hooks/useGlobalStore";
 
 import { getVectorImageByName } from "@assets/images";
 

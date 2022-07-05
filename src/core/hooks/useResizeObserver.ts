@@ -1,92 +1,113 @@
-import React, { useCallback, useEffect, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
+import { transaction } from "mobx";
 import ResizeObserver from "resize-observer-polyfill";
 
-import { useLocalStore, useSpareRef } from "@core/hooks";
-import { debounce as debounceHof } from "@core/utils";
+import { useDebounce } from "./useDebounce";
+import { useLocalStore } from "./useLocalStore";
+import { debounce as debounceHof, throttle as throttleHof } from "@core/utils/common.utils";
+import { getOffset as getOffsetImpl } from "@core/utils/dom.utils";
 
-interface Options {
-	ref?: React.RefObject<any>;
-	debounce?: number;
-	calculateSizeWithPaddings?: boolean;
+export declare namespace useResizeObserver {
+	interface Options {
+		calculateSizeWithPaddings?: boolean;
+		withOffset?: boolean;
+		debounce?: number;
+		throttle?: number;
+	}
+
+	type Offset = { top: number; left: number };
+	type Size = { width: number; height: number };
 }
 
-type Position = { top: number; left: number; right: number; bottom: number };
-type Size = { width: number; height: number };
-
 export function useResizeObserver({
-	ref,
 	debounce,
+	throttle,
+	withOffset = true,
 	calculateSizeWithPaddings = false,
-}: Options = {}) {
-	const spareRef = useSpareRef(ref);
+}: useResizeObserver.Options = {}) {
+	const prevTargetRef = useRef<HTMLElement | null>(null);
 	const localStore = useLocalStore({
-		DOMRect: { width: 0, height: 0, top: 0, left: 0, right: 0, bottom: 0 },
-	} as { DOMRect: Size & Position });
+		size: { width: 0, height: 0 } as useResizeObserver.Size,
+		offset: { top: 0, left: 0 } as useResizeObserver.Offset,
+	});
+
+	const updateStore = useCallback(
+		(entry: ResizeObserverEntry | Element) => {
+			const target = "contentRect" in entry ? entry.target : entry;
+			const { width, height } =
+				!calculateSizeWithPaddings && "contentRect" in entry
+					? entry.contentRect
+					: target.getBoundingClientRect();
+			const offset = withOffset ? getOffsetImpl(target as any) : { top: 0, left: 0 };
+			console.log({ target, width, height });
+			transaction(() => {
+				localStore.setSize({ width, height });
+				localStore.setOffset(offset);
+			});
+		},
+		[calculateSizeWithPaddings, localStore, withOffset]
+	);
 
 	const resizeObserverCallback = useCallback(
 		(entries: ResizeObserverEntry[]) => {
 			const entry = entries[0];
 
 			if (entry) {
-				const DOMRect = !calculateSizeWithPaddings
-					? entry.contentRect
-					: entry.target.getBoundingClientRect();
-
-				const position: Position = {
-					top: DOMRect.top || 0,
-					left: DOMRect.left || 0,
-					bottom: DOMRect.bottom || 0,
-					right: DOMRect.right || 0,
-				};
-				const size: Size = {
-					width: DOMRect.width || 0,
-					height: DOMRect.height || 0,
-				};
-
-				localStore.setDOMRect({ ...size, ...position });
+				updateStore(entry);
 			}
 		},
-		[calculateSizeWithPaddings, localStore]
+		[updateStore]
 	);
 
-	const resizeObserver = useMemo(() => {
-		const callback = debounce
-			? debounceHof(resizeObserverCallback, debounce)
-			: resizeObserverCallback;
-		return new ResizeObserver(callback);
-	}, [debounce, resizeObserverCallback]);
-
-	const getSize = useCallback((): Size => {
-		return {
-			width: localStore.DOMRect.width,
-			height: localStore.DOMRect.height,
-		};
-	}, [localStore]);
-
-	const getPosition = useCallback((): Position => {
-		return {
-			top: localStore.DOMRect.top,
-			bottom: localStore.DOMRect.bottom,
-			left: localStore.DOMRect.left,
-			right: localStore.DOMRect.right,
-		};
-	}, [localStore]);
-
-	useEffect(() => {
-		const targetElement = spareRef.current;
-
-		if (targetElement) {
-			resizeObserver.observe(targetElement);
+	const preparedResizeObserverCallback = useMemo(() => {
+		switch (true) {
+			case Number(debounce) > 0:
+				return debounceHof(resizeObserverCallback, debounce as number);
+			case Number(throttle) > 0:
+				return throttleHof(resizeObserverCallback, throttle as number);
+			default:
+				return resizeObserverCallback;
 		}
+	}, [debounce, resizeObserverCallback, throttle]);
 
-		return () => {
-			if (targetElement) {
-				resizeObserver.unobserve(targetElement);
+	const resizeObserver = useMemo(
+		() => new ResizeObserver(preparedResizeObserverCallback),
+		[preparedResizeObserverCallback]
+	);
+
+	const getSize = useCallback(() => {
+		return localStore.size;
+	}, [localStore]);
+
+	const getOffset = useCallback(() => {
+		return localStore.offset;
+	}, [localStore]);
+
+	const handleWindowResize = useDebounce(() => {
+		const target = prevTargetRef.current;
+		if (!target) return;
+		updateStore(target);
+	}, debounce || 100);
+
+	const handleRef = useCallback(
+		(element: HTMLElement | null) => {
+			if (element) {
+				resizeObserver.observe(element);
 			}
 
-			resizeObserver.disconnect();
-		};
-	}, [resizeObserver, spareRef]);
+			if (prevTargetRef.current) {
+				resizeObserver.unobserve(prevTargetRef.current);
+			}
 
-	return { ref: spareRef, getSize, getPosition };
+			prevTargetRef.current = element;
+		},
+		[resizeObserver]
+	);
+
+	useEffect(() => {
+		window.addEventListener("resize", handleWindowResize);
+		return () => window.removeEventListener("resize", handleWindowResize);
+	}, [handleWindowResize]);
+
+	return { ref: handleRef, getSize, getOffset };
 }

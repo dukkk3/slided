@@ -2,8 +2,12 @@ import { createContext, useCallback, useEffect } from "react";
 import { easings } from "react-spring";
 import { reaction } from "mobx";
 
-import { useIterationsContextFactory, IterationsContext, useLocalStore } from "@core/hooks";
-import { clamp } from "@core/utils";
+import {
+	useIterationsContextFactory,
+	IterationsContext,
+} from "@core/hooks/useIterationsContextFactory";
+import { useLocalStore } from "@core/hooks/useLocalStore";
+import { clamp } from "@core/utils/math.utils";
 
 interface RangeConfig {
 	from: number;
@@ -25,6 +29,8 @@ export type Context = IterationsContext & {
 	getDurationFactorOnRange: (from: number, to: number) => number;
 	enabled: boolean;
 };
+
+export const context = createContext<Context>(null!);
 
 const RANGES: RangeConfig[] = [
 	{ from: 9, to: 9.5, duration: 2000 },
@@ -101,34 +107,6 @@ export const IterationsControls: React.FC<Props> = ({
 		[defaultDuration]
 	);
 
-	// useWheel(
-	// 	({ wheeling, direction: [, dy], memo, elapsedTime }) => {
-	// 		if (!enabled) return;
-
-	// 		const swapEnabled = !wheeling || elapsedTime > 400;
-	// 		const memoIsNumber = typeof memo === "number";
-
-	// 		if (swapEnabled && !memoIsNumber) return null;
-	// 		if (swapEnabled && memoIsNumber) {
-	// 			const direction = memo as number;
-
-	// 			switch (direction) {
-	// 				case 1:
-	// 					next();
-	// 					break;
-	// 				case -1:
-	// 					prev();
-	// 					break;
-	// 			}
-
-	// 			return null;
-	// 		}
-
-	// 		return dy;
-	// 	},
-	// 	{ target: window, axis: "y" }
-	// );
-
 	const handleAnimationRest = useCallback(() => {
 		const { iteration } = iterationsContext.store;
 		if (Math.abs(iteration - localStore.iteration) > 0) {
@@ -181,5 +159,3 @@ export const IterationsControls: React.FC<Props> = ({
 		</context.Provider>
 	);
 };
-
-export const context = createContext<Context>(null!);

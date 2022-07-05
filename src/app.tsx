@@ -1,24 +1,40 @@
-import { useCallback, useEffect } from "react";
+import { useEffect } from "react";
+import { reaction } from "mobx";
 
 import { Routes } from "@components/routes";
 
-import { useGlobalStore } from "@core/hooks";
-import { clientHelper } from "@core/helpers";
+import { useGlobalStore } from "@core/hooks/useGlobalStore";
+import { useMatchMedia } from "@core/hooks/useMatchMedia";
+import { breakpoints, getMatchMediaQuery, BreakpointNameKind } from "@core/helpers/device.helper";
+
+const breakpointsKeys = Object.keys(breakpoints) as BreakpointNameKind[];
+const mediaQueries: Record<BreakpointNameKind, string> = breakpointsKeys.reduce(
+	(acc, breakpointName, index) => ({
+		...acc,
+		[breakpointName]:
+			index === breakpointsKeys.length - 1
+				? getMatchMediaQuery(breakpointName, "min")
+				: getMatchMediaQuery([breakpointName, breakpointsKeys[index + 1]]),
+	}),
+	{} as Record<BreakpointNameKind, string>
+);
 
 export const App: React.FC = () => {
-	const layoutStore = useGlobalStore((store) => store.layout);
+	const matchMedia = useMatchMedia(mediaQueries);
+	const appStore = useGlobalStore((store) => store.app);
 
-	const handleWindowResize = useCallback(() => {
-		layoutStore.setBreakpoint(clientHelper.detectBreakpoint());
-	}, [layoutStore]);
+	useEffect(
+		() =>
+			reaction(
+				() => matchMedia.getValues(),
+				(values) => appStore.setMediaMatches(values)
+			),
+		[appStore, matchMedia]
+	);
 
 	useEffect(() => {
-		window.addEventListener("resize", handleWindowResize);
-
-		return () => {
-			window.removeEventListener("resize", handleWindowResize);
-		};
-	}, [handleWindowResize]);
+		matchMedia.update();
+	}, [matchMedia]);
 
 	return <Routes />;
 };

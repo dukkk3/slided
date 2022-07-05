@@ -4,7 +4,7 @@ import isEqual from "react-fast-compare";
 
 import { SplitChars, Props as SplitCharsProps } from "@components/common/ordinary/SplitChars";
 
-import { toRange, inlineSwitch } from "@core/utils";
+import { interpolations } from "@core/helpers/iteration.helper";
 
 export interface Props extends Pick<SplitCharsProps, "content">, React.ComponentProps<"p"> {
 	logging?: boolean;
@@ -15,7 +15,6 @@ export interface Props extends Pick<SplitCharsProps, "content">, React.Component
 
 export const AnimatedSplitChars: React.FC<Props> = memo(
 	({ type, openingInterpolation, closingInterpolation, logging, ...rest }) => {
-		if (logging) console.log("rerender");
 		return (
 			<SplitChars
 				{...rest}
@@ -23,11 +22,9 @@ export const AnimatedSplitChars: React.FC<Props> = memo(
 				renderChar={({ char, amount, index, swap }) => (
 					<a.span
 						style={{
-							opacity: inlineSwitch(
-								swap,
-								openingInterpolation.to((value) => toRange(value, index / amount, 1)),
-								closingInterpolation.to((value) => 1 - value)
-							),
+							opacity: swap
+								? openingInterpolation.to(interpolations.range(index / amount, 1))
+								: closingInterpolation.to(interpolations.invert),
 						}}>
 						{char}
 					</a.span>

@@ -3,7 +3,7 @@ import styled from "styled-components";
 
 import { Image } from "@components/common/ui/Image/styled";
 
-import { breakpoint } from "@styles/breakpoint";
+import { mobile } from "@styles/breakpoint";
 
 function generateCardSize() {
 	return {
@@ -39,7 +39,7 @@ export const UserCard = styled.div<UserCardSizedProps>`
 	border-radius: 90rem;
 	box-shadow: 5px 10px 20px rgba(0, 0, 0, 0.05);
 
-	${breakpoint("mobile", "tablet")`
+	${mobile`
 		padding: 1rem 2rem 1rem 1rem;
 		border-radius: 90rem;
 	`}
@@ -65,7 +65,7 @@ export const Avatar = styled(a.div)<UserCardSizedProps>`
 		}
 	}
 
-	${breakpoint("mobile", "tablet")`
+	${mobile`
 		--size: 4rem;
 	`}
 `;
@@ -73,7 +73,7 @@ export const Avatar = styled(a.div)<UserCardSizedProps>`
 export const Content = styled.div<UserCardSizedProps>`
 	margin-left: ${(props) => getCardSize(props.$size).fontSize};
 
-	${breakpoint("mobile", "tablet")`
+	${mobile`
 		width: 100%;
 		display: flex;
 		align-items: center;
@@ -95,7 +95,7 @@ export const Rating = styled.div`
 	margin-top: 0.5rem;
 	align-items: center;
 
-	${breakpoint("mobile", "tablet")`
+	${mobile`
 		margin-top: 0;
 		flex-direction: row-reverse;
 	`}
@@ -108,7 +108,7 @@ export const RatingIcon = styled.div`
 
 	--size: 2rem;
 
-	${breakpoint("mobile", "tablet")`
+	${mobile`
 		--size: 1.6rem;
 	`}
 `;
@@ -119,7 +119,7 @@ export const RatingLabel = styled.p`
 	font-size: 2rem;
 	margin-bottom: -0.3em;
 
-	${breakpoint("mobile", "tablet")`
+	${mobile`
 	    margin-right: 0.6rem;
 		 font-size: 1.6rem;
 		 margin-bottom: -0.4em;

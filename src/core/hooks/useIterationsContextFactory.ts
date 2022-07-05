@@ -1,25 +1,27 @@
 import { useCallback, useMemo, useRef } from "react";
 import { Interpolation, SpringValue, SpringConfig, useSpring } from "react-spring";
 
-import { useLocalStore } from "@core/hooks";
+import { useLocalStore } from "./useLocalStore";
 import {
 	clamp,
 	toRange as toRangeImpl,
 	inRange as inRangeImpl,
 	compare as compareImpl,
 	CompareOperatorKind,
-} from "@core/utils";
+} from "@core/utils/math.utils";
 
-interface Options {
-	iterations: number;
-	animationConfig?: SpringConfig;
+export declare namespace useIterationsContextFactory {
+	interface Options {
+		iterations: number;
+		animationConfig?: SpringConfig;
+	}
+
+	type Listener<T extends any[] = never[]> = (...args: T) => void;
+	type Events = {
+		rest: Listener;
+		change: Listener<[number]>;
+	};
 }
-
-type Listener<T extends any[] = never[]> = (...args: T) => void;
-type Events = {
-	rest: Listener;
-	change: Listener<[number]>;
-};
 
 export interface IterationsContext {
 	animated: {
@@ -37,20 +39,25 @@ export interface IterationsContext {
 	};
 	animate: (iteration: number, config?: SpringConfig) => void;
 	set: (iteration: number) => void;
-	addEventListener: <T extends keyof Events>(event: T, listener: Events[T]) => () => void;
-	removeEventListener: <T extends keyof Events>(event: T, listener: Events[T]) => void;
+	addEventListener: <T extends keyof useIterationsContextFactory.Events>(
+		event: T,
+		listener: useIterationsContextFactory.Events[T]
+	) => () => void;
+	removeEventListener: <T extends keyof useIterationsContextFactory.Events>(
+		event: T,
+		listener: useIterationsContextFactory.Events[T]
+	) => void;
 	iterations: number;
 }
 
 export function useIterationsContextFactory({
 	iterations,
 	animationConfig,
-}: Options): IterationsContext {
+}: useIterationsContextFactory.Options): IterationsContext {
 	const targetRef = useRef(0);
-	const listeners = useMemo<{ [K in keyof Events]: Set<Events[K]> }>(
-		() => ({ rest: new Set(), change: new Set() }),
-		[]
-	);
+	const listeners = useMemo<{
+		[K in keyof useIterationsContextFactory.Events]: Set<useIterationsContextFactory.Events[K]>;
+	}>(() => ({ rest: new Set(), change: new Set() }), []);
 	const localStore = useLocalStore<IterationsContext["store"]>({
 		progress: 0,
 		get iteration() {
@@ -123,14 +130,20 @@ export function useIterationsContextFactory({
 	);
 
 	const removeEventListener = useCallback(
-		<T extends keyof Events>(event: T, listener: Events[T]) => {
+		<T extends keyof useIterationsContextFactory.Events>(
+			event: T,
+			listener: useIterationsContextFactory.Events[T]
+		) => {
 			listeners[event].delete(listener);
 		},
 		[listeners]
 	);
 
 	const addEventListener = useCallback(
-		<T extends keyof Events>(event: T, listener: Events[T]) => {
+		<T extends keyof useIterationsContextFactory.Events>(
+			event: T,
+			listener: useIterationsContextFactory.Events[T]
+		) => {
 			listeners[event].add(listener);
 
 			return () => removeEventListener(event, listener);

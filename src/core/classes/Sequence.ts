@@ -1,4 +1,4 @@
-import { createArray } from "@core/utils";
+import { createArray } from "@core/utils/common.utils";
 
 interface Item {
 	image: HTMLImageElement;

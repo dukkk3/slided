@@ -1,62 +1,92 @@
 import { reaction } from "mobx";
 import { useSpring } from "react-spring";
 import { Observer } from "mobx-react-lite";
-import { useCallback, useEffect, useRef } from "react";
+import { createContext, useCallback, useEffect, useRef } from "react";
 import { FullGestureState, useGesture } from "@use-gesture/react";
 
-import { Promo } from "./Promo";
-import { Tariff } from "./Tariff";
-import { Pulses } from "./Pulses";
-import { Assistant } from "./Assistant";
-import { Executors } from "./Executors";
-import { SlidingFooter } from "./SlidingFooter";
-import { TemplatesGrid } from "./TemplatesGrid";
-import { PhoneAssistant } from "./PhoneAssistant";
-import { PhoneTemplates } from "./PhoneTemplates";
-import { BackgroundSequence, BackgroundFrame } from "./BackgroundSequence";
+import { Promo } from "./sections/Promo";
+import { Tariff } from "./sections/Tariff";
+import { Pulses } from "./sections/Pulses";
+import { Assistant } from "./sections/Assistant";
+import { Executors } from "./sections/Executors";
+import { SlidingFooter } from "./sections/SlidingFooter";
+import { TemplatesGrid } from "./sections/TemplatesGrid";
+import { PhoneAssistant } from "./sections/PhoneAssistant";
+import { PhoneTemplates } from "./sections/PhoneTemplates";
+import { BackgroundSequence, BackgroundFrame } from "./sections/BackgroundSequence";
 
-import { MovedGridTemplate } from "./MovedGridTemplate";
-import { MovedExecutorFace } from "./MovedExecutorFace";
-import { MovedAssistantFace } from "./MovedAssistantFace";
-import { MovedCursorTemplate } from "./MovedCursorTemplate";
+import { MovedGridTemplate } from "./flying/MovedGridTemplate";
+import { MovedExecutorFace } from "./flying/MovedExecutorFace";
+import { MovedAssistantFace } from "./flying/MovedAssistantFace";
+import { MovedCursorTemplate } from "./flying/MovedCursorTemplate";
 
 import { DebugIterationControls } from "@components/common/ui/DebugIterationControls";
 
 import { Loader } from "@components/common/ui/Loader";
 import { PromoContainer } from "@components/common/ui/PromoContainer";
 
-import {
-	useBreakpoint,
-	useIteration,
-	useGlobalStore,
-	useResizeObserver,
-	useIterationsControls,
-} from "@core/hooks";
-import { animationHelper } from "@core/helpers";
+import { useIteration } from "@core/hooks/useIteration";
+import { useBreakpoint } from "@core/hooks/useBreakpoint";
+import { useGlobalStore } from "@core/hooks/useGlobalStore";
+import { useResizeObserver } from "@core/hooks/useResizeObserver";
+import { useIterationsControls } from "@core/hooks/useIterationsControls";
+import { useTransformDifference } from "@core/hooks/useTransformDifference";
+import { resolveSpringAnimation } from "@core/helpers/animation.helper";
+import { mergeRefs } from "@core/utils/common.utils";
 
 import { getRasterImageByName, getRasterImagesByNames } from "@assets/images";
 
 import * as S from "./styled";
 
+type UseTransformDifferenceReturnType = ReturnType<typeof useTransformDifference>;
+
+export interface TransformsContext {
+	readonly executorAndPhoneExecutor: UseTransformDifferenceReturnType;
+	readonly bigAssistantAndPhoneAssistant: UseTransformDifferenceReturnType;
+	readonly phoneAssistantAndShiftedAssistant: UseTransformDifferenceReturnType;
+	readonly bigTemplateAndPhoneTemplate: UseTransformDifferenceReturnType;
+	readonly phoneTemplateAndGridTemplate: UseTransformDifferenceReturnType;
+	readonly phoneCardResizeObserver: ReturnType<typeof useResizeObserver>;
+	readonly phoneCardsContainerResizeObserver: ReturnType<typeof useResizeObserver>;
+}
+
+export const transformsContext = createContext<TransformsContext>(null!);
+
 export const Main: React.FC = () => {
 	const [loaderStyle, loaderApi] = useSpring(() => ({ opacity: 1 }));
 
+	const transformBtwExecutorAndPhoneExecutor = useTransformDifference();
+	const transformBtwBigTemplateAndPhoneTemplate = useTransformDifference({ resizeType: "rect" });
+	const transformBtwPhoneTemplateAndGridTemplate = useTransformDifference();
+	const transformBtwBigAssistantAndPhoneAssistant = useTransformDifference();
+	const transformBtwPhoneAssistantAndShiftedAssistant = useTransformDifference();
+	const phoneCardsContainerResizeObserver = useResizeObserver({
+		debounce: 100,
+		calculateSizeWithPaddings: true,
+	});
+	const phoneCardResizeObserver = useResizeObserver({
+		debounce: 100,
+		withOffset: false,
+		calculateSizeWithPaddings: true,
+	});
+
+	const transforms: TransformsContext = {
+		executorAndPhoneExecutor: transformBtwExecutorAndPhoneExecutor,
+		bigAssistantAndPhoneAssistant: transformBtwBigAssistantAndPhoneAssistant,
+		phoneAssistantAndShiftedAssistant: transformBtwPhoneAssistantAndShiftedAssistant,
+		bigTemplateAndPhoneTemplate: transformBtwBigTemplateAndPhoneTemplate,
+		phoneTemplateAndGridTemplate: transformBtwPhoneTemplateAndGridTemplate,
+		phoneCardsContainerResizeObserver,
+		phoneCardResizeObserver,
+	};
+
 	const sandboxRef = useRef<HTMLDivElement>(null);
 	const footerRef = useRef<HTMLDivElement>(null);
-	const gridTemplateContainerRef = useRef<any>(null);
-	const phoneTemplateContainerRef = useRef<any>(null);
-	const phoneShiftedTemplateContainerRef = useRef<any>(null);
-	const assistantContainerRef = useRef<any>(null);
-	const phoneAssistantContainerRef = useRef<any>(null);
-	const shiftedAssistantContainerRef = useRef<any>(null);
-	const executorContainerRef = useRef<any>(null);
-	const phoneExecutorContainerRef = useRef<any>(null);
-	const phoneCardsContainerRef = useRef<any>(null);
 
 	const phoneAssistantResizeObserver = useResizeObserver();
 	const phoneTemplatesRef = useRef<HTMLDivElement>(null);
 
-	const phoneTemplateResizeObserver = useResizeObserver({ ref: phoneTemplateContainerRef });
+	const phoneTemplateResizeObserver = useResizeObserver({ debounce: 100 });
 
 	const iterationsControls = useIterationsControls();
 	const lastIteration = useIteration(iterationsControls.iterations);
@@ -65,15 +95,24 @@ export const Main: React.FC = () => {
 
 	const hideLoader = useCallback(async () => {
 		if (promoStore.sequenceLoaded && !promoStore.loaderHidden) {
-			await animationHelper.resolveSpringAnimation(loaderApi, { opacity: 0 });
+			await resolveSpringAnimation(loaderApi, { opacity: 0 });
 			promoStore.setLoaderHidden(true);
 		}
 	}, [loaderApi, promoStore]);
 
 	const updateBackgroundType = useCallback(() => {
-		const useFrame = breakpoint.range("mobile", "tablet");
+		const useFrame = breakpoint.mobile();
 		promoStore.setBackgroundType(useFrame ? "frame" : "sequence");
 	}, [breakpoint, promoStore]);
+
+	const updateCssProperties = useCallback(() => {
+		const sandbox = sandboxRef.current;
+		if (sandbox) {
+			const size = phoneCardResizeObserver.getSize();
+			sandbox.style.setProperty("--template-card-width", `${size.width}px`);
+			sandbox.style.setProperty("--template-card-height", `${size.height}px`);
+		}
+	}, [phoneCardResizeObserver]);
 
 	const handleWheel = useCallback(
 		({ wheeling, direction: [, dy], memo, elapsedTime }: FullGestureState<"wheel">) => {
@@ -118,50 +157,29 @@ export const Main: React.FC = () => {
 	useGesture(
 		{
 			onWheel: (state) => {
-				if (!iterationsControls.enabled || lastIteration.started()) return;
-				return handleWheel(state);
-			},
-			onDrag: (state) => {
-				if (
-					!iterationsControls.enabled ||
-					lastIteration.started() ||
-					!breakpoint.range("mobile", "tablet")
-				)
-					return;
-				return handleDrag(state);
-			},
-		},
-		{ target: sandboxRef, wheel: { axis: "y" }, drag: { axis: "y" } }
-	);
+				const footer = footerRef.current;
 
-	useGesture(
-		{
-			onWheel: (state) => {
-				const footer = footerRef.current;
-				if (!iterationsControls.enabled || !footer || !lastIteration.started()) return;
-				if (footer.scrollTop > 0) return 0;
+				if (!iterationsControls.enabled) return;
+				if (lastIteration.started() && footer && footer.scrollTop > 0) return;
+
 				return handleWheel(state);
 			},
 			onDrag: (state) => {
 				const footer = footerRef.current;
-				if (
-					!iterationsControls.enabled ||
-					!breakpoint.range("mobile", "tablet") ||
-					!footer ||
-					footer.scrollTop > 0 ||
-					!lastIteration.started()
-				)
-					return;
+
+				if (!iterationsControls.enabled || !breakpoint.range("mobile", "laptop")) return;
+				if (lastIteration.started() && footer && footer.scrollTop > 0) return;
+
 				return handleDrag(state);
 			},
 		},
-		{ target: footerRef, wheel: { axis: "y" }, drag: { axis: "y" } }
+		{ target: document, wheel: { axis: "y" }, drag: { axis: "y" } }
 	);
 
 	useEffect(
 		() =>
 			reaction(
-				() => breakpoint.getBreakpoint(),
+				() => breakpoint.mobile(),
 				() => updateBackgroundType()
 			),
 		[breakpoint, updateBackgroundType]
@@ -184,18 +202,17 @@ export const Main: React.FC = () => {
 		[phoneAssistantResizeObserver]
 	);
 
+	useEffect(() => {
+		updateCssProperties();
+	}, [updateCssProperties]);
+
 	useEffect(
 		() =>
 			reaction(
 				() => phoneTemplateResizeObserver.getSize(),
-				(size) => {
-					const sandbox = sandboxRef.current;
-					if (!sandbox) return;
-					sandbox.style.setProperty("--template-card-width", `${size.width}px`);
-					sandbox.style.setProperty("--template-card-height", `${size.height}px`);
-				}
+				() => updateCssProperties()
 			),
-		[phoneTemplateResizeObserver]
+		[phoneTemplateResizeObserver, updateCssProperties]
 	);
 
 	return (
@@ -207,7 +224,6 @@ export const Main: React.FC = () => {
 						promoStore.backgroundType === "sequence" ? (
 							<>
 								<S.TableBackgroundWrapper style={{ opacity: loaderStyle.opacity.to((value) => 1 - value) }}>
-									{/* <TableBackground /> */}
 									<BackgroundSequence />
 								</S.TableBackgroundWrapper>
 								<Observer>
@@ -225,70 +241,61 @@ export const Main: React.FC = () => {
 						)
 					}
 				</Observer>
-				<S.LayerWrapper>
-					<PromoContainer>
-						<Pulses />
-						<Promo />
-						<Assistant faceContainerRef={assistantContainerRef} />
-						<PhoneAssistant
-							ref={phoneAssistantResizeObserver.ref}
-							templates={getRasterImagesByNames(
-								"BrightTemplate",
-								"GreenTemplate",
-								"BlueTemplate",
-								"BeigeTemplate",
-								"BlackTemplate"
-							)}
-							cardsContainerRef={phoneCardsContainerRef}
-							assistantContainerRef={phoneAssistantContainerRef}
-							shiftedAssistantContainerRef={shiftedAssistantContainerRef}
-							executorContainerRef={phoneExecutorContainerRef}
-						/>
-						<Executors
-							phoneCardsContainerRef={phoneCardsContainerRef}
-							faceContainerRef={executorContainerRef}
-						/>
-						<MovedCursorTemplate
-							templateSource={CAR_TEMPLATE_SOURCE}
-							cursorAvatarSource={getRasterImageByName("Man1")}
-							endContainerRef={phoneTemplateContainerRef}
-						/>
-						<PhoneTemplates
-							ref={phoneTemplatesRef}
-							templates={[
-								CAR_TEMPLATE_SOURCE,
-								...getRasterImagesByNames("ColaCharts", "Plug", "Plug", "Plug"),
-							].map((source, index) => ({
-								source,
-								overlaySource: index === 1 ? getRasterImageByName("Plug") : undefined,
-							}))}
-							templateContainerRef={phoneTemplateContainerRef}
-							shiftedTemplateContainerRef={phoneShiftedTemplateContainerRef}
-						/>
-						<TemplatesGrid
-							templates={GRID_TEMPLATES}
-							templateContainerRef={gridTemplateContainerRef}
-							hidden
-						/>
-						<TemplatesGrid templates={GRID_TEMPLATES} />
-						<Tariff />
-					</PromoContainer>
-					<MovedGridTemplate
-						templateSource={CAR_TEMPLATE_SOURCE}
-						startContainerRef={phoneShiftedTemplateContainerRef}
-						endContainerRef={gridTemplateContainerRef}
-					/>
-					<MovedAssistantFace
-						startContainerRef={assistantContainerRef}
-						middleContainerRef={phoneAssistantContainerRef}
-						endContainerRef={shiftedAssistantContainerRef}
-					/>
-					<MovedExecutorFace
-						avatarSource={getRasterImageByName("Man1")}
-						startContainerRef={executorContainerRef}
-						endContainerRef={phoneExecutorContainerRef}
-					/>
-				</S.LayerWrapper>
+				<transformsContext.Provider value={transforms}>
+					<S.LayerWrapper>
+						<PromoContainer>
+							<Pulses />
+							<Promo />
+							<Assistant faceContainerRef={transformBtwBigAssistantAndPhoneAssistant.startRef} />
+							<PhoneAssistant
+								templates={getRasterImagesByNames(
+									"BrightTemplate",
+									"GreenTemplate",
+									"BlueTemplate",
+									"BeigeTemplate",
+									"BlackTemplate"
+								)}
+								cardsContainerRef={phoneCardsContainerResizeObserver.ref}
+								assistantContainerRef={mergeRefs(
+									transformBtwBigAssistantAndPhoneAssistant.endRef,
+									transformBtwPhoneAssistantAndShiftedAssistant.startRef
+								)}
+								shiftedAssistantContainerRef={transformBtwPhoneAssistantAndShiftedAssistant.endRef}
+								executorContainerRef={transformBtwExecutorAndPhoneExecutor.endRef}
+							/>
+							<Executors faceContainerRef={transformBtwExecutorAndPhoneExecutor.startRef} />
+							<PhoneTemplates
+								ref={phoneTemplatesRef}
+								templates={[
+									CAR_TEMPLATE_SOURCE,
+									...getRasterImagesByNames("ColaCharts", "Plug", "Plug", "Plug"),
+								].map((source, index) => ({
+									source,
+									overlaySource: index === 1 ? getRasterImageByName("Plug") : undefined,
+								}))}
+								templateContainerRef={mergeRefs(
+									transformBtwBigTemplateAndPhoneTemplate.endRef,
+									phoneCardResizeObserver.ref
+								)}
+								shiftedTemplateContainerRef={transformBtwPhoneTemplateAndGridTemplate.startRef}
+							/>
+							<TemplatesGrid
+								templates={GRID_TEMPLATES}
+								templateContainerRef={transformBtwPhoneTemplateAndGridTemplate.endRef}
+								hidden
+							/>
+							<TemplatesGrid templates={GRID_TEMPLATES} />
+							<Tariff />
+							<MovedCursorTemplate
+								containerRef={transforms.bigTemplateAndPhoneTemplate.startRef}
+								templateSource={CAR_TEMPLATE_SOURCE}
+							/>
+						</PromoContainer>
+						<MovedGridTemplate templateSource={CAR_TEMPLATE_SOURCE} />
+						<MovedAssistantFace />
+						<MovedExecutorFace avatarSource={getRasterImageByName("Man1")} />
+					</S.LayerWrapper>
+				</transformsContext.Provider>
 			</S.Sandbox>
 			<SlidingFooter ref={footerRef} />
 		</>

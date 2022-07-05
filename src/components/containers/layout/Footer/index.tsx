@@ -25,34 +25,30 @@ export const Footer: React.FC<Props> = memo(({ scrollingElementRef }) => {
 			<FillingContainer ref={scrollingElementRef}>
 				<Container>
 					<S.Content>
-						<S.Head>
-							<S.Title>
-								Don't make
-								<br />
-								boring presentations.
-								<br />
-								Create with Slided
-							</S.Title>
-							<S.ButtonWrapper>
-								<Button size='m'>Get Started</Button>
-							</S.ButtonWrapper>
-						</S.Head>
-						<S.Features>
-							{FEATURES.map((feature, index) => (
-								<S.Feature key={index}>
-									<S.FeatureHead>
-										<S.FeatureIconWrapper>
-											<Icon name={feature.icon} />
-										</S.FeatureIconWrapper>
-										<S.FeatureTitle>{feature.title}</S.FeatureTitle>
-									</S.FeatureHead>
-									<S.FeatureBody>
-										<S.FeatureLineGroup />
-										<S.FeatureDescription>{feature.description}</S.FeatureDescription>
-									</S.FeatureBody>
-								</S.Feature>
-							))}
-						</S.Features>
+						<div>
+							<S.Head>
+								<S.Title>Next slide!</S.Title>
+								<S.ButtonWrapper>
+									<Button size='m'>Get Started</Button>
+								</S.ButtonWrapper>
+							</S.Head>
+							<S.Features>
+								{FEATURES.map((feature, index) => (
+									<S.Feature key={index}>
+										<S.FeatureHead>
+											<S.FeatureIconWrapper>
+												<Icon name={feature.icon} />
+											</S.FeatureIconWrapper>
+											<S.FeatureTitle>{feature.title}</S.FeatureTitle>
+										</S.FeatureHead>
+										<S.FeatureBody>
+											<S.FeatureLineGroup />
+											<S.FeatureDescription>{feature.description}</S.FeatureDescription>
+										</S.FeatureBody>
+									</S.Feature>
+								))}
+							</S.Features>
+						</div>
 						<FooterInfo />
 					</S.Content>
 				</Container>

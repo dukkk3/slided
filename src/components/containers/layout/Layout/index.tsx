@@ -9,7 +9,8 @@ import { Header } from "@components/containers/layout/Header";
 
 import { IterationsControls } from "@components/common/hoc/IterationsControls";
 
-import { useGlobalStore, useResizeObserver } from "@core/hooks";
+import { useResizeObserver } from "@core/hooks/useResizeObserver";
+import { useGlobalStore } from "@core/hooks/useGlobalStore";
 
 import * as S from "./styled";
 
@@ -18,7 +19,11 @@ export interface Props extends React.PropsWithChildren<{}> {}
 export const Layout: React.FC<Props> = ({ children }) => {
 	const promoStore = useGlobalStore((store) => store.layout.promo);
 	const layoutStore = useGlobalStore((store) => store.layout);
-	const headerResizeObserver = useResizeObserver({ calculateSizeWithPaddings: true });
+	const headerResizeObserver = useResizeObserver({
+		calculateSizeWithPaddings: true,
+		debounce: 100,
+		withOffset: false,
+	});
 	const [feedbackStyle, feedbackApi] = useSpring(() => ({ y: "100%" }));
 	const [headerStyle, headerApi] = useSpring(() => ({ opacity: 0 }));
 
@@ -55,6 +60,10 @@ export const Layout: React.FC<Props> = ({ children }) => {
 			),
 		[headerApi, promoStore]
 	);
+
+	useEffect(() => {
+		updateCSSProperties();
+	}, [updateCSSProperties]);
 
 	return (
 		<S.Layout>

@@ -1,8 +1,8 @@
 import styled from "styled-components";
 
-import { breakpoint } from "@styles/breakpoint";
+import { mobile } from "@styles/breakpoint";
 
-const ITEM_OFFSET = "2rem";
+const ITEM_OFFSET = "2.4rem";
 
 export const FooterInfo = styled.div`
 	width: 100%;
@@ -14,11 +14,10 @@ export const FooterInfo = styled.div`
 	width: calc(100% + ${ITEM_OFFSET} * 2);
 	margin: 0 -${ITEM_OFFSET};
 
-	${breakpoint("mobile", "tablet")`
+	${mobile`
 		margin: 0;
 		width: 100%;
 		align-items: flex-end;
-		text-transform: lowercase;
 	`}
 `;
 
@@ -27,17 +26,23 @@ export const ItemGroup = styled.div`
 	align-items: center;
 	flex-direction: row;
 
-	${breakpoint("mobile", "tablet")`
+	${mobile`
 		flex-direction: column;
 		align-items: flex-start;
 	`}
 `;
 
 export const ItemWrapper = styled.div`
-	margin: 0 ${ITEM_OFFSET};
+	padding: 0 ${ITEM_OFFSET};
 
-	${breakpoint("mobile", "tablet")`
+	&:not(:nth-child(1)) {
+		border-left: 1px solid rgba(255, 255, 255, 0.4);
+	}
+
+	${mobile`
 		margin: .2rem 0;
+		padding :0;
+		border-left:none!important;
 	`}
 `;
 
@@ -46,12 +51,15 @@ interface ItemProps {
 }
 
 export const Item = styled.p<ItemProps>`
-	font-weight: 600;
+	font-weight: 400;
 	font-size: 1.6rem;
 	color: white;
-	text-decoration: ${(props) => props.$asLink && "underline"};
 
-	${breakpoint("mobile", "tablet")`
+	&:hover {
+		text-decoration: ${(props) => props.$asLink && "underline"};
+	}
+
+	${mobile`
 		font-size: 1.4rem;
 	`}
 `;

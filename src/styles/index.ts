@@ -1,6 +1,6 @@
 import { createGlobalStyle, css } from "styled-components";
 
-import { breakpoint } from "./breakpoint";
+import { mobile } from "./breakpoint";
 import { fontsStyle } from "./fonts";
 
 export const GlobalStyle = createGlobalStyle`
@@ -29,7 +29,7 @@ export const GlobalStyle = createGlobalStyle`
         --container-width-bigger: calc(100vw - var(--container-gap) * 2);
         --container-width-smaller: calc(100vw - var(--container-bigger-gap) * 2);
 
-        ${breakpoint("mobile", "tablet")`
+        ${mobile`
             --container-gap: 4.5vw;
         `}
     }
@@ -56,7 +56,7 @@ export const GlobalStyle = createGlobalStyle`
         word-wrap: break-word;
         text-transform: inherit;
 
-        ${breakpoint("mobile", "tablet")`
+        ${mobile`
             cursor: inherit;
         `}
     }
@@ -134,7 +134,7 @@ export const GlobalStyle = createGlobalStyle`
 
 export const descriptionMixin = css`
 	line-height: 100%;
-	font-weight: 700;
+	font-weight: 600;
 	text-align: center;
 	color: black;
 `;

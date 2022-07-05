@@ -2,7 +2,8 @@ import React, { memo } from "react";
 import { Observer } from "mobx-react-lite";
 import { a } from "react-spring";
 
-import { useIterationsControls, useGlobalStore } from "@core/hooks";
+import { useGlobalStore } from "@core/hooks/useGlobalStore";
+import { useIterationsControls } from "@core/hooks/useIterationsControls";
 
 import * as S from "./styled";
 

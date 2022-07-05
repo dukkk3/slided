@@ -1,17 +1,20 @@
 import { useCallback, useMemo } from "react";
 
-import { useIterationsControls, useLocalStore } from "@core/hooks";
-import { clamp } from "@core/utils";
+import { useIterationsControls } from "./useIterationsControls";
+import { useLocalStore } from "./useLocalStore";
+import { clamp } from "@core/utils/math.utils";
 
-interface Options {
-	offsetAroundCenter?: number;
-	startOffset?: number;
-	endOffset?: number;
+export declare namespace useIteration {
+	interface Options {
+		offsetAroundCenter?: number;
+		startOffset?: number;
+		endOffset?: number;
+	}
 }
 
 export function useIteration(
 	iteration: number,
-	{ startOffset = 0.5, endOffset = 0.5, offsetAroundCenter = 0.001 }: Options = {}
+	{ startOffset = 0.5, endOffset = 0.5, offsetAroundCenter = 0.001 }: useIteration.Options = {}
 ) {
 	const iterationsControls = useIterationsControls();
 	const center = useMemo(

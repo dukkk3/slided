@@ -1,12 +1,11 @@
-import { schemaHelper, clientHelper } from "@core/helpers";
+import { storeSchemaFactory } from "@core/helpers/factories/schema.factory.helper";
 
 export const layout = {
-	...schemaHelper.generateStoreSchema({
+	...storeSchemaFactory({
 		scrollEnabled: false,
 		feedbackOpened: false,
-		breakpoint: clientHelper.detectBreakpoint(),
 	}),
-	promo: schemaHelper.generateStoreSchema({
+	promo: storeSchemaFactory({
 		backgroundType: null as "frame" | "sequence" | null,
 		promoBannerOpeningAnimationEnded: false,
 		sequenceOpeningAnimationEnded: false,

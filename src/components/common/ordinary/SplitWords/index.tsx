@@ -2,7 +2,7 @@ import React, { memo, useMemo } from "react";
 import isEqual from "react-fast-compare";
 import classNames from "classnames";
 
-import { splitIntoWords, calculateCurrentIndex2D } from "@core/utils";
+import { splitIntoWords, calculateCurrentIndex2D } from "@core/utils/common.utils";
 
 export interface Props extends React.ComponentProps<"p"> {
 	animated?: boolean;

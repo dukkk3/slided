@@ -4,7 +4,7 @@ import styled, { css } from "styled-components";
 import { Image } from "@components/common/ui/Image/styled";
 
 import { descriptionMixin } from "@styles";
-import { breakpoint } from "@styles/breakpoint";
+import { mobile, tablet } from "@styles/breakpoint";
 
 export const Plug = styled(a.div)`
 	top: 0;
@@ -79,7 +79,7 @@ export const DescriptionWrapper = styled.div`
 	width: 100%;
 	${descriptionMixin}
 
-	${breakpoint("mobile", "tablet")`
+	${mobile`
 		font-size: 2.4rem;
 		line-height: 95%;
 	`}
@@ -98,7 +98,7 @@ export const Description = styled.div<DescriptionProps>`
 	line-height: ${(props) => props.$big && "70%"};
 	position: ${(props) => props.$overlay && "absolute"};
 
-	${breakpoint("mobile", "tablet")`
+	${mobile`
 		top: ${(props: DescriptionProps) => props.$overlay && 0};
 	`}
 `;
@@ -130,10 +130,15 @@ export const PhoneCard = styled.div<PhoneCardProps>`
 			}
 		`}
 
-	${breakpoint("mobile", "tablet")`
+	${mobile`
 		left: 0;
 		width: 100%;
 		height: 100%;
 		max-height: 100%;
+	`}
+
+	${tablet`
+		top: 50%;
+		transform: translateY(-50%);
 	`}
 `;

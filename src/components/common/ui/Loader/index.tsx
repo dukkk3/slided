@@ -1,12 +1,11 @@
 import { memo, useCallback, useEffect } from "react";
 import { config, easings, useSpring } from "react-spring";
 
-import { createArray } from "@core/utils";
-
 import { getVectorImageByName } from "@assets/images";
 
-import { animationHelper } from "@core/helpers";
-import { toRange } from "@core/utils";
+import { resolveSpringAnimation } from "@core/helpers/animation.helper";
+import { toRange } from "@core/utils/math.utils";
+import { createArray } from "@core/utils/common.utils";
 
 import * as S from "./styled";
 
@@ -20,7 +19,7 @@ export const Loader: React.FC<Props> = memo(({ onAnimationEnded }) => {
 	const animate = useCallback(async () => {
 		api.set({ opacity: 1 });
 
-		await animationHelper.resolveSpringAnimation(api, {
+		await resolveSpringAnimation(api, {
 			scale: 1,
 			config: { duration: 1650 },
 			// config: { friction: 50, tension: 150 },
@@ -30,7 +29,7 @@ export const Loader: React.FC<Props> = memo(({ onAnimationEnded }) => {
 			onAnimationEnded();
 		}
 
-		await animationHelper.resolveSpringAnimation(api, { opacity: 0, config: config.slow });
+		await resolveSpringAnimation(api, { opacity: 0, config: config.slow });
 
 		api.set({ scale: 0 });
 

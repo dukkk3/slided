@@ -1,8 +1,7 @@
 import { useLocalObservable } from "mobx-react-lite";
 
-import { schemaHelper } from "@core/helpers";
-import type { SchemaBase } from "@core/types";
+import { storeSchemaFactory, Store } from "@core/helpers/factories/schema.factory.helper";
 
-export function useLocalStore<T extends SchemaBase.Store>(schema: T) {
-	return useLocalObservable(() => schemaHelper.generateStoreSchema(schema));
+export function useLocalStore<T extends Store.Base>(schema: T) {
+	return useLocalObservable(() => storeSchemaFactory(schema));
 }

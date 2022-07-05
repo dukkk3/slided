@@ -5,7 +5,7 @@ import {
 	Content as ContentImpl,
 } from "@components/common/ui/FillingContainer/styled";
 
-import { breakpoint } from "@styles/breakpoint";
+import { mobile } from "@styles/breakpoint";
 
 export const Footer = styled.div`
 	width: 100%;
@@ -29,13 +29,17 @@ export const Content = styled.div`
 	flex-direction: column;
 	justify-content: space-between;
 	min-height: calc(100vh - var(--header-height));
+
+	${mobile`
+		justify-content: initial;
+	`}
 `;
 
 export const Head = styled.div`
-	margin: 6rem 0;
+	margin: 14rem 0;
 
-	${breakpoint("mobile", "tablet")`
-		margin-top: 1rem;
+	${mobile`
+		margin-top: 10rem 0;
 	`}
 `;
 
@@ -46,7 +50,7 @@ export const Title = styled.p`
 	text-align: center;
 	color: white;
 
-	${breakpoint("mobile", "tablet")`
+	${mobile`
 		font-weight: 700;
 		font-size: 2.8rem;
 		line-height: 140%;
@@ -58,27 +62,30 @@ export const ButtonWrapper = styled.div`
 	margin-top: 4rem;
 	justify-content: center;
 
-	${breakpoint("mobile", "tablet")`
-		margin-top: 5rem;
+	${mobile`
+		margin-top: 2rem;
 	`}
 `;
 
 export const Features = styled.div`
 	display: flex;
 	padding: 0 4rem;
-	margin: 10rem 0 14rem;
+	margin: 4rem 0 14rem;
 	justify-content: space-between;
 
-	${breakpoint("mobile", "tablet")`
-		border-top: 1px solid rgba(255, 255, 255, .4);
-		padding: 1rem 0 0;
+	${mobile`
+		border: 1px solid rgba(255, 255, 255, .4);
+		border-right: none;
+		border-left: none;
+		padding: 1rem 0;
 		flex-wrap: wrap;
 		margin: 0;
+		margin-bottom: 2rem;
 	`}
 `;
 
 export const Feature = styled.div`
-	${breakpoint("mobile", "tablet")`
+	${mobile`
 		flex: 0 0 50%;
 		padding: 1rem 0;
 	`}
@@ -89,7 +96,7 @@ export const FeatureHead = styled.div`
 	align-items: center;
 	margin-bottom: 1rem;
 
-	${breakpoint("mobile", "tablet")`
+	${mobile`
 		margin-bottom: 0;
 	`}
 `;
@@ -99,7 +106,7 @@ export const FeatureBody = styled.div`
 	position: relative;
 	align-items: center;
 
-	${breakpoint("mobile", "tablet")`
+	${mobile`
 		display: none;
 	`}
 `;
@@ -119,7 +126,7 @@ export const FeatureTitle = styled.p`
 	color: white;
 	margin-bottom: -0.2em;
 
-	${breakpoint("mobile", "tablet")`
+	${mobile`
 		font-size: 1.8rem;
 	`}
 `;

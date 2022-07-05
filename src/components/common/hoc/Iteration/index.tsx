@@ -6,8 +6,8 @@ import {
 	Props as VisibilitySwitchProps,
 } from "@components/common/hoc/VisibilitySwitch";
 
-import { useIteration, useMultipleHooks } from "@core/hooks";
-import { iterationHelper } from "@core/helpers";
+import { useIteration } from "@core/hooks/useIteration";
+import { useMultipleHooks } from "@core/hooks/useMultipleHooks";
 
 type UseIterationParams = Parameters<typeof useIteration>;
 type UseIterationReturnType = ReturnType<typeof useIteration>;
@@ -16,10 +16,7 @@ export interface Props {
 	switchVisibility?: boolean | VisibilitySwitchProps;
 	iterations: number | (number | UseIterationParams)[];
 	checkForVisible?: (iterations: UseIterationReturnType[]) => boolean;
-	children: (
-		iteration: UseIterationReturnType[],
-		interpolator: typeof iterationHelper.interpolations
-	) => JSX.Element;
+	children: (iteration: UseIterationReturnType[]) => JSX.Element;
 }
 
 export const Iteration: React.FC<Props> = memo(
@@ -53,12 +50,12 @@ export const Iteration: React.FC<Props> = memo(
 					<VisibilitySwitch
 						visible={visible()}
 						{...(typeof switchVisibility === "object" ? switchVisibility : {})}>
-						{children(iterationInstances, iterationHelper.interpolations)}
+						{children(iterationInstances)}
 					</VisibilitySwitch>
 				)}
 			</Observer>
 		) : (
-			children(iterationInstances, iterationHelper.interpolations)
+			children(iterationInstances)
 		);
 	}
 );

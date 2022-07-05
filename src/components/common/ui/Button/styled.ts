@@ -7,7 +7,7 @@ function generateButtonSize(theme: DefaultTheme) {
 			fontSize: "1.6rem",
 		},
 		m: {
-			padding: "2rem 3.2rem 1.8rem",
+			padding: "1.6rem 3rem 1.4rem",
 			fontSize: "1.8rem",
 		},
 	};
@@ -53,5 +53,5 @@ export const Button = styled.button<ButtonProps>`
 	color: ${(props) => getButtonTheme(props.$theme, props.theme).color};
 	border-radius: 0.5rem;
 	text-align: center;
-	font-weight: 700;
+	font-weight: 600;
 `;

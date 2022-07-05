@@ -1,5 +1,11 @@
-import { schemaHelper, clientHelper } from "@core/helpers";
+import { BreakpointNameKind, getOsName } from "@core/helpers/device.helper";
+import { storeSchemaFactory } from "@core/helpers/factories/schema.factory.helper";
 
-export const app = schemaHelper.generateStoreSchema({
-	osName: clientHelper.detectOperationSystemName(),
-});
+export const app = {
+	os: storeSchemaFactory({
+		name: getOsName(),
+	}),
+	...storeSchemaFactory({
+		mediaMatches: {} as Record<BreakpointNameKind, boolean>,
+	}),
+};

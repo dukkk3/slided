@@ -1,46 +1,67 @@
 import { useCallback } from "react";
 
-import { useGlobalStore } from "@core/hooks";
-import { interfaceConfig } from "@core/config";
+import { useGlobalStore } from "./useGlobalStore";
+import { breakpoints, BreakpointNameKind } from "@core/helpers/device.helper";
+import { useLocalStore } from "./useLocalStore";
 
-const breakpointsKeys = Object.keys(
-	interfaceConfig.breakpoints
-) as interfaceConfig.BreakpointsKind[];
+const breakpointsKeys = Object.keys(breakpoints) as BreakpointNameKind[];
 
 export function useBreakpoint() {
-	const layoutStore = useGlobalStore((store) => store.layout);
+	const appStore = useGlobalStore((store) => store.app);
 
-	const range = useCallback(
-		(a: interfaceConfig.BreakpointsKind, b?: interfaceConfig.BreakpointsKind) => {
-			const currentBreakpointIndex = breakpointsKeys.indexOf(layoutStore.breakpoint);
-			const aBreakpointIndex = breakpointsKeys.indexOf(a);
+	const getMediaMatches = useCallback(() => {
+		return appStore.mediaMatches;
+	}, [appStore]);
 
-			if (!b) {
-				return aBreakpointIndex <= currentBreakpointIndex;
-			}
-
-			const bBreakpointIndex = breakpointsKeys.indexOf(b);
-
-			return aBreakpointIndex <= currentBreakpointIndex && currentBreakpointIndex <= bBreakpointIndex;
+	const getMediaMatch = useCallback(
+		(key: BreakpointNameKind) => {
+			return getMediaMatches()[key];
 		},
-		[layoutStore]
+		[getMediaMatches]
 	);
 
-	const getBreakpoint = useCallback(() => {
-		return layoutStore.breakpoint;
-	}, [layoutStore]);
+	const range = useCallback(
+		(a: BreakpointNameKind, b?: BreakpointNameKind) => {
+			const aIndex = breakpointsKeys.indexOf(a);
+
+			if (!b) return breakpointsKeys.slice(aIndex).some(getMediaMatch);
+
+			const bIndex = breakpointsKeys.indexOf(b);
+			return breakpointsKeys.slice(aIndex, bIndex).some(getMediaMatch);
+		},
+		[getMediaMatch]
+	);
+
+	const localStore = useLocalStore({
+		get mobile() {
+			return range("mobile", "tablet");
+		},
+		get tablet() {
+			return range("tablet", "laptop");
+		},
+		get laptop() {
+			return range("laptop");
+		},
+	});
 
 	const mobile = useCallback(() => {
-		return range("mobile", "mobile.l");
-	}, [range]);
+		return localStore.mobile;
+	}, [localStore]);
 
 	const tablet = useCallback(() => {
-		return range("tablet");
-	}, [range]);
+		return localStore.tablet;
+	}, [localStore]);
 
-	const desktop = useCallback(() => {
-		return range("laptop");
-	}, [range]);
+	const laptop = useCallback(() => {
+		return localStore.laptop;
+	}, [localStore]);
 
-	return { mobile, tablet, desktop, range, getBreakpoint };
+	return {
+		getMediaMatches,
+		getMediaMatch,
+		laptop,
+		mobile,
+		tablet,
+		range,
+	};
 }

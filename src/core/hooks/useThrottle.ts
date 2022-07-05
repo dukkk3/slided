@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 
-import { throttle } from "@core/utils";
+import { throttle } from "@core/utils/common.utils";
 
 export function useThrottle<T extends any[]>(
 	callback: (...args: T) => void,
