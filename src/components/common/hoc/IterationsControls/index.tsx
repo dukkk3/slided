@@ -63,11 +63,13 @@ export const IterationsControls: React.FC<Props> = ({
 	);
 
 	const next = useCallback(() => {
-		change(localStore.iteration + 1);
+		const iteration = localStore.iteration + 1;
+		change(iteration === 7 ? 8 : iteration);
 	}, [change, localStore]);
 
 	const prev = useCallback(() => {
-		change(localStore.iteration - 1);
+		const iteration = localStore.iteration - 1;
+		change(iteration === 7 ? 6 : iteration);
 	}, [change, localStore]);
 
 	const handleDocumentKeyDown = useCallback(
@@ -111,13 +113,15 @@ export const IterationsControls: React.FC<Props> = ({
 		const { iteration } = iterationsContext.store;
 		if (Math.abs(iteration - localStore.iteration) > 0) {
 			const sign = Math.sign(iteration - localStore.iteration);
+			const nextIteration = floor(iteration) + stepBetweenIterations * sign * -1;
 			const config = getCurrentRangeConfig(
 				iterationsContext.store.iteration,
 				sign === -1 ? "right" : "left"
 			);
-			iterationsContext.animate(localStore.iteration, config);
+			console.log({ iteration: localStore.iteration, nextIteration });
+			iterationsContext.animate(nextIteration, config);
 		}
-	}, [getCurrentRangeConfig, iterationsContext, localStore]);
+	}, [getCurrentRangeConfig, iterationsContext, localStore.iteration, stepBetweenIterations]);
 
 	useEffect(
 		() => iterationsContext.addEventListener("rest", handleAnimationRest),
@@ -129,11 +133,16 @@ export const IterationsControls: React.FC<Props> = ({
 			reaction(
 				() => localStore.iteration,
 				(iteration) => {
-					const sign = Math.sign(iterationsContext.store.iteration - localStore.iteration);
-					const targetIteration = iteration + stepBetweenIterations * sign;
+					const sign = Math.sign(iterationsContext.store.iteration - iteration);
+					const targetIteration =
+						floor(iterationsContext.store.iteration) + stepBetweenIterations * sign * -1;
 					const durationFactor =
 						Math.abs(iterationsContext.store.iteration - targetIteration) / stepBetweenIterations;
-					const config = getCurrentRangeConfig(targetIteration, sign === -1 ? "left" : "right");
+					const config = getCurrentRangeConfig(
+						round(iterationsContext.store.iteration + stepBetweenIterations * sign * -1),
+						sign === -1 ? "left" : "right"
+					);
+
 					iterationsContext.animate(targetIteration, {
 						...config,
 						duration: config.duration * clamp(durationFactor, 0, 1),
@@ -158,4 +167,14 @@ export const IterationsControls: React.FC<Props> = ({
 			{children}
 		</context.Provider>
 	);
+};
+
+const floor = (value: number) => {
+	const diff = value % 0.5;
+	return diff === 0 ? value : value - diff;
+};
+
+const round = (value: number) => {
+	const diff = value % 0.5;
+	return diff === 0 ? value : value + (0.5 - diff);
 };

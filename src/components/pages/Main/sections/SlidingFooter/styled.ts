@@ -9,3 +9,8 @@ export const SlidingFooter = styled(a.div)`
 	position: absolute;
 	z-index: 999;
 `;
+
+export const FooterGroup = styled(a.div)`
+	width: 100%;
+	height: 100%;
+`;

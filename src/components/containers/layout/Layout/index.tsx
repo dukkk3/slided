@@ -4,8 +4,8 @@ import { Observer } from "mobx-react-lite";
 import { reaction, when } from "mobx";
 
 import { Header } from "@components/containers/layout/Header";
+import { Feedback } from "@components/containers/layout/Feedback";
 // import { Footer } from "@components/containers/layout/Footer";
-// import { Feedback } from "@components/containers/layout/Feedback";
 
 import { IterationsControls } from "@components/common/hoc/IterationsControls";
 
@@ -24,7 +24,7 @@ export const Layout: React.FC<Props> = ({ children }) => {
 		debounce: 100,
 		withOffset: false,
 	});
-	const [feedbackStyle, feedbackApi] = useSpring(() => ({ y: "100%" }));
+	const [feedbackStyle, feedbackApi] = useSpring(() => ({ y: "100%", opacity: 0 }));
 	const [headerStyle, headerApi] = useSpring(() => ({ opacity: 0 }));
 
 	const updateCSSProperties = useCallback(() => {
@@ -38,7 +38,7 @@ export const Layout: React.FC<Props> = ({ children }) => {
 		() =>
 			reaction(
 				() => layoutStore.feedbackOpened,
-				(opened) => feedbackApi.start({ y: opened ? "0%" : "100%" })
+				(opened) => feedbackApi.start({ y: opened ? "0%" : "100%", opacity: opened ? 1 : 0 })
 			),
 		[feedbackApi, layoutStore]
 	);
@@ -81,6 +81,9 @@ export const Layout: React.FC<Props> = ({ children }) => {
 					</IterationsControls>
 				)}
 			</Observer>
+			<S.FeedbackWrapper style={feedbackStyle}>
+				<Feedback />
+			</S.FeedbackWrapper>
 		</S.Layout>
 	);
 };

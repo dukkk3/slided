@@ -311,11 +311,6 @@ const SlideButton: React.FC<SlideButtonProps> = ({ state, onSwipeEnded }) => {
 	const [buttonStyle, buttonApi] = useSpring(
 		() => ({
 			x: state === "active" ? 0 : 1,
-			onRest: {
-				x: (value: any) => {
-					if (value.value === 1 && onSwipeEnded) onSwipeEnded();
-				},
-			},
 		}),
 		[state]
 	);
@@ -337,7 +332,14 @@ const SlideButton: React.FC<SlideButtonProps> = ({ state, onSwipeEnded }) => {
 			// if (vx > 5) progress = 1;
 
 			if (progress === 0 || progress >= 0.99) {
-				buttonApi.start({ x: clamp(progress, 0, 1) });
+				buttonApi.start({
+					x: clamp(progress, 0, 1),
+					onRest: {
+						x: (value) => {
+							if (value.value === 1 && onSwipeEnded) onSwipeEnded();
+						},
+					},
+				});
 			} else {
 				buttonApi.set({ x: clamp(progress, 0, 1) });
 			}

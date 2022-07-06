@@ -38,8 +38,10 @@ export const Cards = styled(a.div)`
 
 export const Slide = styled.div`
 	width: 100%;
-	height: 100%;
-	position: relative;
+	height: var(--height);
+	position: absolute;
+	bottom: 0;
+	left: 0;
 	border-radius: inherit;
 	touch-action: none;
 	cursor: grab;
@@ -47,6 +49,7 @@ export const Slide = styled.div`
 	background: var(--background);
 
 	--background: #e4e4e4;
+	--height: 8rem;
 	--button-size: calc(var(--height) - 1rem);
 `;
 
@@ -95,7 +98,7 @@ export const SlideButtonLabelGroup = styled(a.div)`
 `;
 
 export const SlideButtonLabel = styled.p`
-	font-size: 1.8rem;
+	font-size: 2rem;
 	font-weight: 500;
 	opacity: 0.6;
 `;
@@ -120,6 +123,10 @@ export const ButtonWrapper = styled.div`
 		width: 100%;
 		height: 100%;
 		position: absolute;
+	}
+
+	> div > .unit {
+		position: relative;
 	}
 
 	.unit {

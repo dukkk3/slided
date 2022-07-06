@@ -1,4 +1,4 @@
-import { reaction } from "mobx";
+import { reaction, transaction } from "mobx";
 import { useSpring } from "react-spring";
 import { Observer } from "mobx-react-lite";
 import { createContext, useCallback, useEffect, useRef } from "react";
@@ -32,11 +32,12 @@ import { useResizeObserver } from "@core/hooks/useResizeObserver";
 import { useIterationsControls } from "@core/hooks/useIterationsControls";
 import { useTransformDifference } from "@core/hooks/useTransformDifference";
 import { resolveSpringAnimation } from "@core/helpers/animation.helper";
-import { mergeRefs } from "@core/utils/common.utils";
+import { createArray, mergeRefs } from "@core/utils/common.utils";
 
 import { getRasterImageByName, getRasterImagesByNames } from "@assets/images";
 
 import * as S from "./styled";
+import { interpolations } from "@core/helpers/iteration.helper";
 
 type UseTransformDifferenceReturnType = ReturnType<typeof useTransformDifference>;
 
@@ -90,6 +91,7 @@ export const Main: React.FC = () => {
 
 	const iterationsControls = useIterationsControls();
 	const lastIteration = useIteration(iterationsControls.iterations);
+	const layoutStore = useGlobalStore((store) => store.layout);
 	const promoStore = useGlobalStore((store) => store.layout.promo);
 	const breakpoint = useBreakpoint();
 
@@ -102,8 +104,24 @@ export const Main: React.FC = () => {
 
 	const updateBackgroundType = useCallback(() => {
 		const useFrame = breakpoint.mobile();
-		promoStore.setBackgroundType(useFrame ? "frame" : "sequence");
+
+		transaction(() => {
+			if (useFrame) {
+				promoStore.setSequenceOpeningAnimationEnded(true);
+				promoStore.setSequenceLoaded(true);
+			}
+
+			promoStore.setBackgroundType(useFrame ? "frame" : "sequence");
+		});
 	}, [breakpoint, promoStore]);
+
+	const createDotClickHandler = useCallback(
+		(iteration: number) => () => {
+			if (!promoStore.interactiveEnabled) return;
+			iterationsControls.change(iteration);
+		},
+		[iterationsControls, promoStore.interactiveEnabled]
+	);
 
 	const updateCssProperties = useCallback(() => {
 		const sandbox = sandboxRef.current;
@@ -159,7 +177,7 @@ export const Main: React.FC = () => {
 			onWheel: (state) => {
 				const footer = footerRef.current;
 
-				if (!iterationsControls.enabled) return;
+				if (!iterationsControls.enabled || layoutStore.feedbackOpened) return;
 				if (lastIteration.started() && footer && footer.scrollTop > 0) return;
 
 				return handleWheel(state);
@@ -167,7 +185,12 @@ export const Main: React.FC = () => {
 			onDrag: (state) => {
 				const footer = footerRef.current;
 
-				if (!iterationsControls.enabled || !breakpoint.range("mobile", "laptop")) return;
+				if (
+					!iterationsControls.enabled ||
+					!breakpoint.range("mobile", "laptop") ||
+					layoutStore.feedbackOpened
+				)
+					return;
 				if (lastIteration.started() && footer && footer.scrollTop > 0) return;
 
 				return handleDrag(state);
@@ -214,6 +237,10 @@ export const Main: React.FC = () => {
 			),
 		[phoneTemplateResizeObserver, updateCssProperties]
 	);
+
+	useEffect(() => {
+		promoStore.setWasMounted(true);
+	}, [promoStore]);
 
 	return (
 		<>
@@ -298,6 +325,36 @@ export const Main: React.FC = () => {
 				</transformsContext.Provider>
 			</S.Sandbox>
 			<SlidingFooter ref={footerRef} />
+			<S.Dots style={{ opacity: loaderStyle.opacity.to((value) => 1 - value) }}>
+				<S.DotGroup>
+					<S.FlyingDot
+						style={{
+							y: iterationsControls.animated.progress
+								.to((value) => value * iterationsControls.iterations)
+								.to((value) =>
+									value >= 6 && value <= 8 ? 6 + (1 * (value - 6)) / 2 : value > 8 ? value - 1 : value
+								)
+								.to((value) => `${value * 100}%`),
+						}}
+					/>
+					<Observer>
+						{() => (
+							<>
+								{createArray(iterationsControls.iterations + 1).map((_, index) =>
+									index === 7 ? null : (
+										<S.Dot
+											data-key={index}
+											key={index}
+											onClick={createDotClickHandler(index)}
+											$active={iterationsControls.store.iteration === index}
+										/>
+									)
+								)}
+							</>
+						)}
+					</Observer>
+				</S.DotGroup>
+			</S.Dots>
 		</>
 	);
 };

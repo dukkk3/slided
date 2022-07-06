@@ -1,4 +1,4 @@
-import React, { memo } from "react";
+import React, { memo, useCallback } from "react";
 
 import { FooterInfo } from "@components/common/ordinary/FooterInfo";
 
@@ -6,6 +6,8 @@ import { Button } from "@components/common/ui/Button";
 import { Container } from "@components/common/ui/Container";
 import { Icon, IconNameKind } from "@components/common/ui/Icon";
 import { FillingContainer } from "@components/common/ui/FillingContainer";
+
+import { useGlobalStore } from "@core/hooks/useGlobalStore";
 
 import * as S from "./styled";
 
@@ -20,6 +22,12 @@ export interface Props {
 }
 
 export const Footer: React.FC<Props> = memo(({ scrollingElementRef }) => {
+	const layoutStore = useGlobalStore((store) => store.layout);
+
+	const handleGetStartedButtonClick = useCallback(() => {
+		layoutStore.setFeedbackOpened(true);
+	}, [layoutStore]);
+
 	return (
 		<S.Footer>
 			<FillingContainer ref={scrollingElementRef}>
@@ -29,7 +37,9 @@ export const Footer: React.FC<Props> = memo(({ scrollingElementRef }) => {
 							<S.Head>
 								<S.Title>Next slide!</S.Title>
 								<S.ButtonWrapper>
-									<Button size='m'>Get Started</Button>
+									<Button size='m' onClick={handleGetStartedButtonClick}>
+										Get Started
+									</Button>
 								</S.ButtonWrapper>
 							</S.Head>
 							<S.Features>

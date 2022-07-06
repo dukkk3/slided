@@ -186,12 +186,12 @@ export const BackgroundFrame: React.FC = () => {
 };
 
 function formatSource(index: number) {
-	return `https://ik.imagekit.io/64nah4dsw/slided/sequence/${String(index + 1).padStart(
+	return `https://ik.imagekit.io/64nah4dsw/slided/slided_20/${String(index + 1).padStart(
 		3,
 		"0"
 	)}.jpg`;
 }
 
-const FPS = 30;
-const ITERATIONS = [115, 240, 380, 443];
+const FPS = 25;
+const ITERATIONS = [80, 160, 239, 283];
 const SEQUENCE = new Sequence(ITERATIONS[ITERATIONS.length - 1] + 1, formatSource);

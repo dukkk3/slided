@@ -34,8 +34,6 @@ export class Sequence {
 		const diff = Math.abs(to - from) + 1;
 		const promises: Promise<any>[] = [];
 
-		// console.log({ from, to, amount: this.amount, length: this.items.length });
-
 		for (let i = from; i <= to; i++) {
 			const item = this._items[i];
 			const source = this._sources[i];
@@ -46,7 +44,6 @@ export class Sequence {
 			}
 
 			const promise = new Promise((resolve) => {
-				// console.log(item);
 				item.image.src = source;
 				item.loading = true;
 				item.image.onload = () => {

@@ -11,11 +11,7 @@ export function useMatchMedia<T extends Record<string, string>>(queries: T) {
 		[keys]
 	);
 	const mediaQueryList = useMemo(
-		() =>
-			keys.map((key) => {
-				console.log(queries[key]);
-				return window.matchMedia(queries[key]);
-			}),
+		() => keys.map((key) => window.matchMedia(queries[key])),
 		[keys, queries]
 	);
 	const localStore = useLocalStore({

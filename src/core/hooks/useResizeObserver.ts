@@ -39,7 +39,6 @@ export function useResizeObserver({
 					? entry.contentRect
 					: target.getBoundingClientRect();
 			const offset = withOffset ? getOffsetImpl(target as any) : { top: 0, left: 0 };
-			console.log({ target, width, height });
 			transaction(() => {
 				localStore.setSize({ width, height });
 				localStore.setOffset(offset);

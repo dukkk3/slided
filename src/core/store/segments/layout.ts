@@ -6,6 +6,7 @@ export const layout = {
 		feedbackOpened: false,
 	}),
 	promo: storeSchemaFactory({
+		wasMounted: false,
 		backgroundType: null as "frame" | "sequence" | null,
 		promoBannerOpeningAnimationEnded: false,
 		sequenceOpeningAnimationEnded: false,

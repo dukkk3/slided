@@ -9,7 +9,7 @@ export const GlobalStyle = createGlobalStyle`
     html {
         font-size: 10px;
     }
-
+    
     body {
         margin: 0;
         -webkit-font-smoothing: antialiased;
@@ -20,6 +20,7 @@ export const GlobalStyle = createGlobalStyle`
         font-variant-numeric: normal;
         font-variant-east-asian: normal;
         font-weight: 400;
+        height: 100vh;
         font-stretch: normal;
         font-family: ${(props) => props.theme.font.primary};
 

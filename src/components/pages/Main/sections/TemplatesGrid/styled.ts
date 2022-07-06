@@ -60,7 +60,7 @@ const templateContainsTextMixin = css`
 	border: 1px solid black;
 	line-height: 120%;
 	font-weight: 600;
-	font-size: 2.4rem;
+	font-size: 2.8rem;
 `;
 
 export const Template = styled(a.div)<TemplateProps>`
