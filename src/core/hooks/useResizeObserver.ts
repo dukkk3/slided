@@ -7,28 +7,26 @@ import { useLocalStore } from "./useLocalStore";
 import { debounce as debounceHof, throttle as throttleHof } from "@core/utils/common.utils";
 import { getOffset as getOffsetImpl } from "@core/utils/dom.utils";
 
-export declare namespace useResizeObserver {
-	interface Options {
-		calculateSizeWithPaddings?: boolean;
-		withOffset?: boolean;
-		debounce?: number;
-		throttle?: number;
-	}
-
-	type Offset = { top: number; left: number };
-	type Size = { width: number; height: number };
+export interface Options {
+	calculateSizeWithPaddings?: boolean;
+	withOffset?: boolean;
+	debounce?: number;
+	throttle?: number;
 }
+
+export type Offset = { top: number; left: number };
+export type Size = { width: number; height: number };
 
 export function useResizeObserver({
 	debounce,
 	throttle,
 	withOffset = true,
 	calculateSizeWithPaddings = false,
-}: useResizeObserver.Options = {}) {
+}: Options = {}) {
 	const prevTargetRef = useRef<HTMLElement | null>(null);
 	const localStore = useLocalStore({
-		size: { width: 0, height: 0 } as useResizeObserver.Size,
-		offset: { top: 0, left: 0 } as useResizeObserver.Offset,
+		size: { width: 0, height: 0 } as Size,
+		offset: { top: 0, left: 0 } as Offset,
 	});
 
 	const updateStore = useCallback(

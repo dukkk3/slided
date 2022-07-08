@@ -1,1 +1,1 @@
-export { default as BasicGirl } from "./basic-girl.mp4";
+export { default as Assistant } from "./assistant.mp4";

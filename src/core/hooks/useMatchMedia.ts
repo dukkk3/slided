@@ -2,7 +2,7 @@ import { useCallback, useLayoutEffect, useMemo } from "react";
 
 import { useLocalStore } from "./useLocalStore";
 
-type Matches<T extends object> = { [K in keyof T]: boolean };
+export type Matches<T extends object> = { [K in keyof T]: boolean };
 
 export function useMatchMedia<T extends Record<string, string>>(queries: T) {
 	const keys = useMemo(() => Object.keys(queries) as (keyof T)[], [queries]);
@@ -47,6 +47,10 @@ export function useMatchMedia<T extends Record<string, string>>(queries: T) {
 		mediaQueryList.forEach((mql) => mql.addEventListener("change", handleChange));
 		return () => mediaQueryList.forEach((mql) => mql.removeEventListener("change", handleChange));
 	}, [getMatches, handleChange, mediaQueryList]);
+
+	useLayoutEffect(() => {
+		handleChange();
+	}, [handleChange]);
 
 	return {
 		getValue,

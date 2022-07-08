@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { reaction } from "mobx";
 
-import { Routes } from "@components/routes";
+import { Promo } from "@components/pages/Promo";
 
 import { useGlobalStore } from "@core/hooks/useGlobalStore";
 import { useMatchMedia } from "@core/hooks/useMatchMedia";
@@ -32,9 +32,5 @@ export const App: React.FC = () => {
 		[appStore, matchMedia]
 	);
 
-	useEffect(() => {
-		matchMedia.update();
-	}, [matchMedia]);
-
-	return <Routes />;
+	return <Promo />;
 };

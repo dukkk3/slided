@@ -22,7 +22,6 @@ export const Loader: React.FC<Props> = memo(({ onAnimationEnded }) => {
 		await resolveSpringAnimation(api, {
 			scale: 1,
 			config: { duration: 1650 },
-			// config: { friction: 50, tension: 150 },
 		});
 
 		if (onAnimationEnded) {
@@ -52,7 +51,6 @@ export const Loader: React.FC<Props> = memo(({ onAnimationEnded }) => {
 									.to({ output: [0, 1], range: [0, 1], easing: easings.easeInOutCubic }),
 							}}
 						/>
-						{/* {getVectorImageByName("common", "LogoRayPiece")} */}
 					</S.Piece>
 				))}
 			</S.PieceGroup>

@@ -10,20 +10,19 @@ import {
 	CompareOperatorKind,
 } from "@core/utils/math.utils";
 
-export declare namespace useIterationsContextFactory {
-	interface Options {
-		iterations: number;
-		animationConfig?: SpringConfig;
-	}
-
-	type Listener<T extends any[] = never[]> = (...args: T) => void;
-	type Events = {
-		rest: Listener;
-		change: Listener<[number]>;
-	};
+export interface Options {
+	iterations: number;
+	animationConfig?: SpringConfig;
 }
 
-export interface IterationsContext {
+export type Listener<T extends any[] = never[]> = (...args: T) => void;
+
+export type Events = {
+	rest: Listener;
+	change: Listener<[number]>;
+};
+
+export interface Context {
 	animated: {
 		progress: SpringValue<number>;
 		compare: (a: number, operator: CompareOperatorKind) => Interpolation<number, boolean>;
@@ -39,26 +38,20 @@ export interface IterationsContext {
 	};
 	animate: (iteration: number, config?: SpringConfig) => void;
 	set: (iteration: number) => void;
-	addEventListener: <T extends keyof useIterationsContextFactory.Events>(
-		event: T,
-		listener: useIterationsContextFactory.Events[T]
-	) => () => void;
-	removeEventListener: <T extends keyof useIterationsContextFactory.Events>(
-		event: T,
-		listener: useIterationsContextFactory.Events[T]
-	) => void;
+	addEventListener: <T extends keyof Events>(event: T, listener: Events[T]) => () => void;
+	removeEventListener: <T extends keyof Events>(event: T, listener: Events[T]) => void;
 	iterations: number;
 }
 
-export function useIterationsContextFactory({
+export function useIterationsControlsContextFactory({
 	iterations,
 	animationConfig,
-}: useIterationsContextFactory.Options): IterationsContext {
+}: Options): Context {
 	const targetRef = useRef(0);
 	const listeners = useMemo<{
-		[K in keyof useIterationsContextFactory.Events]: Set<useIterationsContextFactory.Events[K]>;
+		[K in keyof Events]: Set<Events[K]>;
 	}>(() => ({ rest: new Set(), change: new Set() }), []);
-	const localStore = useLocalStore<IterationsContext["store"]>({
+	const localStore = useLocalStore<Context["store"]>({
 		progress: 0,
 		get iteration() {
 			return this.progress * iterations;
@@ -130,20 +123,14 @@ export function useIterationsContextFactory({
 	);
 
 	const removeEventListener = useCallback(
-		<T extends keyof useIterationsContextFactory.Events>(
-			event: T,
-			listener: useIterationsContextFactory.Events[T]
-		) => {
+		<T extends keyof Events>(event: T, listener: Events[T]) => {
 			listeners[event].delete(listener);
 		},
 		[listeners]
 	);
 
 	const addEventListener = useCallback(
-		<T extends keyof useIterationsContextFactory.Events>(
-			event: T,
-			listener: useIterationsContextFactory.Events[T]
-		) => {
+		<T extends keyof Events>(event: T, listener: Events[T]) => {
 			listeners[event].add(listener);
 
 			return () => removeEventListener(event, listener);

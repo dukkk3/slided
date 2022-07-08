@@ -8,16 +8,11 @@ import { clamp } from "@core/utils/math.utils";
 import { useLocalStore } from "./useLocalStore";
 import { useResizeObserver } from "./useResizeObserver";
 
-export declare namespace useCanvasSequence {
-	interface Options {
-		resizeObserverDebounce?: number;
-	}
+export interface Options {
+	resizeObserverDebounce?: number;
 }
 
-export function useCanvasSequence(
-	sequence: Sequence,
-	{ resizeObserverDebounce }: useCanvasSequence.Options = {}
-) {
+export function useCanvasSequence(sequence: Sequence, { resizeObserverDebounce }: Options = {}) {
 	const canvasRef = useRef<HTMLCanvasElement>(null!);
 	const contextRef = useRef<CanvasRenderingContext2D>(null!);
 	const previousFrameRef = useRef<number>(null!);
