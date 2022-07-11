@@ -3,12 +3,17 @@ import React, { memo } from "react";
 export interface Props {
 	visible?: boolean;
 	interactive?: boolean;
+	unmountWhenInvisible?: boolean;
 }
 
 export const VisibilitySwitch: React.FC<React.PropsWithChildren<Props>> = memo(
-	({ children, visible = true, interactive = true }) => {
-		if (!children) {
+	({ children, visible = true, interactive = true, unmountWhenInvisible = true }) => {
+		if (!children || (unmountWhenInvisible && !visible)) {
 			return null;
+		}
+
+		if (visible) {
+			return children as any;
 		}
 
 		return (

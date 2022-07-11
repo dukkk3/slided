@@ -1,0 +1,66 @@
+import { memo } from "react";
+import { a, Interpolation } from "react-spring";
+
+import { clamp } from "@core/utils/math.utils";
+
+import { getVideoByName } from "@assets/videos";
+
+import * as S from "./styled";
+
+export interface Props {
+	videoRef?: React.Ref<any>;
+	openingInterpolation: Interpolation<number, number>;
+	pulseInterpolation: Interpolation<number, number>;
+	backgroundOpacityInterpolation: Interpolation<number, number>;
+	swap?: boolean;
+}
+
+export const Face: React.FC<Props> = memo(
+	({ videoRef, openingInterpolation, pulseInterpolation, backgroundOpacityInterpolation }) => {
+		return (
+			<S.Face>
+				<S.Background>
+					<S.Pulse style={{ scale: pulseInterpolation, opacity: backgroundOpacityInterpolation }} />
+					<S.Circle style={{ opacity: backgroundOpacityInterpolation }}>
+						<svg viewBox={`0 0 ${CIRCLE_VIEW_BOX_SIZE} ${CIRCLE_VIEW_BOX_SIZE}`}>
+							<a.circle
+								cx={CIRCLE_CENTER}
+								cy={CIRCLE_CENTER}
+								r={CIRCLE_RADIUS}
+								strokeDasharray={CIRCLE_CIRCUMFERENCE}
+								strokeDashoffset={openingInterpolation.to((value) =>
+									getCircleStrokeDashoffset(value * 100)
+								)}
+							/>
+						</svg>
+					</S.Circle>
+				</S.Background>
+				<S.Content>
+					<S.VideoWrapper
+						className='safari-border-radius-overflow-bugfix'
+						style={{ scale: openingInterpolation }}>
+						<a.video
+							ref={videoRef}
+							src={getVideoByName("Assistant")}
+							muted
+							loop
+							autoPlay
+							playsInline
+							style={{ scale: openingInterpolation.to((value) => 1 / value) }}
+						/>
+					</S.VideoWrapper>
+				</S.Content>
+			</S.Face>
+		);
+	},
+	({ swap: a }, { swap: b }) => a === b
+);
+
+const CIRCLE_RADIUS = 45.5;
+const CIRCLE_VIEW_BOX_SIZE = 100;
+const CIRCLE_CIRCUMFERENCE = Math.PI * (CIRCLE_RADIUS * 2);
+const CIRCLE_CENTER = CIRCLE_VIEW_BOX_SIZE / 2;
+
+function getCircleStrokeDashoffset(progress: number) {
+	return ((100 - clamp(progress, 0, 100)) / 100) * CIRCLE_CIRCUMFERENCE;
+}

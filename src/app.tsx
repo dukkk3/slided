@@ -32,5 +32,9 @@ export const App: React.FC = () => {
 		[appStore, matchMedia]
 	);
 
+	useEffect(() => {
+		matchMedia.update();
+	}, [matchMedia]);
+
 	return <Promo />;
 };

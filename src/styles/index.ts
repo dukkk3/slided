@@ -21,6 +21,7 @@ export const GlobalStyle = createGlobalStyle`
         font-variant-east-asian: normal;
         font-weight: 400;
         height: 100vh;
+        background: white;
         font-stretch: normal;
         font-family: ${(props) => props.theme.font.primary};
 

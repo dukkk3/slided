@@ -51,6 +51,7 @@ export const IterationsControls: React.FC<Props> = ({
 	const localStore = useLocalStore({
 		currentPartIndex: [0, -1] as PartIndexWithBound,
 		targetPartIndex: [0, 0] as PartIndexWithBound,
+		animated: false,
 		direction: 0,
 	});
 
@@ -67,8 +68,8 @@ export const IterationsControls: React.FC<Props> = ({
 			return typeof partOrIteration === "number"
 				? flattenParts.findIndex(
 						({ from, to }) =>
-							(direction === -1 && from <= partOrIteration && partOrIteration < to) ||
-							(direction === 1 && from < partOrIteration && partOrIteration <= to) ||
+							(direction === -1 && from < partOrIteration && partOrIteration <= to) ||
+							(direction === 1 && from <= partOrIteration && partOrIteration < to) ||
 							(!direction && from <= partOrIteration && partOrIteration <= to)
 				  )
 				: flattenParts.findIndex(
@@ -93,11 +94,27 @@ export const IterationsControls: React.FC<Props> = ({
 			const iteration = getPartAccessProp(part, partIndexWithBound[1]);
 			const { iteration: currentIteration } = iterationsControlsContext.store;
 			const durationFactor = Math.abs(currentIteration - iteration) / Math.abs(part.from - part.to);
+
+			localStore.setAnimated(true);
+			localStore.setCurrentPartIndex(partIndexWithBound);
+
+			const configPartSource = getPartByIndex(
+				findPartIndex(
+					iterationsControlsContext.store.iteration,
+					getDirectionBtwParts(localStore.targetPartIndex, localStore.currentPartIndex)
+				)
+			);
+			console.log({
+				iteration,
+				currentIteration: iterationsControlsContext.store.iteration,
+				duration: part.duration || defaultDuration,
+				configPartSource,
+				part,
+			});
 			iterationsControlsContext.animate(iteration, {
 				easing: easings.linear,
 				duration: (part.duration || defaultDuration) * clamp(durationFactor, 0, 1),
 			});
-			localStore.setCurrentPartIndex(partIndexWithBound);
 		},
 		[defaultDuration, flattenParts.length, getPartByIndex, iterationsControlsContext, localStore]
 	);
@@ -123,10 +140,15 @@ export const IterationsControls: React.FC<Props> = ({
 
 			if (direction === 0) return;
 
+			const nextPartIndexWithBound =
+				direction === -1
+					? getPrevPartIndexWithBound(localStore.currentPartIndex)
+					: getNextPartIndexWithBound(localStore.currentPartIndex);
+
 			// console.log(currentPart);
 
 			localStore.setTargetPartIndex([boundPartIndex, partIndexWithBound[1]]);
-			applyPartConfig(partIndexWithBound);
+			applyPartConfig(nextPartIndexWithBound);
 		},
 		[applyPartConfig, findPartIndex, findPartSource, getPartByIndex, localStore, parts]
 	);
@@ -148,7 +170,11 @@ export const IterationsControls: React.FC<Props> = ({
 			direction === -1
 				? getPrevPartIndexWithBound(currentPartIndex)
 				: getNextPartIndexWithBound(currentPartIndex);
+
+		localStore.setAnimated(false);
+
 		if (direction === 0) return;
+
 		applyPartConfig(nextPartIndexWithBound);
 	}, [applyPartConfig, localStore]);
 

@@ -20,6 +20,7 @@ export interface Props extends React.PropsWithChildren<{}> {
 	enabled?: boolean;
 	defaultDuration?: number;
 	parts: (Part | Part[])[];
+	stepBetweenIterations?: number;
 }
 
 export type Context = IterationsControlsContext & {
@@ -27,7 +28,6 @@ export type Context = IterationsControlsContext & {
 	next: () => void;
 	partsAmount: number;
 	getActivePartIndex: () => number;
-	getDurationFactorInRange: (start: number, end: number) => number;
 	change: (partIndex: number) => void;
 	enabled: boolean;
 };
@@ -37,31 +37,22 @@ export const context = createContext<Context>(null!);
 export const IterationsControls: React.FC<Props> = ({
 	parts,
 	children,
-	enabled = true,
 	defaultDuration = 1000,
+	enabled = true,
 }) => {
-	const flattenParts = useMemo(
-		() => parts.flat(1).sort(({ from: a }, { from: b }) => a - b),
-		[parts]
-	);
-
-	const partsWithShiftedBound = useMemo(
-		() => [
-			...mapParts(parts, (part) => ({
-				...part,
-				to: part.to - 0.001,
-			})),
-			{
-				from: flattenParts[flattenParts.length - 1].to,
-				to: flattenParts[flattenParts.length - 1].to + 0.001,
-			},
-		],
-		[flattenParts, parts]
+	const partsWithShiftedBound = parts.map((part) =>
+		Array.isArray(part)
+			? part.map((part) => ({ ...part, from: part.from + 0.001 }))
+			: { ...part, from: part.from + 0.001 }
 	);
 
 	const flattenPartsWithShiftedBound = useMemo(
 		() => partsWithShiftedBound.flat(1).sort(({ from: a }, { from: b }) => a - b),
 		[partsWithShiftedBound]
+	);
+	const flattenParts = useMemo(
+		() => parts.flat(1).sort(({ from: a }, { from: b }) => a - b),
+		[parts]
 	);
 
 	const iterations = useMemo(() => Math.max(...flattenParts.map(({ to }) => to)), [flattenParts]);
@@ -69,23 +60,29 @@ export const IterationsControls: React.FC<Props> = ({
 		iterations,
 	});
 
+	const localStore = useLocalStore({
+		direction: 0,
+		targetPartIndexWithBound: [0, 0] as PartIndexWithBound,
+		currentPartIndexWithBound: [0, -1] as PartIndexWithBound,
+	});
+
 	const findPartIndex = useCallback(
 		(
 			partOrIteration: Part | number,
-			{ target = flattenParts, direction }: { direction?: number; target?: Part[] } = {}
+			{ shifted = false, direction }: { direction?: number; shifted?: boolean } = {}
 		) => {
 			return typeof partOrIteration === "number"
-				? target.findIndex(
+				? (shifted ? flattenPartsWithShiftedBound : flattenParts).findIndex(
 						({ from, to }) =>
 							(direction === -1 && from < partOrIteration && partOrIteration <= to) ||
 							(direction === 1 && from <= partOrIteration && partOrIteration < to) ||
 							(!direction && from <= partOrIteration && partOrIteration <= to)
 				  )
-				: target.findIndex(
+				: (shifted ? flattenPartsWithShiftedBound : flattenParts).findIndex(
 						({ from, to }) => from === partOrIteration.from && to === partOrIteration.to
 				  );
 		},
-		[flattenParts]
+		[flattenParts, flattenPartsWithShiftedBound]
 	);
 
 	const getPartByIndex = useCallback(
@@ -95,27 +92,10 @@ export const IterationsControls: React.FC<Props> = ({
 		[flattenParts]
 	);
 
-	const localStore = useLocalStore({
-		direction: 0,
-		targetPartIndexWithBound: [0, 0] as PartIndexWithBound,
-		currentPartIndexWithBound: [0, -1] as PartIndexWithBound,
-		get activePartIndex() {
-			const prop = getPartAccessProp(
-				getPartByIndex(this.targetPartIndexWithBound[0]),
-				this.targetPartIndexWithBound[1]
-			);
-			const partIndex = findPartIndex(prop, { target: flattenPartsWithShiftedBound });
-			const part = flattenPartsWithShiftedBound[partIndex];
-			const partSource = findPartSource(part, partsWithShiftedBound);
-			if (!partSource) return -1;
-			return partsWithShiftedBound.indexOf(partSource);
-		},
-	});
-
 	const bootstrapAnimation = useCallback(
 		(partIndexWithBound: PartIndexWithBound) => {
-			const partIndex = clamp(partIndexWithBound[0], 0, flattenParts.length - 1);
-			const part = getPartByIndex(partIndex);
+			partIndexWithBound[0] = clamp(partIndexWithBound[0], 0, flattenParts.length - 1);
+			const part = getPartByIndex(partIndexWithBound[0]);
 			if (!part) return;
 			const neededIteration = getPartAccessProp(part, partIndexWithBound[1]);
 			const { iteration: currentIteration } = iterationsControlsContext.store;
@@ -133,8 +113,6 @@ export const IterationsControls: React.FC<Props> = ({
 
 	const change = useCallback(
 		(partIndexWithBound: PartIndexWithBound, force: boolean = false, neededBound: number = 0) => {
-			if (!enabled) return;
-
 			const part = getPartByIndex(partIndexWithBound[0]);
 			const partSource = findPartSource(part, parts);
 			const merged = Array.isArray(partSource);
@@ -181,15 +159,7 @@ export const IterationsControls: React.FC<Props> = ({
 					merged || long ? nextPartIndexWithBound : localStore.targetPartIndexWithBound
 				);
 		},
-		[
-			enabled,
-			getPartByIndex,
-			parts,
-			localStore,
-			findPartIndex,
-			iterationsControlsContext.animated.progress.isAnimating,
-			bootstrapAnimation,
-		]
+		[iterationsControlsContext, bootstrapAnimation, getPartByIndex, findPartIndex, localStore, parts]
 	);
 
 	const handleRest = useCallback(() => {
@@ -212,11 +182,16 @@ export const IterationsControls: React.FC<Props> = ({
 	}, [bootstrapAnimation, localStore]);
 
 	const next = useCallback(() => {
+		// const partIndexWithBound = getNextPartIndexWithBound(
+		// 	iterationsControlsContext.animated.progress.isAnimating && localStore
+		// 		? localStore.targetPartIndexWithBound
+		// 		: localStore.currentPartIndexWithBound
+		// );
 		const animated = iterationsControlsContext.animated.progress.isAnimating;
 		const partIndexWithBound = getNextPartIndexWithBound(
 			animated ? localStore.targetPartIndexWithBound : localStore.currentPartIndexWithBound
 		);
-		change(partIndexWithBound, !animated || localStore.direction !== 1);
+		change(partIndexWithBound, animated || localStore.direction !== 1);
 	}, [change, localStore, iterationsControlsContext]);
 
 	const prev = useCallback(() => {
@@ -224,34 +199,32 @@ export const IterationsControls: React.FC<Props> = ({
 		const partIndexWithBound = getPrevPartIndexWithBound(
 			animated ? localStore.targetPartIndexWithBound : localStore.currentPartIndexWithBound
 		);
-		change(partIndexWithBound, !animated || localStore.direction !== -1);
+		change(partIndexWithBound, animated || localStore.direction !== -1);
 	}, [change, localStore, iterationsControlsContext]);
 
 	const smartChange = useCallback(
 		(partIndex: number) => {
-			const direction = partsWithShiftedBound.length - 1 === partIndex ? 1 : -1;
-			const part = parts[direction === 1 ? partIndex - 1 : partIndex];
+			const part = parts[partIndex];
 			if (!part) return;
 			const boundPart = Array.isArray(part) ? part[0] : part;
 			partIndex = flattenParts.findIndex((part) => isPartsEquals(part, boundPart));
-			change([partIndex, direction], true, direction);
+			change([partIndex, -1], true, -1);
 		},
-		[change, flattenParts, parts, partsWithShiftedBound.length]
-	);
-
-	const getDurationFactorInRange = useCallback(
-		(start: number, end: number) => {
-			const part = flattenParts.find((part) => part.from <= start && part.to >= end);
-			if (!part) return 0;
-			const duration = part.duration || defaultDuration;
-			return duration / defaultDuration;
-		},
-		[defaultDuration, flattenParts]
+		[change, flattenParts, parts]
 	);
 
 	const getActivePartIndex = useCallback(() => {
-		return localStore.activePartIndex;
-	}, [localStore]);
+		const prop = getPartAccessProp(
+			getPartByIndex(localStore.targetPartIndexWithBound[0]),
+			localStore.targetPartIndexWithBound[1]
+		);
+		const partIndex = findPartIndex(prop, { shifted: true });
+		// return parts.indexOf(partSource);
+		const part = getPartByIndex(partIndex);
+		const partSource = findPartSource(part, parts);
+		if (!partSource) return -1;
+		return parts.indexOf(partSource);
+	}, [flattenParts, localStore, parts]);
 
 	useEffect(
 		() => iterationsControlsContext.addEventListener("rest", handleRest),
@@ -262,7 +235,6 @@ export const IterationsControls: React.FC<Props> = ({
 		<context.Provider
 			value={{
 				...iterationsControlsContext,
-				getDurationFactorInRange,
 				change: smartChange,
 				getActivePartIndex,
 				prev,
@@ -305,9 +277,3 @@ const findPartSource = (part: Part, targetParts: (Part | Part[])[]) => {
 const isPartsEquals = (a: Part, b: Part) => a && b && a.from === b.from && a.to === b.to;
 const getPartAccessProp = (part: Part, direction: number): number =>
 	part[direction === 1 ? "to" : "from"];
-
-const mapParts = (parts: (Part | Part[])[], callback: (part: Part, index: number) => Part) => {
-	return parts.map((part, index) =>
-		Array.isArray(part) ? part.map(callback) : callback(part, index)
-	);
-};

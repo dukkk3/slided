@@ -2,12 +2,12 @@ import React, { memo } from "react";
 import { a } from "react-spring";
 
 // import { useGlobalStore } from "@core/hooks/useGlobalStore";
-import { useIterationsContext } from "@core/hooks/useIterationsContext";
+import { useIterationsControls } from "@core/hooks/useIterationsControls";
 
 import * as S from "./styled";
 
 export const DebugIterationControls: React.FC = memo(() => {
-	const iterationsContext = useIterationsContext();
+	const iterationsControls = useIterationsControls();
 
 	return (
 		<S.DebugIterationControls>
@@ -18,7 +18,7 @@ export const DebugIterationControls: React.FC = memo(() => {
 				<span>
 					Progress:{" "}
 					<a.span>
-						{iterationsContext.animated.progress.to((value) => value.toFixed(4)) as unknown as number}
+						{iterationsControls.animated.progress.to((value) => value.toFixed(4)) as unknown as number}
 					</a.span>
 				</span>
 			</p>
@@ -27,8 +27,8 @@ export const DebugIterationControls: React.FC = memo(() => {
 					Iteration:{" "}
 					<a.span>
 						{
-							iterationsContext.animated.progress.to((value) =>
-								(value * iterationsContext.iterations).toFixed(4)
+							iterationsControls.animated.progress.to((value) =>
+								(value * iterationsControls.iterations).toFixed(4)
 							) as unknown as number
 						}
 					</a.span>
@@ -39,8 +39,8 @@ export const DebugIterationControls: React.FC = memo(() => {
 					Iteration №:{" "}
 					<a.span>
 						{
-							iterationsContext.animated.progress.to((value) =>
-								Math.floor(value * iterationsContext.iterations)
+							iterationsControls.animated.progress.to((value) =>
+								Math.floor(value * iterationsControls.iterations)
 							) as unknown as number
 						}
 					</a.span>

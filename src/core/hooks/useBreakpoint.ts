@@ -42,6 +42,9 @@ export function useBreakpoint() {
 		get laptop() {
 			return range("laptop");
 		},
+		get identified() {
+			return Object.values(getMediaMatches()).some(Boolean);
+		},
 	});
 
 	const mobile = useCallback(() => {
@@ -56,9 +59,14 @@ export function useBreakpoint() {
 		return localStore.laptop;
 	}, [localStore]);
 
+	const identified = useCallback(() => {
+		return localStore.identified;
+	}, [localStore]);
+
 	return {
 		getMediaMatches,
 		getMediaMatch,
+		identified,
 		laptop,
 		mobile,
 		tablet,
