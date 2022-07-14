@@ -1,4 +1,3 @@
-import { useContext } from "react";
 import { Observer } from "mobx-react-lite";
 
 import { Iteration } from "@components/common/hoc/Iteration";
@@ -14,7 +13,7 @@ import { ProfileCard, Props as ProfileCardProps } from "./ProfileCard";
 
 import { PromoContainer } from "../../shared/PromoContainer";
 
-import { context as promoContext } from "../../index";
+import { usePromo } from "../../index";
 
 import * as S from "./styled";
 
@@ -23,22 +22,16 @@ export interface Props {
 }
 
 export const Designers: React.FC = () => {
+	const promo = usePromo();
 	const breakpoint = useBreakpoint();
-	const promoStore = useContext(promoContext);
 
 	return (
 		<Observer>
 			{() =>
 				breakpoint.mobile() ? (
-					<DesignersMobile faceContainerRef={promoStore.transforms.executorAndPhoneExecutor.startRef} />
+					<DesignersMobile faceContainerRef={promo.transforms.executorAndPhoneExecutor.startRef} />
 				) : (
-					<PromoContainer
-						data-iteration-name='Designers'
-						style={{ top: 0, left: 0, position: "absolute" }}>
-						<DesignersDesktop
-							faceContainerRef={promoStore.transforms.executorAndPhoneExecutor.startRef}
-						/>
-					</PromoContainer>
+					<DesignersDesktop faceContainerRef={promo.transforms.executorAndPhoneExecutor.startRef} />
 				)
 			}
 		</Observer>
@@ -46,7 +39,7 @@ export const Designers: React.FC = () => {
 };
 
 const DesignersMobile: React.FC<Props> = ({ faceContainerRef }) => {
-	const promoStore = useContext(promoContext);
+	const promo = usePromo();
 
 	return (
 		<Iteration iterations={5} visibilitySwitch={{ unmountWhenInvisible: false }}>
@@ -56,8 +49,8 @@ const DesignersMobile: React.FC<Props> = ({ faceContainerRef }) => {
 						{() => (
 							<S.Designers
 								style={{
-									...promoStore.resizeObservers.phoneCardsContainer.getSize(),
-									...promoStore.resizeObservers.phoneCardsContainer.getOffset(),
+									...promo.resizeObservers.phoneCardsContainer.getSize(),
+									...promo.resizeObservers.phoneCardsContainer.getOffset(),
 								}}>
 								<S.Content>
 									<VisibilitySwitch visible={false} unmountWhenInvisible={false}>
@@ -134,73 +127,77 @@ const DesignersDesktop: React.FC<Props> = ({ faceContainerRef }) => {
 	return (
 		<Iteration iterations={5} visibilitySwitch={{ unmountWhenInvisible: false }}>
 			{([iteration5]) => (
-				<S.Designers>
-					<VisibilitySwitch visible={false} unmountWhenInvisible={false}>
-						<S.ProfileCardGroup
-							style={{
-								top: `${normalize(TARGET_USER.position.y) * 100}%`,
-								left: `${normalize(TARGET_USER.position.x) * 100}%`,
-								transform: `translate3d(-50%, -50%, 0)`,
-							}}>
-							<ProfileCard {...TARGET_USER.data} avatarRef={faceContainerRef} />
-						</S.ProfileCardGroup>
-					</VisibilitySwitch>
-					<Observer>
-						{() => (
-							<VisibilitySwitch visible={iteration5.visible()}>
-								<div>
-									{USERS.map(({ position, data, inQueueIndex }, index) => (
-										<S.ProfileCardGroup
-											key={index}
-											style={{
-												top: `${(position.y / 2 + 0.5) * 100}%`,
-												left: `${(position.x / 2 + 0.5) * 100}%`,
-												transform: `translate3d(-50%, -50%, 0)`,
-											}}>
-											<S.ProfileCardWrapper
+				<PromoContainer
+					data-iteration-name='Designers'
+					style={{ top: 0, left: 0, position: "absolute" }}>
+					<S.Designers>
+						<VisibilitySwitch visible={false} unmountWhenInvisible={false}>
+							<S.ProfileCardGroup
+								style={{
+									top: `${normalize(TARGET_USER.position.y) * 100}%`,
+									left: `${normalize(TARGET_USER.position.x) * 100}%`,
+									transform: `translate3d(-50%, -50%, 0)`,
+								}}>
+								<ProfileCard {...TARGET_USER.data} avatarRef={faceContainerRef} />
+							</S.ProfileCardGroup>
+						</VisibilitySwitch>
+						<Observer>
+							{() => (
+								<VisibilitySwitch visible={iteration5.visible()}>
+									<div>
+										{USERS.map(({ position, data, inQueueIndex }, index) => (
+											<S.ProfileCardGroup
+												key={index}
 												style={{
-													opacity:
-														iteration5.currentState() === "opening"
-															? iteration5.interpolations.opening
-																	.to(interpolations.range(0, 0.5))
-																	.to(interpolations.easing("easeInOutCubic"))
-															: iteration5.interpolations.closing
-																	.to(interpolations.range(0, 0.5))
-																	.to(interpolations.easing("easeInOutCubic"))
-																	.to(interpolations.invert),
-													scale:
-														iteration5.currentState() === "opening"
-															? iteration5.interpolations.opening
-																	.to(
-																		interpolations.range(
-																			inQueueIndex / USERS.length,
-																			(inQueueIndex + 1) / USERS.length
-																		)
-																	)
-																	.to(interpolations.easing("easeInOutCubic"))
-															: iteration5.interpolations.closing
-																	.to(interpolations.invert)
-																	.to(interpolations.easing("easeInOutCubic")),
+													top: `${(position.y / 2 + 0.5) * 100}%`,
+													left: `${(position.x / 2 + 0.5) * 100}%`,
+													transform: `translate3d(-50%, -50%, 0)`,
 												}}>
-												<ProfileCard
-													{...data}
-													avatarVisibleInterpolation={
-														index === TARGET_INDEX
-															? iteration5.interpolations.closing
-																	.to(interpolations.step(0.001))
-																	.to(interpolations.easing("easeInOutQuart"))
-																	.to(interpolations.invert)
-															: undefined
-													}
-												/>
-											</S.ProfileCardWrapper>
-										</S.ProfileCardGroup>
-									))}
-								</div>
-							</VisibilitySwitch>
-						)}
-					</Observer>
-				</S.Designers>
+												<S.ProfileCardWrapper
+													style={{
+														opacity:
+															iteration5.currentState() === "opening"
+																? iteration5.interpolations.opening
+																		.to(interpolations.range(0, 0.5))
+																		.to(interpolations.easing("easeInOutCubic"))
+																: iteration5.interpolations.closing
+																		.to(interpolations.range(0, 0.5))
+																		.to(interpolations.easing("easeInOutCubic"))
+																		.to(interpolations.invert),
+														scale:
+															iteration5.currentState() === "opening"
+																? iteration5.interpolations.opening
+																		.to(
+																			interpolations.range(
+																				inQueueIndex / USERS.length,
+																				(inQueueIndex + 1) / USERS.length
+																			)
+																		)
+																		.to(interpolations.easing("easeInOutCubic"))
+																: iteration5.interpolations.closing
+																		.to(interpolations.invert)
+																		.to(interpolations.easing("easeInOutCubic")),
+													}}>
+													<ProfileCard
+														{...data}
+														avatarVisibleInterpolation={
+															index === TARGET_INDEX
+																? iteration5.interpolations.closing
+																		.to(interpolations.step(0.001))
+																		.to(interpolations.easing("easeInOutQuart"))
+																		.to(interpolations.invert)
+																: undefined
+														}
+													/>
+												</S.ProfileCardWrapper>
+											</S.ProfileCardGroup>
+										))}
+									</div>
+								</VisibilitySwitch>
+							)}
+						</Observer>
+					</S.Designers>
+				</PromoContainer>
 			)}
 		</Iteration>
 	);

@@ -23,14 +23,7 @@ export const Tariffs: React.FC = () => {
 								.to(interpolations.invert)
 								.to((value) => `${10 * value}rem`),
 						}}>
-						{breakpoint.mobile() ? (
-							<S.Title>
-								One
-								<br /> subscription
-							</S.Title>
-						) : (
-							<S.Title>One subscription</S.Title>
-						)}
+						<S.Title>One subscription</S.Title>
 						{breakpoint.mobile() && (
 							<S.Subtitle>
 								Up to 40 slides,

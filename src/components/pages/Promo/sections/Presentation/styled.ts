@@ -1,8 +1,6 @@
 import { a } from "react-spring";
 import styled from "styled-components";
 
-import { Image } from "@components/common/ui/Image/styled";
-
 export const EndContainer = styled.div`
 	top: 0;
 	left: 0;
@@ -35,15 +33,4 @@ export const CardImageGroup = styled(a.div)<CardImageGroupProps>`
 	transform-origin: center;
 	will-change: transform;
 	position: absolute;
-
-	${Image} {
-		width: 100%;
-		height: 100%;
-
-		img {
-			width: 100%;
-			height: 100%;
-			object-fit: cover;
-		}
-	}
 `;

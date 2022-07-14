@@ -94,7 +94,7 @@ export const Description = styled.div<DescriptionProps>`
 	left: 0;
 	width: 100%;
 	top: ${(props) => props.$overlay && "3.4rem"};
-	font-size: ${(props) => props.$big && "4.8rem"};
+	font-size: ${(props) => props.$big && "4.2rem"};
 	line-height: ${(props) => props.$big && "70%"};
 	position: ${(props) => props.$overlay && "absolute"};
 

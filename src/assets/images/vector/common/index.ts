@@ -12,3 +12,4 @@ export {
 } from "./logo-ray-piece-mask.svg";
 export { default as SlidedSource, ReactComponent as Slided } from "./slided.svg";
 export { default as LogoRayIcoSource, ReactComponent as LogoRayIco } from "./logo-ray-ico.svg";
+export { default as RaySource, ReactComponent as Ray } from "./ray.svg";

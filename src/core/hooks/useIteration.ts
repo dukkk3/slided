@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
 
-import { useIterationsControls } from "./useIterationsControls";
+import { useIterationsControls } from "@components/providers/IterationsControlsProvider";
 import { useLocalStore } from "./useLocalStore";
 import { clamp } from "@core/utils/math.utils";
 

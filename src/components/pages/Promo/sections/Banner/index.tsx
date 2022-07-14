@@ -1,4 +1,4 @@
-import { useCallback, useContext, useEffect } from "react";
+import { useCallback, useEffect } from "react";
 import { a, useSprings, useSpring } from "react-spring";
 import { Observer } from "mobx-react-lite";
 import { when } from "mobx";
@@ -13,12 +13,12 @@ import { interpolations } from "@core/helpers/iteration.helper";
 import { resolveSpringAnimation } from "@core/helpers/animation.helper";
 import { splitRowsIntoWords } from "@core/utils/common.utils";
 
-import { context as promoContext } from "../../index";
+import { usePromo } from "../../index";
 
 import * as S from "./styled";
 
 export const Banner: React.FC = () => {
-	const promoStore = useContext(promoContext);
+	const promo = usePromo();
 	const [buttonStyle, buttonStyleApi] = useSpring(() => ({ progress: 0 }));
 	const [titleWordsStyles, titleWordsApi] = useSprings(TITLE_WORDS_AMOUNT, () => ({ progress: 0 }));
 
@@ -37,10 +37,10 @@ export const Banner: React.FC = () => {
 	useEffect(
 		() =>
 			when(
-				() => promoStore.store.canShowContent,
-				() => animate().then(() => promoStore.store.setPromoBannerOpened(true))
+				() => promo.store.canShowContent,
+				() => animate().then(() => promo.store.setPromoBannerOpened(true))
 			),
-		[animate, promoStore]
+		[animate, promo]
 	);
 
 	return (
@@ -54,7 +54,7 @@ export const Banner: React.FC = () => {
 									<S.TitleWrapper>
 										<AnimatedSplitWords
 											text={TITLE}
-											opening={!promoStore.store.interactiveEnabled}
+											opening={!promo.store.interactiveEnabled}
 											getOpeningInterpolation={(index) => titleWordsStyles[index].progress}
 											getClosingInterpolation={() =>
 												iteration0.interpolations.closing.to(interpolations.easing("easeInOutCubic"))
@@ -68,11 +68,11 @@ export const Banner: React.FC = () => {
 							{() => (
 								<a.div
 									style={{
-										y: (promoStore.store.interactiveEnabled
+										y: (promo.store.interactiveEnabled
 											? iteration0.interpolations.closing.to(interpolations.easing("easeInOutCubic"))
 											: buttonStyle.progress.to(interpolations.invert)
 										).to((value) => `-${2 * value}rem`),
-										opacity: promoStore.store.interactiveEnabled
+										opacity: promo.store.interactiveEnabled
 											? iteration0.interpolations.closing
 													.to(interpolations.easing("easeInOutCubic"))
 													.to(interpolations.invert)

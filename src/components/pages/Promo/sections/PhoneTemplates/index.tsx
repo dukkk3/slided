@@ -1,5 +1,4 @@
-import { forwardRef, useContext } from "react";
-import { a } from "react-spring";
+import { forwardRef } from "react";
 import { Observer } from "mobx-react-lite";
 
 import { Iteration } from "@components/common/hoc/Iteration";
@@ -13,11 +12,12 @@ import { useLocalStore } from "@core/hooks/useLocalStore";
 import { interpolations } from "@core/helpers/iteration.helper";
 import { mergeRefs } from "@core/utils/common.utils";
 
-import * as S from "./styled";
-
 import { AnimatedSplitChars } from "../../helpers/AnimatedSplitChars";
 import { Phone } from "../../shared/Phone";
-import { context as promoContext } from "../../index";
+
+import { usePromo } from "../../index";
+
+import * as S from "./styled";
 
 export interface Template {
 	source: string;
@@ -29,7 +29,7 @@ export interface Props {
 }
 
 export const PhoneTemplates = forwardRef<HTMLDivElement, Props>(({ templates }, ref) => {
-	const promoStore = useContext(promoContext);
+	const promo = usePromo();
 	const breakpoint = useBreakpoint();
 
 	const localStore = useLocalStore({
@@ -46,7 +46,7 @@ export const PhoneTemplates = forwardRef<HTMLDivElement, Props>(({ templates }, 
 			}
 			visibilitySwitch={{ unmountWhenInvisible: false }}>
 			{([iteration7, iteration8, iteration9]) => (
-				<a.div
+				<S.PhoneGroup
 					data-iteration-name='PhoneTemplates'
 					style={{
 						opacity: iteration9.interpolations.closing
@@ -116,8 +116,8 @@ export const PhoneTemplates = forwardRef<HTMLDivElement, Props>(({ templates }, 
 													<S.Card>
 														<S.CardImage
 															ref={mergeRefs(
-																promoStore.transforms.bigTemplateAndPhoneTemplate.endRef,
-																promoStore.resizeObservers.phoneCard.ref
+																promo.transforms.bigTemplateAndPhoneTemplate.endRef,
+																promo.resizeObservers.phoneCard.ref
 															)}
 														/>
 													</S.Card>
@@ -126,7 +126,7 @@ export const PhoneTemplates = forwardRef<HTMLDivElement, Props>(({ templates }, 
 											<VisibilitySwitch visible={false} unmountWhenInvisible={false}>
 												<S.CardWrapper $overlay>
 													<S.Card style={{ y: getCardTranslate(1, 0, localStore.cardOffset) }}>
-														<S.CardImage ref={promoStore.transforms.phoneTemplateAndGridTemplate.startRef} />
+														<S.CardImage ref={promo.transforms.phoneTemplateAndGridTemplate.startRef} />
 													</S.Card>
 												</S.CardWrapper>
 											</VisibilitySwitch>
@@ -153,8 +153,7 @@ export const PhoneTemplates = forwardRef<HTMLDivElement, Props>(({ templates }, 
 																						.to(interpolations.easing("easeInOutCubic"))
 																						.to((value) => 1 - (index / templates.length) * value),
 																	}}>
-																	<S.CardImage
-																		style={{ height: promoStore.resizeObservers.phoneCard.getSize().height }}>
+																	<S.CardImage style={{ height: promo.resizeObservers.phoneCard.getSize().height }}>
 																		<Image src={template.source} />
 																	</S.CardImage>
 																	{template.overlaySource && (
@@ -167,7 +166,7 @@ export const PhoneTemplates = forwardRef<HTMLDivElement, Props>(({ templates }, 
 																						.to((value) => `${value * 100}%`),
 																				}}>
 																				<S.CardImage
-																					style={{ height: promoStore.resizeObservers.phoneCard.getSize().height }}>
+																					style={{ height: promo.resizeObservers.phoneCard.getSize().height }}>
 																					<Image src={template.overlaySource} />
 																				</S.CardImage>
 																			</S.OverlayCardImage>
@@ -215,7 +214,7 @@ export const PhoneTemplates = forwardRef<HTMLDivElement, Props>(({ templates }, 
 							)}
 						</Observer>
 					</Phone>
-				</a.div>
+				</S.PhoneGroup>
 			)}
 		</Iteration>
 	);

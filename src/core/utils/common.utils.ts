@@ -194,3 +194,35 @@ export function calculateCurrentIndex3D(array: any[][], x: number, y: number, z:
 			) + z
 	);
 }
+
+export function lockOrientation(orientation: OrientationLockType) {
+	const d = document.documentElement as any;
+
+	if (d.requestFullscreen) {
+		d.requestFullscreen();
+	} else if (d.mozRequestFullScreen) {
+		d.mozRequestFullScreen();
+	} else if (d.webkitRequestFullscreen) {
+		d.webkitRequestFullscreen();
+	} else if (d.msRequestFullscreen) {
+		d.msRequestFullscreen();
+	}
+
+	window.screen.orientation.lock(orientation);
+}
+
+export function unlockOrientation() {
+	window.screen.orientation.unlock();
+
+	const d = document as any;
+
+	if (d.exitFullscreen) {
+		d.exitFullscreen();
+	} else if (d.webkitExitFullscreen) {
+		d.webkitExitFullscreen();
+	} else if (d.mozCancelFullScreen) {
+		d.mozCancelFullScreen();
+	} else if (d.msExitFullscreen) {
+		d.msExitFullscreen();
+	}
+}

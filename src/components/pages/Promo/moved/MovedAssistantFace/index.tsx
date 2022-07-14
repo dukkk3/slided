@@ -1,4 +1,4 @@
-import { useEffect, useContext, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useSpring } from "react-spring";
 import { Observer } from "mobx-react-lite";
 import { reaction } from "mobx";
@@ -8,15 +8,15 @@ import { Iteration } from "@components/common/hoc/Iteration";
 import { useIteration } from "@core/hooks/useIteration";
 import { interpolations } from "@core/helpers/iteration.helper";
 
-import * as S from "./styled";
+import { usePromo } from "../../index";
 
-import { context as promoContext } from "../../index";
 import { Face } from "./Face";
+import * as S from "./styled";
 
 export interface Props {}
 
 export const MovedAssistantFace: React.FC<Props> = () => {
-	const promoStore = useContext(promoContext);
+	const promo = usePromo();
 	const videoRef = useRef<HTMLVideoElement>(null);
 	const iteration1 = useIteration(1);
 	const iteration6 = useIteration(6);
@@ -74,20 +74,16 @@ export const MovedAssistantFace: React.FC<Props> = () => {
 						<>
 							<S.MovedAssistantFace
 								style={{
-									...promoStore.transforms.bigAssistantAndPhoneAssistant.startResizeObserver.getSize(),
+									...promo.transforms.bigAssistantAndPhoneAssistant.startResizeObserver.getSize(),
 									...(iteration3.visible() || iteration4.visible()
 										? {
 												x: iteration3.interpolations.opening
 													.to(interpolations.easing("easeInOutCubic"))
-													.to(
-														(value) => promoStore.transforms.bigAssistantAndPhoneAssistant.getPosition().x * value
-													),
+													.to((value) => promo.transforms.bigAssistantAndPhoneAssistant.getPosition().x * value),
 												y: iteration3.interpolations.opening
 													.to(interpolations.easing("easeInOutCubic"))
-													.to(
-														(value) => promoStore.transforms.bigAssistantAndPhoneAssistant.getPosition().y * value
-													),
-												...promoStore.transforms.bigAssistantAndPhoneAssistant.getStartOffset(),
+													.to((value) => promo.transforms.bigAssistantAndPhoneAssistant.getPosition().y * value),
+												...promo.transforms.bigAssistantAndPhoneAssistant.getStartOffset(),
 										  }
 										: iteration5.started()
 										? {
@@ -95,33 +91,31 @@ export const MovedAssistantFace: React.FC<Props> = () => {
 													.to(interpolations.easing("easeInOutCubic"))
 													.to(
 														(value) =>
-															promoStore.transforms.bigAssistantAndPhoneAssistant.getPosition().x +
-															promoStore.transforms.phoneAssistantAndShiftedAssistant.getPosition().x * value
+															promo.transforms.bigAssistantAndPhoneAssistant.getPosition().x +
+															promo.transforms.phoneAssistantAndShiftedAssistant.getPosition().x * value
 													),
 												y: iteration5.interpolations.closing
 													.to(interpolations.easing("easeInOutCubic"))
 													.to(
 														(value) =>
-															promoStore.transforms.bigAssistantAndPhoneAssistant.getPosition().y +
-															promoStore.transforms.phoneAssistantAndShiftedAssistant.getPosition().y * value
+															promo.transforms.bigAssistantAndPhoneAssistant.getPosition().y +
+															promo.transforms.phoneAssistantAndShiftedAssistant.getPosition().y * value
 													),
-												...promoStore.transforms.bigAssistantAndPhoneAssistant.getStartOffset(),
+												...promo.transforms.bigAssistantAndPhoneAssistant.getStartOffset(),
 										  }
 										: {
-												...promoStore.transforms.bigAssistantAndPhoneAssistant.startResizeObserver.getSize(),
-												...promoStore.transforms.bigAssistantAndPhoneAssistant.getStartOffset(),
+												...promo.transforms.bigAssistantAndPhoneAssistant.startResizeObserver.getSize(),
+												...promo.transforms.bigAssistantAndPhoneAssistant.getStartOffset(),
 										  }),
 									scaleX: iteration3.interpolations.opening
 										.to(interpolations.easing("easeInOutCubic"))
 										.to(
-											(value) =>
-												1 - (1 - promoStore.transforms.bigAssistantAndPhoneAssistant.getScale().x) * value
+											(value) => 1 - (1 - promo.transforms.bigAssistantAndPhoneAssistant.getScale().x) * value
 										),
 									scaleY: iteration3.interpolations.opening
 										.to(interpolations.easing("easeInOutCubic"))
 										.to(
-											(value) =>
-												1 - (1 - promoStore.transforms.bigAssistantAndPhoneAssistant.getScale().y) * value
+											(value) => 1 - (1 - promo.transforms.bigAssistantAndPhoneAssistant.getScale().y) * value
 										),
 								}}>
 								<Face
@@ -142,19 +136,17 @@ export const MovedAssistantFace: React.FC<Props> = () => {
 							</S.MovedAssistantFace>
 							<S.OverlayBorderGroup
 								style={{
-									...promoStore.transforms.phoneAssistantAndShiftedAssistant.startResizeObserver.getSize(),
-									...promoStore.transforms.phoneAssistantAndShiftedAssistant.getStartOffset(),
+									...promo.transforms.phoneAssistantAndShiftedAssistant.startResizeObserver.getSize(),
+									...promo.transforms.phoneAssistantAndShiftedAssistant.getStartOffset(),
 									x: iteration5.interpolations.closing
 										.to(interpolations.easing("easeInOutCubic"))
 										.to(
-											(value) =>
-												promoStore.transforms.phoneAssistantAndShiftedAssistant.getPosition().x * value
+											(value) => promo.transforms.phoneAssistantAndShiftedAssistant.getPosition().x * value
 										),
 									y: iteration5.interpolations.closing
 										.to(interpolations.easing("easeInOutCubic"))
 										.to(
-											(value) =>
-												promoStore.transforms.phoneAssistantAndShiftedAssistant.getPosition().y * value
+											(value) => promo.transforms.phoneAssistantAndShiftedAssistant.getPosition().y * value
 										),
 									opacity: iteration5.interpolations.closing
 										.to(interpolations.easing("easeInOutCubic"))

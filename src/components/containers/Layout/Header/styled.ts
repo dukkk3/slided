@@ -51,7 +51,7 @@ export const Navbar = styled.div`
 	`}
 `;
 
-export const Burger = styled.div`
+export const Burger = styled.button`
 	width: 2rem;
 	height: 1rem;
 	display: none;

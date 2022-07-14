@@ -3,12 +3,15 @@ import { reaction } from "mobx";
 
 import { useResizeObserver } from "@core/hooks/useResizeObserver";
 
-import { Header } from "./Header";
+import { Header, Props as HeaderProps } from "./Header";
+
 import * as S from "./styled";
 
-export interface Props extends React.PropsWithChildren<{}> {}
+export interface Props extends React.PropsWithChildren<{}> {
+	header?: HeaderProps;
+}
 
-export const Layout: React.FC<Props> = ({ children }) => {
+export const Layout: React.FC<Props> = ({ children, header }) => {
 	const layoutRef = useRef<HTMLDivElement>(null);
 	const headerResizeObserver = useResizeObserver({
 		calculateSizeWithPaddings: true,
@@ -18,10 +21,8 @@ export const Layout: React.FC<Props> = ({ children }) => {
 
 	const updateCSSProperties = useCallback(() => {
 		const { height: headerHeight, width: headerWidth } = headerResizeObserver.getSize();
-		const layout = layoutRef.current;
-		if (!layout) return;
-		layout.style.setProperty("--header-height", `${headerHeight}px`);
-		layout.style.setProperty("--header-width", `${headerWidth}px`);
+		document.body.style.setProperty("--header-height", `${headerHeight}px`);
+		document.body.style.setProperty("--header-width", `${headerWidth}px`);
 	}, [headerResizeObserver]);
 
 	useEffect(
@@ -40,7 +41,7 @@ export const Layout: React.FC<Props> = ({ children }) => {
 	return (
 		<S.Layout ref={layoutRef}>
 			<S.HeaderWrapper ref={headerResizeObserver.ref}>
-				<Header />
+				<Header {...header} />
 			</S.HeaderWrapper>
 			<div>{children}</div>
 		</S.Layout>

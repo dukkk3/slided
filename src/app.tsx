@@ -5,6 +5,7 @@ import { Promo } from "@components/pages/Promo";
 
 import { useGlobalStore } from "@core/hooks/useGlobalStore";
 import { useMatchMedia } from "@core/hooks/useMatchMedia";
+import { useBreakpoint } from "@core/hooks/useBreakpoint";
 import { breakpoints, getMatchMediaQuery, BreakpointNameKind } from "@core/helpers/device.helper";
 
 const breakpointsKeys = Object.keys(breakpoints) as BreakpointNameKind[];
@@ -34,6 +35,7 @@ export const App: React.FC = () => {
 
 	useEffect(() => {
 		matchMedia.update();
+		window.scrollTo(0, 0);
 	}, [matchMedia]);
 
 	return <Promo />;

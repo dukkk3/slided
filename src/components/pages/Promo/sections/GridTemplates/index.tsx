@@ -1,4 +1,4 @@
-import { useContext, useMemo } from "react";
+import { useMemo } from "react";
 import { Observer } from "mobx-react-lite";
 
 import { Iteration } from "@components/common/hoc/Iteration";
@@ -11,7 +11,7 @@ import { interpolations } from "@core/helpers/iteration.helper";
 import { clamp } from "@core/utils/math.utils";
 
 import { AnimatedSplitChars } from "../../helpers/AnimatedSplitChars";
-import { context as promoContext } from "../../index";
+import { usePromo } from "../../index";
 
 import * as S from "./styled";
 
@@ -21,8 +21,8 @@ export interface Props {
 }
 
 export const GridTemplates: React.FC<Props> = ({ templatesSources, hidden }) => {
+	const promo = usePromo();
 	const breakpoint = useBreakpoint();
-	const promoStore = useContext(promoContext);
 	const cellsAmount = useMemo(() => templatesSources.flat(Infinity).length, [templatesSources]);
 	const centerColumn = useMemo(() => (templatesSources[0].length - 1) / 2, [templatesSources]);
 	const centerRow = useMemo(() => (templatesSources.length - 1) / 2, [templatesSources]);
@@ -79,11 +79,9 @@ export const GridTemplates: React.FC<Props> = ({ templatesSources, hidden }) => 
 														{rowIndex === centerRow && templateIndex === centerColumn && (
 															<VisibilitySwitch visible={false} unmountWhenInvisible={false}>
 																<S.Template
-																	ref={
-																		hidden ? promoStore.transforms.phoneTemplateAndGridTemplate.endRef : undefined
-																	}
+																	ref={hidden ? promo.transforms.phoneTemplateAndGridTemplate.endRef : undefined}
 																	style={{
-																		...promoStore.resizeObservers.phoneCard.getSize(),
+																		...promo.resizeObservers.phoneCard.getSize(),
 																	}}
 																	$overlay
 																/>
@@ -92,7 +90,7 @@ export const GridTemplates: React.FC<Props> = ({ templatesSources, hidden }) => 
 														<S.Template
 															$containsText={containsText}
 															style={{
-																...promoStore.resizeObservers.phoneCard.getSize(),
+																...promo.resizeObservers.phoneCard.getSize(),
 																...(!hidden
 																	? iteration10.started() &&
 																	  (distance === 0 || distance === 1) &&

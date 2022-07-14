@@ -6,7 +6,29 @@ import { Image } from "@components/common/ui/Image/styled";
 
 import { mobile } from "@styles/breakpoint";
 
+import {
+	Phone,
+	Description,
+	Content as PhoneContent,
+	ContentWrapper as PhoneContentWrapper,
+} from "../../shared/Phone/styled";
+
 export { Description, DescriptionGroup } from "../../shared/Phone/styled";
+
+export const PhoneGroup = styled(a.div)`
+	${Phone} {
+		height: 70rem;
+		max-height: 100%;
+
+		${PhoneContent}, ${PhoneContentWrapper} {
+			height: 100%;
+		}
+
+		${Description} {
+			top: 0 !important;
+		}
+	}
+`;
 
 export const Face = styled.div`
 	width: 10rem;
@@ -16,7 +38,11 @@ export const Face = styled.div`
 `;
 
 export const Content = styled.div`
+	display: flex;
+	flex-direction: column;
+	justify-content: space-between;
 	padding-top: calc(var(--phone-padding) * 2);
+	height: 100%;
 `;
 
 export const FaceWrapper = styled.div`
@@ -27,8 +53,31 @@ export const FaceWrapper = styled.div`
 	position: absolute;
 `;
 
+export const CardsGroup = styled.div`
+	position: relative;
+`;
+
+export const RayImageGroup = styled(a.div)`
+	width: 100%;
+	top: -3rem;
+	display: flex;
+	align-items: center;
+	height: 100%;
+	position: absolute;
+	justify-content: center;
+
+	${Image} {
+		height: calc(100% - 8rem);
+		max-height: 14rem;
+
+		${mobile`
+			height: calc(100% - 4rem);
+		`}
+	}
+`;
+
 export const Cards = styled(a.div)`
-	margin: 2.4rem 0;
+	margin: 2rem 0;
 	will-change: transform, opacity;
 
 	${mobile`
@@ -40,6 +89,7 @@ export const ButtonWrapper = styled.div`
 	width: 100%;
 	position: relative;
 	height: var(--height);
+	flex: 0 0 var(--height);
 
 	--height: 6rem;
 
@@ -58,13 +108,6 @@ export const ButtonWrapper = styled.div`
 		border-radius: 90rem;
 		will-change: opacity;
 	}
-
-	${mobile`
-		position: absolute;
-		bottom: var(--phone-padding);
-		left: var(--phone-padding);
-		width: calc(100% - var(--phone-padding) * 2);
-	`}
 `;
 
 export const TemplatesCards = styled.div`

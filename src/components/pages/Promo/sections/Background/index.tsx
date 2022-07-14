@@ -4,11 +4,12 @@ import { Observer } from "mobx-react-lite";
 import { reaction, when } from "mobx";
 import { a } from "react-spring";
 
+import { useIterationsControls } from "@components/providers/IterationsControlsProvider";
+
 import { Iteration } from "@components/common/hoc/Iteration";
 
 import { Image } from "@components/common/ui/Image";
 
-import { useIterationsControls } from "@core/hooks/useIterationsControls";
 import { useCanvasSequence } from "@core/hooks/useCanvasSequence";
 import { useLocalStore } from "@core/hooks/useLocalStore";
 import { useBreakpoint } from "@core/hooks/useBreakpoint";
@@ -17,7 +18,7 @@ import { interpolations } from "@core/helpers/iteration.helper";
 
 import { getRasterImageByName } from "@assets/images";
 
-import { context as promoContext } from "../../index";
+import { usePromo } from "../../index";
 
 import * as S from "./styled";
 
@@ -33,8 +34,8 @@ interface Context {
 const context = createContext<Context>(null!);
 
 export const Background: React.FC = () => {
+	const promo = usePromo();
 	const breakpoint = useBreakpoint();
-	const promoStore = useContext(promoContext);
 	const canvasSequence = useCanvasSequence(SEQUENCE, { resizeObserverDebounce: 100 });
 
 	const localStore = useLocalStore<Context["store"]>({
@@ -53,12 +54,12 @@ export const Background: React.FC = () => {
 				() => localStore.sequenceAvailable,
 				(available) => {
 					if (!available && available !== null) {
-						promoStore.store.setSequenceLoaded(true);
-						promoStore.store.setBackgroundAnimationEnded(true);
+						promo.store.setSequenceLoaded(true);
+						promo.store.setBackgroundAnimationEnded(true);
 					}
 				}
 			),
-		[localStore, promoStore]
+		[localStore, promo]
 	);
 
 	return (
@@ -77,8 +78,8 @@ export const Background: React.FC = () => {
 };
 
 const BackgroundDesktop: React.FC = () => {
+	const promo = usePromo();
 	const background = useContext(context);
-	const promoStore = useContext(promoContext);
 	const iterationsControls = useIterationsControls();
 
 	const updateNeededFrame = useCallback(
@@ -98,13 +99,13 @@ const BackgroundDesktop: React.FC = () => {
 	);
 
 	const preloadSequence = useCallback(async () => {
-		console.log(promoStore.store.sequenceLoaded);
-		if (promoStore.store.sequenceLoaded) return;
+		console.log(promo.store.sequenceLoaded);
+		if (promo.store.sequenceLoaded) return;
 		await SEQUENCE.preloadOne(0);
 		background.canvasSequence.drawCurrentFrame(true);
 		await SEQUENCE.preload(0, ITERATIONS[0]);
-		promoStore.store.setSequenceLoaded(true);
-	}, [background, promoStore]);
+		promo.store.setSequenceLoaded(true);
+	}, [background, promo]);
 
 	const preloadSequenceIteration = useCallback(() => {
 		const currentFrame = background.canvasSequence.getCurrentFrame();
@@ -172,20 +173,20 @@ const BackgroundDesktop: React.FC = () => {
 					preloadSequenceIteration();
 
 					if (currentFrame >= ITERATIONS[0]) {
-						promoStore.store.setBackgroundAnimationEnded(true);
+						promo.store.setBackgroundAnimationEnded(true);
 					}
 				}
 			),
-		[background, preloadSequenceIteration, promoStore]
+		[background, preloadSequenceIteration, promo]
 	);
 
 	useEffect(
 		() =>
 			when(
-				() => promoStore.store.canShowContent && !promoStore.store.backgroundAnimationEnded,
+				() => promo.store.canShowContent && !promo.store.backgroundAnimationEnded,
 				() => updateNeededFrame(ITERATIONS[0])
 			),
-		[iterationsControls, promoStore, updateNeededFrame]
+		[iterationsControls, promo, updateNeededFrame]
 	);
 
 	useEffect(() => {

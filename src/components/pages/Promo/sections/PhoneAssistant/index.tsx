@@ -1,7 +1,9 @@
-import { useEffect, forwardRef, useContext } from "react";
+import { useEffect, forwardRef } from "react";
 import { Observer } from "mobx-react-lite";
 import { a } from "react-spring";
 import { when } from "mobx";
+
+import { useIterationsControls } from "@components/providers/IterationsControlsProvider";
 
 import { Iteration } from "@components/common/hoc/Iteration";
 
@@ -10,7 +12,6 @@ import { VisibilitySwitch } from "@components/common/ui/VisibilitySwitch";
 import { Button } from "@components/common/ui/Button";
 import { Image } from "@components/common/ui/Image";
 
-import { useIterationsControls } from "@core/hooks/useIterationsControls";
 import { useBreakpoint } from "@core/hooks/useBreakpoint";
 import { useLocalStore } from "@core/hooks/useLocalStore";
 import { useIteration } from "@core/hooks/useIteration";
@@ -23,18 +24,19 @@ import { SlideButton } from "./SlideButton";
 import { AnimatedSplitChars } from "../../helpers/AnimatedSplitChars";
 import { Phone } from "../../shared/Phone";
 
-import { context as promoContext } from "../../index";
+import { usePromo } from "../../index";
 
 import * as S from "./styled";
+import { getVectorImageByName } from "@assets/images";
 
 export interface Props {
 	templatesSources: string[];
 }
 
 export const PhoneAssistant = forwardRef<HTMLDivElement, Props>(({ templatesSources }, ref) => {
+	const promo = usePromo();
 	const iteration3 = useIteration(3);
 	const breakpoint = useBreakpoint();
-	const promoStore = useContext(promoContext);
 	const iterationsControls = useIterationsControls();
 
 	const localStore = useLocalStore({
@@ -58,7 +60,7 @@ export const PhoneAssistant = forwardRef<HTMLDivElement, Props>(({ templatesSour
 			}
 			visibilitySwitch={{ unmountWhenInvisible: false }}>
 			{([iteration3, iteration4, iteration5, iteration6, iteration7]) => (
-				<a.div
+				<S.PhoneGroup
 					data-iteration-name='PhoneAssistant'
 					style={{
 						opacity: iteration7.interpolations.opening
@@ -72,96 +74,106 @@ export const PhoneAssistant = forwardRef<HTMLDivElement, Props>(({ templatesSour
 							interpolations.easing("easeInOutCubic")
 						)}>
 						<S.Content>
-							<S.Face>
-								<S.FaceWrapper
-									ref={mergeRefs(
-										promoStore.transforms.bigAssistantAndPhoneAssistant.endRef,
-										promoStore.transforms.phoneAssistantAndShiftedAssistant.startRef
+							<div>
+								<S.Face>
+									<S.FaceWrapper
+										ref={mergeRefs(
+											promo.transforms.bigAssistantAndPhoneAssistant.endRef,
+											promo.transforms.phoneAssistantAndShiftedAssistant.startRef
+										)}
+									/>
+									<S.FaceWrapper
+										ref={promo.transforms.phoneAssistantAndShiftedAssistant.endRef}
+										style={{ transform: "translateX(-40%)" }}
+									/>
+									<S.FaceWrapper
+										ref={promo.transforms.executorAndPhoneExecutor.endRef}
+										style={{ transform: "translateX(40%)" }}
+									/>
+								</S.Face>
+								<Observer>
+									{() => (
+										<S.DescriptionGroup>
+											<VisibilitySwitch
+												visible={iteration3.started() && !iteration4.ended()}
+												unmountWhenInvisible={false}>
+												<S.Description>
+													<Observer>
+														{() => (
+															<AnimatedSplitChars
+																text={["Choose a style", "from ready-made", "templates"]}
+																openingInterpolation={iteration3.interpolations.opening.to(
+																	interpolations.easing("easeInOutCubic")
+																)}
+																closingInterpolation={iteration4.interpolations.closing.to(
+																	interpolations.easing("easeInOutCubic")
+																)}
+																type={iteration3.visible() || iteration4.visible("opening") ? "opening" : "closing"}
+															/>
+														)}
+													</Observer>
+												</S.Description>
+											</VisibilitySwitch>
+											<VisibilitySwitch visible={iteration5.visible()}>
+												<S.Description $overlay>
+													<Observer>
+														{() => (
+															<AnimatedSplitChars
+																text={
+																	breakpoint.mobile()
+																		? ["Our best designers", "are here to pick up", "the presentation... "]
+																		: ["Our selected", "designers are on", "the mission to get", "your task done"]
+																}
+																openingInterpolation={iteration5.interpolations.opening
+																	.to(interpolations.defaultDuration(iteration5.durationFactorOpening))
+																	.to(interpolations.easing("easeInOutCubic"))}
+																closingInterpolation={iteration5.interpolations.closing
+																	.to(interpolations.defaultDuration(iteration5.durationFactorClosing))
+																	.to(interpolations.easing("easeInOutCubic"))}
+																type={iteration5.currentState()}
+															/>
+														)}
+													</Observer>
+												</S.Description>
+											</VisibilitySwitch>
+											<VisibilitySwitch visible={iteration6.started() && !iteration7.ended()}>
+												<S.Description $overlay $big>
+													<Observer>
+														{() => (
+															<AnimatedSplitChars
+																text={["Designer is set", "& ready to start"]}
+																openingInterpolation={iteration6.interpolations.opening.to(
+																	interpolations.easing("easeInOutCubic")
+																)}
+																closingInterpolation={iteration6.interpolations.closing.to(() => 0)}
+																type={iteration6.currentState()}
+															/>
+														)}
+													</Observer>
+												</S.Description>
+											</VisibilitySwitch>
+										</S.DescriptionGroup>
 									)}
-								/>
-								<S.FaceWrapper
-									ref={promoStore.transforms.phoneAssistantAndShiftedAssistant.endRef}
-									style={{ transform: "translateX(-40%)" }}
-								/>
-								<S.FaceWrapper
-									ref={promoStore.transforms.executorAndPhoneExecutor.endRef}
-									style={{ transform: "translateX(40%)" }}
-								/>
-							</S.Face>
-							<Observer>
-								{() => (
-									<S.DescriptionGroup>
-										<VisibilitySwitch
-											visible={iteration3.started() && !iteration4.ended()}
-											unmountWhenInvisible={false}>
-											<S.Description>
-												<Observer>
-													{() => (
-														<AnimatedSplitChars
-															text={["Choose a style", "from ready-made", "templates"]}
-															openingInterpolation={iteration3.interpolations.opening.to(
-																interpolations.easing("easeInOutCubic")
-															)}
-															closingInterpolation={iteration4.interpolations.closing.to(
-																interpolations.easing("easeInOutCubic")
-															)}
-															type={iteration3.visible() || iteration4.visible("opening") ? "opening" : "closing"}
-														/>
-													)}
-												</Observer>
-											</S.Description>
-										</VisibilitySwitch>
-										<VisibilitySwitch visible={iteration5.visible()}>
-											<S.Description $overlay>
-												<Observer>
-													{() => (
-														<AnimatedSplitChars
-															text={
-																breakpoint.mobile()
-																	? ["Our best designers", "are here to pick up", "the presentation... "]
-																	: ["Our selected", "designers are on", "the mission to get", "your task done"]
-															}
-															openingInterpolation={iteration5.interpolations.opening
-																.to(interpolations.defaultDuration(iteration5.durationFactorOpening))
-																.to(interpolations.easing("easeInOutCubic"))}
-															closingInterpolation={iteration5.interpolations.closing
-																.to(interpolations.defaultDuration(iteration5.durationFactorClosing))
-																.to(interpolations.easing("easeInOutCubic"))}
-															type={iteration5.currentState()}
-														/>
-													)}
-												</Observer>
-											</S.Description>
-										</VisibilitySwitch>
-										<VisibilitySwitch visible={iteration6.started() && !iteration7.ended()}>
-											<S.Description $overlay $big>
-												<Observer>
-													{() => (
-														<AnimatedSplitChars
-															text={
-																breakpoint.mobile()
-																	? ["Designer is set", "& ready to start"]
-																	: ["Designer", "is ready", "to start"]
-															}
-															openingInterpolation={iteration6.interpolations.opening.to(
-																interpolations.easing("easeInOutCubic")
-															)}
-															closingInterpolation={iteration6.interpolations.closing.to(() => 0)}
-															type={iteration6.currentState()}
-														/>
-													)}
-												</Observer>
-											</S.Description>
-										</VisibilitySwitch>
-									</S.DescriptionGroup>
-								)}
-							</Observer>
+								</Observer>
+							</div>
 							<Observer>
 								{() => (
 									<VisibilitySwitch
-										visible={iteration3.started() && !iteration4.ended()}
+										visible={iteration3.started() && !iteration7.ended()}
 										unmountWhenInvisible={false}>
-										<div ref={promoStore.resizeObservers.phoneCardsContainer.ref}>
+										<S.CardsGroup ref={promo.resizeObservers.phoneCardsContainer.ref}>
+											<Observer>
+												{() => (
+													<S.RayImageGroup
+														style={{
+															opacity: iteration6.interpolations.opening.to(
+																interpolations.easing("easeInOutCubic")
+															),
+														}}>
+														<Image src={getVectorImageByName("common", "RaySource")} />
+													</S.RayImageGroup>
+												)}
+											</Observer>
 											<S.Cards
 												style={{
 													opacity: iteration4.interpolations.closing
@@ -209,7 +221,7 @@ export const PhoneAssistant = forwardRef<HTMLDivElement, Props>(({ templatesSour
 													)}
 												</Observer>
 											</S.Cards>
-										</div>
+										</S.CardsGroup>
 									</VisibilitySwitch>
 								)}
 							</Observer>
@@ -282,7 +294,7 @@ export const PhoneAssistant = forwardRef<HTMLDivElement, Props>(({ templatesSour
 							</Observer>
 						</S.Content>
 					</Phone>
-				</a.div>
+				</S.PhoneGroup>
 			)}
 		</Iteration>
 	);

@@ -1,4 +1,3 @@
-import { useContext } from "react";
 import { Observer } from "mobx-react-lite";
 
 import { Iteration } from "@components/common/hoc/Iteration";
@@ -11,7 +10,8 @@ import { Sequence } from "@core/classes/Sequence";
 import { createArray } from "@core/utils/common.utils";
 
 import { PresentationSequence } from "./PresentationSequence";
-import { context as promoContext } from "../../index";
+
+import { usePromo } from "../../index";
 
 import * as S from "./styled";
 
@@ -20,7 +20,7 @@ export interface Props {
 }
 
 export const Presentation: React.FC<Props> = ({ templateSource }) => {
-	const promoStore = useContext(promoContext);
+	const promo = usePromo();
 	const breakpoint = useBreakpoint();
 
 	return (
@@ -31,7 +31,7 @@ export const Presentation: React.FC<Props> = ({ templateSource }) => {
 			{([iteration7, iteration8]) => (
 				<div data-iteration-name='Presentation'>
 					<VisibilitySwitch visible={false} unmountWhenInvisible={false}>
-						<S.EndContainer ref={promoStore.transforms.bigTemplateAndPhoneTemplate.startRef} />
+						<S.EndContainer ref={promo.transforms.bigTemplateAndPhoneTemplate.startRef} />
 					</VisibilitySwitch>
 					<S.EndContainer style={{ perspective: `${PERSPECTIVE}rem` }}>
 						<Observer>
@@ -53,26 +53,20 @@ export const Presentation: React.FC<Props> = ({ templateSource }) => {
 											.to((value) => `${PERSPECTIVE * 0.4 * value}rem`),
 										x: iteration8.interpolations.opening
 											.to(interpolations.easing("easeInOutCubic"))
-											.to(
-												(value) => promoStore.transforms.bigTemplateAndPhoneTemplate.getPosition().x * value
-											),
+											.to((value) => promo.transforms.bigTemplateAndPhoneTemplate.getPosition().x * value),
 										y: iteration8.interpolations.opening
 											.to(interpolations.easing("easeInOutCubic"))
-											.to(
-												(value) => promoStore.transforms.bigTemplateAndPhoneTemplate.getPosition().y * value
-											),
+											.to((value) => promo.transforms.bigTemplateAndPhoneTemplate.getPosition().y * value),
 										width: iteration8.interpolations.opening
 											.to(interpolations.easing("easeInOutCubic"))
 											.to(
-												(value) =>
-													1 - (1 - promoStore.transforms.bigTemplateAndPhoneTemplate.getScale().x) * value
+												(value) => 1 - (1 - promo.transforms.bigTemplateAndPhoneTemplate.getScale().x) * value
 											)
 											.to((value) => `${value * 100}%`),
 										height: iteration8.interpolations.opening
 											.to(interpolations.easing("easeInOutCubic"))
 											.to(
-												(value) =>
-													1 - (1 - promoStore.transforms.bigTemplateAndPhoneTemplate.getScale().y) * value
+												(value) => 1 - (1 - promo.transforms.bigTemplateAndPhoneTemplate.getScale().y) * value
 											)
 											.to((value) => `${value * 100}%`),
 										background: `url(${templateSource}) center center / cover`,

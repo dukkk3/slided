@@ -4,7 +4,15 @@ import styled from "styled-components";
 import { Image } from "@components/common/ui/Image/styled";
 import { Button } from "@components/common/ui/Button/styled";
 
+import { Phone } from "../../shared/Phone/styled";
+
 export { Description, DescriptionGroup } from "../../shared/Phone/styled";
+
+export const PhoneGroup = styled(a.div)`
+	${Phone} {
+		height: min(70rem, 100%);
+	}
+`;
 
 export const ButtonWrapper = styled(a.div)`
 	position: absolute;

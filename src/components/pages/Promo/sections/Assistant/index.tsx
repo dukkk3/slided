@@ -1,4 +1,3 @@
-import { useContext } from "react";
 import { Observer } from "mobx-react-lite";
 
 import { Iteration } from "@components/common/hoc/Iteration";
@@ -9,12 +8,12 @@ import { interpolations } from "@core/helpers/iteration.helper";
 
 import { AnimatedSplitChars } from "../../helpers/AnimatedSplitChars";
 
-import { context as promoContext } from "../../index";
+import { usePromo } from "../../index";
 
 import * as S from "./styled";
 
 export const Assistant: React.FC = () => {
-	const promoStore = useContext(promoContext);
+	const promo = usePromo();
 
 	return (
 		<Iteration
@@ -23,7 +22,7 @@ export const Assistant: React.FC = () => {
 			checkForVisible={([iteration1, iteration2]) => iteration1.started() && !iteration2.ended()}>
 			{() => (
 				<S.Assistant data-iteration-name='Assistant'>
-					<S.FaceWrapper ref={promoStore.transforms.bigAssistantAndPhoneAssistant.startRef} />
+					<S.FaceWrapper ref={promo.transforms.bigAssistantAndPhoneAssistant.startRef} />
 					<Iteration
 						iterations={[1, 2]}
 						checkForVisible={([iteration1, iteration2]) => iteration1.visible() || iteration2.visible()}>

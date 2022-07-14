@@ -8,7 +8,7 @@ export const Designers = styled.div`
 
 	${mobile`
 		position: absolute;
-		padding-top: 1rem;
+		padding-top: 4rem;
 		box-sizing: content-box;
 		// margin-top: calc(var(--header-height) * -1);
 		// margin-left: calc(var(--container-gap) * -1);

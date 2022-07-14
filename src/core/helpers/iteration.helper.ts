@@ -5,6 +5,7 @@ import { step, toRange } from "@core/utils/math.utils";
 export const interpolations = {
 	range: (a: number, b: number) => (value: number) => toRange(value, a, b),
 	invert: (value: number) => 1 - value,
+	noop: (value: number) => value,
 	defaultDuration:
 		(durationFactor: number, bound: "in" | "out" = "in") =>
 		(value: number) => {

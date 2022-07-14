@@ -11,3 +11,11 @@ export const Promo = styled(a.div)`
 	touch-action: none;
 	backface-visibility: hidden;
 `;
+
+export const SlidingGroup = styled(a.div)`
+	top: 0;
+	left: 0;
+	width: 100%;
+	position: absolute;
+	z-index: 9999;
+`;

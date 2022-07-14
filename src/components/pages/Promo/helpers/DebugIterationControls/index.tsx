@@ -1,8 +1,7 @@
 import React, { memo } from "react";
 import { a } from "react-spring";
 
-// import { useGlobalStore } from "@core/hooks/useGlobalStore";
-import { useIterationsControls } from "@core/hooks/useIterationsControls";
+import { useIterationsControls } from "@components/providers/IterationsControlsProvider";
 
 import * as S from "./styled";
 

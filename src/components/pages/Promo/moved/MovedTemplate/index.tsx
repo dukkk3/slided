@@ -1,4 +1,3 @@
-import { useContext } from "react";
 import { Observer } from "mobx-react-lite";
 
 import { Iteration } from "@components/common/hoc/Iteration";
@@ -7,16 +6,16 @@ import { Image } from "@components/common/ui/Image";
 
 import { interpolations } from "@core/helpers/iteration.helper";
 
-import * as S from "./styled";
+import { usePromo } from "../../index";
 
-import { context as promoContext } from "../../index";
+import * as S from "./styled";
 
 export interface Props {
 	templateSource: string;
 }
 
 export const MovedTemplate: React.FC<Props> = ({ templateSource }) => {
-	const promoStore = useContext(promoContext);
+	const promo = usePromo();
 
 	return (
 		<Iteration
@@ -29,18 +28,14 @@ export const MovedTemplate: React.FC<Props> = ({ templateSource }) => {
 						{() => (
 							<S.MovedTemplate
 								style={{
-									...promoStore.transforms.phoneTemplateAndGridTemplate.startResizeObserver.getSize(),
-									...promoStore.transforms.phoneTemplateAndGridTemplate.getStartOffset(),
+									...promo.transforms.phoneTemplateAndGridTemplate.startResizeObserver.getSize(),
+									...promo.transforms.phoneTemplateAndGridTemplate.getStartOffset(),
 									x: iteration9.interpolations.closing
 										.to(interpolations.easing("easeInOutCubic"))
-										.to(
-											(value) => promoStore.transforms.phoneTemplateAndGridTemplate.getPosition().x * value
-										),
+										.to((value) => promo.transforms.phoneTemplateAndGridTemplate.getPosition().x * value),
 									y: iteration9.interpolations.closing
 										.to(interpolations.easing("easeInOutCubic"))
-										.to(
-											(value) => promoStore.transforms.phoneTemplateAndGridTemplate.getPosition().y * value
-										),
+										.to((value) => promo.transforms.phoneTemplateAndGridTemplate.getPosition().y * value),
 									opacity: iteration9.interpolations.closing
 										.to(interpolations.step(1))
 										.to(interpolations.easing("easeInOutCubic"))
