@@ -37,3 +37,5 @@ export { default as MobileSequenceIteration1 } from "./mobile-sequence-iteration
 export { default as MobileSequenceIteration2 } from "./mobile-sequence-iteration-2.jpg";
 export { default as MobileSequenceIteration3 } from "./mobile-sequence-iteration-3.jpg";
 export { default as MobileSequenceIteration4 } from "./mobile-sequence-iteration-4.jpg";
+
+export { default as AssistantPoster } from "./assistant-poster.jpg";

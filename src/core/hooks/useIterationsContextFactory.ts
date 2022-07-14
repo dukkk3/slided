@@ -9,6 +9,7 @@ import {
 	compare as compareImpl,
 	CompareOperatorKind,
 } from "@core/utils/math.utils";
+import { resolveSpringAnimation } from "@core/helpers/animation.helper";
 
 export interface Options {
 	iterations: number;
@@ -60,6 +61,7 @@ export function useIterationsControlsContextFactory({
 			return inRangeImpl(this.progress * iterations, a, b);
 		},
 		toRange: function (a: number, b: number) {
+			console.log(this.progress);
 			return toRangeImpl(this.progress * iterations, a, b);
 		},
 		compare: function (a: number, operator: CompareOperatorKind) {
@@ -118,8 +120,9 @@ export function useIterationsControlsContextFactory({
 		(iteration: number) => {
 			const progress = toProgress(iteration);
 			animatedProgressApi.set({ value: progress });
+			localStore.setProgress(progress);
 		},
-		[animatedProgressApi, toProgress]
+		[animatedProgressApi, localStore, toProgress]
 	);
 
 	const removeEventListener = useCallback(
@@ -142,8 +145,8 @@ export function useIterationsControlsContextFactory({
 		(iteration: number, config?: SpringConfig) => {
 			if (iteration === targetRef.current) return;
 			const progress = toProgress(iteration);
-			animatedProgressApi.start({ value: progress, config });
 			targetRef.current = iteration;
+			return resolveSpringAnimation(animatedProgressApi, { value: progress, config });
 		},
 		[animatedProgressApi, toProgress]
 	);

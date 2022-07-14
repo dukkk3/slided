@@ -45,6 +45,12 @@ export function useBreakpoint() {
 		get identified() {
 			return Object.values(getMediaMatches()).some(Boolean);
 		},
+		get landscape() {
+			return appStore.orientation === "landscape";
+		},
+		get portrait() {
+			return appStore.orientation === "portrait";
+		},
 	});
 
 	const mobile = useCallback(() => {
@@ -63,10 +69,20 @@ export function useBreakpoint() {
 		return localStore.identified;
 	}, [localStore]);
 
+	const landscape = useCallback(() => {
+		return localStore.landscape;
+	}, [localStore]);
+
+	const portrait = useCallback(() => {
+		return localStore.portrait;
+	}, [localStore]);
+
 	return {
 		getMediaMatches,
 		getMediaMatch,
 		identified,
+		landscape,
+		portrait,
 		laptop,
 		mobile,
 		tablet,

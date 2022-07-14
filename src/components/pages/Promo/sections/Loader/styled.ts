@@ -7,7 +7,8 @@ export const LoaderGroup = styled(a.div)`
 	width: 100%;
 	height: 100%;
 	display: flex;
-	position: absolute;
+	position: fixed;
+	background: white;
 	align-items: center;
 	justify-content: center;
 	z-index: 9999;

@@ -29,17 +29,6 @@ export const Controls: React.FC = () => {
 	useEffect(
 		() =>
 			reaction(
-				() => [iterationsControls.getPrevIteration(), iterationsControls.getTargetIteration()] as const,
-				([prevIteration, targetIteration]) => {
-					console.log({ prevIteration, targetIteration });
-				}
-			),
-		[iterationsControls]
-	);
-
-	useEffect(
-		() =>
-			reaction(
 				() => iterationsControls.getActivePartIndex(),
 				(index) => flyingDotApi.start({ top: `${(index / dotsAmount) * 100}%` })
 			),

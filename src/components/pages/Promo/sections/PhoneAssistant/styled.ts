@@ -66,7 +66,7 @@ export const RayImageGroup = styled(a.div)`
 	position: absolute;
 	justify-content: center;
 
-	${Image} {
+	svg {
 		height: calc(100% - 8rem);
 		max-height: 14rem;
 

@@ -9,7 +9,10 @@ import { interpolations } from "@core/helpers/iteration.helper";
 import { Sequence } from "@core/classes/Sequence";
 import { createArray } from "@core/utils/common.utils";
 
-import { PresentationSequence } from "./PresentationSequence";
+import { getVideoByName } from "@assets/videos";
+
+// import { PresentationSequence } from "./PresentationSequence";
+import { PresentationVideo } from "./PresentationVideo";
 
 import { usePromo } from "../../index";
 
@@ -83,8 +86,12 @@ export const Presentation: React.FC<Props> = ({ templateSource }) => {
 												.to(interpolations.easing("easeInOutCubic"))
 												.to(interpolations.invert),
 										}}>
-										<PresentationSequence
-											sequence={breakpoint.mobile() ? SEQUENCE_MOBILE : SEQUENCE_DESKTOP}
+										<PresentationVideo
+											source={
+												breakpoint.mobile()
+													? getVideoByName("PresentationMobile")
+													: getVideoByName("Presentation")
+											}
 										/>
 									</S.CardImageGroup>
 								</S.Card>

@@ -70,4 +70,8 @@ export class Sequence {
 	preloadAll() {
 		return this.preload(0, this._sources.length - 1);
 	}
+
+	loaded() {
+		return this._items.every((item) => item.loaded);
+	}
 }

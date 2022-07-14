@@ -148,7 +148,7 @@ export const GridTemplates: React.FC<Props> = ({ templatesSources, hidden }) => 
 						{() => (
 							<>
 								{!hidden && !breakpoint.mobile() && (
-									<VisibilitySwitch visible={iteration10.visible()}>
+									<VisibilitySwitch visible={iteration10.visible()} unmountWhenInvisible={false}>
 										<S.Layer>
 											<S.Title>
 												<AnimatedSplitChars

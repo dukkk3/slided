@@ -57,7 +57,7 @@ export const SlideButton: React.FC<Props> = ({ state, onSwipeEnded }) => {
 				cancel();
 			}
 		},
-		{ target: buttonRef, axis: "x" }
+		{ target: buttonRef, axis: "x", preventDefault: true }
 	);
 
 	return (

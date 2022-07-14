@@ -38,7 +38,7 @@ export function useCanvasSequence(sequence: Sequence, { resizeObserverDebounce }
 			const sequenceItem = sequence.items[index];
 			const { width, height } = canvasResizeObserver.getSize();
 
-			if ((previousFrameRef.current === index && !rerenderEnabled) || !sequenceItem.loaded) return;
+			if (previousFrameRef.current === index && !rerenderEnabled) return;
 
 			drawImageCover(context, sequenceItem.image, 0, 0, width, height, 0.5, 0.5);
 			previousFrameRef.current = index;

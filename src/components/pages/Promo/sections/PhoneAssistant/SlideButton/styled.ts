@@ -35,7 +35,7 @@ export const SlideContent = styled(a.div)`
 		height: 100%;
 		border-radius: inherit;
 		position: absolute;
-		background: linear-gradient(90deg, var(--background) 90%, rgba(255, 255, 255, 0));
+		background: linear-gradient(90deg, var(--background) 80%, rgba(255, 255, 255, 0));
 	}
 `;
 
@@ -63,7 +63,7 @@ export const SlideButtonLabelGroup = styled(a.div)`
 `;
 
 export const SlideButtonLabel = styled.p`
-	font-size: 2rem;
-	font-weight: 500;
+	font-size: 1.8rem;
+	font-weight: 600;
 	opacity: 0.6;
 `;

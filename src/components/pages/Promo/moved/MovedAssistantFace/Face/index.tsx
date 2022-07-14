@@ -3,6 +3,7 @@ import { a, Interpolation } from "react-spring";
 
 import { clamp } from "@core/utils/math.utils";
 
+import { getRasterImageByName } from "@assets/images";
 import { getVideoByName } from "@assets/videos";
 
 import * as S from "./styled";
@@ -41,12 +42,20 @@ export const Face: React.FC<Props> = memo(
 						style={{ scale: openingInterpolation }}>
 						<a.video
 							ref={videoRef}
+							poster={getRasterImageByName("AssistantPoster")}
 							src={getVideoByName("Assistant")}
 							muted
 							loop
 							autoPlay
 							playsInline
-							style={{ scale: openingInterpolation.to((value) => 1 / value) }}
+							style={{
+								scale: openingInterpolation
+									.to((value) => {
+										console.log(value);
+										return value;
+									})
+									.to((value) => 1 / value),
+							}}
 						/>
 					</S.VideoWrapper>
 				</S.Content>

@@ -99,11 +99,13 @@ const BackgroundDesktop: React.FC = () => {
 	);
 
 	const preloadSequence = useCallback(async () => {
-		console.log(promo.store.sequenceLoaded);
-		if (promo.store.sequenceLoaded) return;
-		await SEQUENCE.preloadOne(0);
+		if (promo.store.sequenceLoaded || SEQUENCE.loaded()) {
+			background.canvasSequence.drawCurrentFrame(true);
+			promo.store.setSequenceLoaded(true);
+			return;
+		}
+		await SEQUENCE.preloadAll();
 		background.canvasSequence.drawCurrentFrame(true);
-		await SEQUENCE.preload(0, ITERATIONS[0]);
 		promo.store.setSequenceLoaded(true);
 	}, [background, promo]);
 

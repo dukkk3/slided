@@ -15,7 +15,7 @@ export const FooterInfo: React.FC = memo(() => {
 			</S.ItemGroup>
 			<S.ItemGroup>
 				<S.ItemWrapper>
-					<S.Item>© 2022 All Right Reserved</S.Item>
+					<S.Item>© 2022 All Rights Reserved</S.Item>
 				</S.ItemWrapper>
 			</S.ItemGroup>
 		</S.FooterInfo>

@@ -44,7 +44,7 @@ export const Banner: React.FC = () => {
 	);
 
 	return (
-		<Iteration iterations={0}>
+		<Iteration iterations={0} visibilitySwitch={{ unmountWhenInvisible: false }}>
 			{([iteration0]) => (
 				<S.Banner data-iteration-name='Banner'>
 					<div>

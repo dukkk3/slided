@@ -19,6 +19,7 @@ export function useTransformDifference({ debounce = 100, resizeType = "scale" }:
 	const localStore = useLocalStore({
 		scale: { x: 1, y: 1 },
 		position: { x: 0, y: 0 },
+		calculated: false,
 	});
 
 	const calculate = useCallback(() => {
@@ -46,6 +47,7 @@ export function useTransformDifference({ debounce = 100, resizeType = "scale" }:
 		transaction(() => {
 			localStore.setScale({ ...scale });
 			localStore.setPosition({ ...position });
+			localStore.setCalculated(true);
 		});
 	}, [startResizeObserver, endResizeObserver, resizeType, localStore]);
 
@@ -77,6 +79,10 @@ export function useTransformDifference({ debounce = 100, resizeType = "scale" }:
 		};
 	}, [getScale, getPosition]);
 
+	const calculated = useCallback(() => {
+		return localStore.calculated;
+	}, [localStore]);
+
 	useEffect(
 		() =>
 			reaction(
@@ -97,6 +103,7 @@ export function useTransformDifference({ debounce = 100, resizeType = "scale" }:
 		getEndOffset,
 		getDifference,
 		getPosition,
+		calculated,
 		getScale,
 		calculate,
 	};

@@ -5,7 +5,6 @@ import { Promo } from "@components/pages/Promo";
 
 import { useGlobalStore } from "@core/hooks/useGlobalStore";
 import { useMatchMedia } from "@core/hooks/useMatchMedia";
-import { useBreakpoint } from "@core/hooks/useBreakpoint";
 import { breakpoints, getMatchMediaQuery, BreakpointNameKind } from "@core/helpers/device.helper";
 
 const breakpointsKeys = Object.keys(breakpoints) as BreakpointNameKind[];
@@ -22,6 +21,11 @@ const mediaQueries: Record<BreakpointNameKind, string> = breakpointsKeys.reduce(
 
 export const App: React.FC = () => {
 	const matchMedia = useMatchMedia(mediaQueries);
+	const orientationMatchMedia = useMatchMedia({
+		landscape: "(orientation: landscape)",
+		portrait: "(orientation: portrait)",
+	});
+
 	const appStore = useGlobalStore((store) => store.app);
 
 	useEffect(
@@ -33,10 +37,21 @@ export const App: React.FC = () => {
 		[appStore, matchMedia]
 	);
 
+	useEffect(
+		() =>
+			reaction(
+				() => orientationMatchMedia.getValues(),
+				(values) =>
+					appStore.setOrientation(values.landscape ? "landscape" : values.portrait ? "portrait" : null)
+			),
+		[appStore, orientationMatchMedia]
+	);
+
 	useEffect(() => {
 		matchMedia.update();
+		orientationMatchMedia.update();
 		window.scrollTo(0, 0);
-	}, [matchMedia]);
+	}, [matchMedia, orientationMatchMedia]);
 
 	return <Promo />;
 };

@@ -170,7 +170,7 @@ export const PhoneAssistant = forwardRef<HTMLDivElement, Props>(({ templatesSour
 																interpolations.easing("easeInOutCubic")
 															),
 														}}>
-														<Image src={getVectorImageByName("common", "RaySource")} />
+														{getVectorImageByName("common", "Ray")}
 													</S.RayImageGroup>
 												)}
 											</Observer>

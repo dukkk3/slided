@@ -8,12 +8,14 @@ import { Layout } from "@components/containers/Layout";
 import { IterationsControlsProvider } from "@components/providers/IterationsControlsProvider";
 
 import { useLocalStore } from "@core/hooks/useLocalStore";
-import { interpolations } from "@core/helpers/iteration.helper";
+import { useBreakpoint } from "@core/hooks/useBreakpoint";
 import { useResizeObserver } from "@core/hooks/useResizeObserver";
 import { useTransformDifference } from "@core/hooks/useTransformDifference";
+import { interpolations } from "@core/helpers/iteration.helper";
 
 import { Banner } from "./sections/Banner";
 import { Assistant } from "./sections/Assistant";
+import { LandscapePlug } from "./sections/LandscapePlug";
 import { Designers, TARGET_USER } from "./sections/Designers";
 import { Presentation, presentationFramesDesktop } from "./sections/Presentation";
 import { PhoneAssistant } from "./sections/PhoneAssistant";
@@ -77,6 +79,7 @@ interface Context {
 const context = createContext<Context>(null!);
 
 export const Promo: React.FC = () => {
+	const breakpoint = useBreakpoint();
 	const [promoStyle, promoApi] = useSpring(() => ({ opacity: 0 }));
 	const [feedbackStyle, feedbackApi] = useSpring(() => ({ y: 0 }));
 	const footerContentRef = useRef<any>(null);
@@ -117,7 +120,11 @@ export const Promo: React.FC = () => {
 			this.sequenceLoaded = value;
 		},
 		get interactiveEnabled() {
-			return this.promoBannerOpened && this.backgroundAnimationEnded;
+			return (
+				this.promoBannerOpened &&
+				this.backgroundAnimationEnded &&
+				!(breakpoint.mobile() && breakpoint.landscape())
+			);
 		},
 		get canShowContent() {
 			return this.sequenceLoaded && this.loaderHidden;
@@ -174,12 +181,12 @@ export const Promo: React.FC = () => {
 								{ from: 0, to: 1 },
 								{ from: 1, to: 2 },
 								{ from: 2, to: 3 },
-								{ from: 3, to: 4 },
 								[
+									{ from: 3, to: 4 },
 									{ from: 4, to: 4.5 },
 									{ from: 4.5, to: 5, duration: 2500 },
+									{ from: 5, to: 6 },
 								],
-								{ from: 5, to: 6 },
 								[
 									{ from: 6, to: 7 },
 									{ from: 7, to: 7.5, duration: 5000 },
@@ -232,19 +239,22 @@ export const Promo: React.FC = () => {
 									<MovedDesignerFace avatarSource={TARGET_USER.data.avatarSource} />
 								</S.Promo>
 							</Layout>
-							<Controls />
-							<SwipeControls />
 							<S.SlidingGroup
 								style={{ y: feedbackStyle.y.to(interpolations.invert).to((value) => `${value * 100}vh`) }}>
 								<Feedback />
 							</S.SlidingGroup>
 							<S.SlidingGroup style={{ y: feedbackStyle.y.to((value) => `${value * 100}vh`) }}>
 								<Footer ref={footerContentRef} />
+								<Controls />
 							</S.SlidingGroup>
+							<SwipeControls />
 						</IterationsControlsProvider>
 					)}
 				</Observer>
 			</a.div>
+			<Observer>
+				{() => (breakpoint.mobile() && breakpoint.landscape() ? <LandscapePlug /> : null)}
+			</Observer>
 			<Loader />
 		</context.Provider>
 	);

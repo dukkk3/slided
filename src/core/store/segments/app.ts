@@ -7,5 +7,6 @@ export const app = {
 	}),
 	...storeSchemaFactory({
 		mediaMatches: {} as Record<BreakpointNameKind, boolean>,
+		orientation: null as "landscape" | "portrait" | null,
 	}),
 };
