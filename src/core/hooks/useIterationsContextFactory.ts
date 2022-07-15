@@ -61,7 +61,6 @@ export function useIterationsControlsContextFactory({
 			return inRangeImpl(this.progress * iterations, a, b);
 		},
 		toRange: function (a: number, b: number) {
-			console.log(this.progress);
 			return toRangeImpl(this.progress * iterations, a, b);
 		},
 		compare: function (a: number, operator: CompareOperatorKind) {

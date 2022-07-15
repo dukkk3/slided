@@ -1,4 +1,4 @@
-import { Iteration } from "@components/common/hoc/Iteration";
+import { Iteration } from "@components/pages/Promo/helpers/Iteration";
 
 import { useBreakpoint } from "@core/hooks/useBreakpoint";
 import { interpolations } from "@core/helpers/iteration.helper";

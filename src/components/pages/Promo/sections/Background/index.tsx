@@ -6,18 +6,17 @@ import { a } from "react-spring";
 
 import { useIterationsControls } from "@components/providers/IterationsControlsProvider";
 
-import { Iteration } from "@components/common/hoc/Iteration";
-
 import { Image } from "@components/common/ui/Image";
 
 import { useCanvasSequence } from "@core/hooks/useCanvasSequence";
 import { useLocalStore } from "@core/hooks/useLocalStore";
 import { useBreakpoint } from "@core/hooks/useBreakpoint";
-import { Sequence } from "@core/classes/Sequence";
+import { ImageKitSequence } from "@core/classes/ImageKitSequence";
 import { interpolations } from "@core/helpers/iteration.helper";
 
 import { getRasterImageByName } from "@assets/images";
 
+import { Iteration } from "../../helpers/Iteration";
 import { usePromo } from "../../index";
 
 import * as S from "./styled";
@@ -54,8 +53,8 @@ export const Background: React.FC = () => {
 				() => localStore.sequenceAvailable,
 				(available) => {
 					if (!available && available !== null) {
-						promo.store.setSequenceLoaded(true);
-						promo.store.setBackgroundAnimationEnded(true);
+						promo.store.setSequenceCanPlay(true);
+						promo.store.setBackgroundOpeningEnded(true);
 					}
 				}
 			),
@@ -98,17 +97,6 @@ const BackgroundDesktop: React.FC = () => {
 		[background]
 	);
 
-	const preloadSequence = useCallback(async () => {
-		if (promo.store.sequenceLoaded || SEQUENCE.loaded()) {
-			background.canvasSequence.drawCurrentFrame(true);
-			promo.store.setSequenceLoaded(true);
-			return;
-		}
-		await SEQUENCE.preloadAll();
-		background.canvasSequence.drawCurrentFrame(true);
-		promo.store.setSequenceLoaded(true);
-	}, [background, promo]);
-
 	const preloadSequenceIteration = useCallback(() => {
 		const currentFrame = background.canvasSequence.getCurrentFrame();
 		const currentIteration = ITERATIONS.reduce(
@@ -139,6 +127,17 @@ const BackgroundDesktop: React.FC = () => {
 
 		updateCurrentFrame(frame);
 	}, [iterationsControls, updateCurrentFrame]);
+
+	const preloadSequence = useCallback(async () => {
+		if (promo.store.sequenceCanPlay || SEQUENCE.loaded()) {
+			background.canvasSequence.drawCurrentFrame(true);
+			promo.store.setSequenceCanPlay(true);
+			return;
+		}
+		await SEQUENCE.preloadAll();
+		background.canvasSequence.drawCurrentFrame(true);
+		promo.store.setSequenceCanPlay(true);
+	}, [background, promo]);
 
 	useAnimationFrame(() => {
 		const currentFrame = background.canvasSequence.getCurrentFrame();
@@ -175,7 +174,7 @@ const BackgroundDesktop: React.FC = () => {
 					preloadSequenceIteration();
 
 					if (currentFrame >= ITERATIONS[0]) {
-						promo.store.setBackgroundAnimationEnded(true);
+						promo.store.setBackgroundOpeningEnded(true);
 					}
 				}
 			),
@@ -185,7 +184,7 @@ const BackgroundDesktop: React.FC = () => {
 	useEffect(
 		() =>
 			when(
-				() => promo.store.canShowContent && !promo.store.backgroundAnimationEnded,
+				() => promo.store.contentCanShow && !promo.store.backgroundOpeningEnded,
 				() => updateNeededFrame(ITERATIONS[0])
 			),
 		[iterationsControls, promo, updateNeededFrame]
@@ -193,7 +192,11 @@ const BackgroundDesktop: React.FC = () => {
 
 	useEffect(() => {
 		preloadSequence();
-	}, [preloadSequence]);
+
+		if (promo.store.backgroundOpeningEnded) {
+			updateFrameRelativeCurrentIteration();
+		}
+	}, [preloadSequence, promo, updateFrameRelativeCurrentIteration]);
 
 	return (
 		<S.BackgroundSequence>
@@ -226,13 +229,8 @@ const BackgroundMobile: React.FC = () => {
 	);
 };
 
-function formatSource(index: number) {
-	return `https://ik.imagekit.io/64nah4dsw/slided/slided_20/${String(index + 1).padStart(
-		3,
-		"0"
-	)}.jpg`;
-}
-
 const FPS = 25;
 const ITERATIONS = [80, 160, 239, 283];
-const SEQUENCE = new Sequence(ITERATIONS[ITERATIONS.length - 1] + 1, formatSource);
+const SEQUENCE = new ImageKitSequence(ITERATIONS[ITERATIONS.length - 1] + 1, "table");
+
+console.log(SEQUENCE.sources);

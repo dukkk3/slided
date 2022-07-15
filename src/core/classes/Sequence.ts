@@ -8,7 +8,7 @@ interface Item {
 
 export class Sequence {
 	private _items: Item[];
-	private _sources: string[];
+	readonly sources: string[];
 	readonly amount: number;
 
 	get items(): Readonly<Item>[] {
@@ -16,8 +16,8 @@ export class Sequence {
 	}
 
 	constructor(amount: number, formatSource: (index: number) => string) {
-		this._sources = createArray(amount).map((_, index) => formatSource(index));
-		this._items = this._sources.map(() => ({
+		this.sources = createArray(amount).map((_, index) => formatSource(index));
+		this._items = this.sources.map(() => ({
 			image: new Image(),
 			loading: false,
 			loaded: false,
@@ -36,7 +36,7 @@ export class Sequence {
 
 		for (let i = from; i <= to; i++) {
 			const item = this._items[i];
-			const source = this._sources[i];
+			const source = this.sources[i];
 
 			if (item.loaded || item.loading) {
 				loadedItemsCount++;
@@ -68,7 +68,7 @@ export class Sequence {
 	}
 
 	preloadAll() {
-		return this.preload(0, this._sources.length - 1);
+		return this.preload(0, this.sources.length - 1);
 	}
 
 	loaded() {

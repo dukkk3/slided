@@ -1,6 +1,6 @@
 import { Observer } from "mobx-react-lite";
 
-import { Iteration } from "@components/common/hoc/Iteration";
+import { Iteration } from "@components/pages/Promo/helpers/Iteration";
 
 import { VisibilitySwitch } from "@components/common/ui/VisibilitySwitch";
 
@@ -129,7 +129,7 @@ const DesignersDesktop: React.FC<Props> = ({ faceContainerRef }) => {
 			{([iteration5]) => (
 				<PromoContainer
 					data-iteration-name='Designers'
-					style={{ top: 0, left: 0, position: "absolute" }}>
+					style={{ top: 0, left: 0, position: "absolute", width: "100%" }}>
 					<S.Designers>
 						<VisibilitySwitch visible={false} unmountWhenInvisible={false}>
 							<S.ProfileCardGroup

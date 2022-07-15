@@ -5,7 +5,7 @@ import { when } from "mobx";
 
 import { AnimatedSplitWords } from "@components/pages/Promo/helpers/AnimatedSplitWords";
 
-import { Iteration } from "@components/common/hoc/Iteration";
+import { Iteration } from "@components/pages/Promo/helpers/Iteration";
 
 import { Button } from "@components/common/ui/Button";
 
@@ -37,8 +37,8 @@ export const Banner: React.FC = () => {
 	useEffect(
 		() =>
 			when(
-				() => promo.store.canShowContent,
-				() => animate().then(() => promo.store.setPromoBannerOpened(true))
+				() => promo.store.contentCanShow,
+				() => animate().then(() => promo.store.setPromoBannerOpeningEnded(true))
 			),
 		[animate, promo]
 	);

@@ -24,10 +24,9 @@ export const VideoWrapper = styled(a.div)`
 	border-radius: 50%;
 	will-change: transform;
 
-	video {
+	canvas {
 		width: 100%;
 		height: 100%;
-		object-fit: cover;
 		will-change: transform;
 	}
 `;

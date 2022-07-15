@@ -1,7 +1,7 @@
 import { forwardRef } from "react";
 import { Observer } from "mobx-react-lite";
 
-import { Iteration } from "@components/common/hoc/Iteration";
+import { Iteration } from "@components/pages/Promo/helpers/Iteration";
 
 import { VisibilitySwitch } from "@components/common/ui/VisibilitySwitch";
 import { Button } from "@components/common/ui/Button";

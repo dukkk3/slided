@@ -2,7 +2,7 @@ import { useCallback, useEffect } from "react";
 import { a, easings, useSprings } from "react-spring";
 import { Observer } from "mobx-react-lite";
 
-import { Iteration } from "@components/common/hoc/Iteration";
+import { Iteration } from "@components/pages/Promo/helpers/Iteration";
 
 import { useIteration } from "@core/hooks/useIteration";
 import { interpolations } from "@core/helpers/iteration.helper";

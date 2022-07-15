@@ -5,7 +5,7 @@ import { when } from "mobx";
 
 import { useIterationsControls } from "@components/providers/IterationsControlsProvider";
 
-import { Iteration } from "@components/common/hoc/Iteration";
+import { Iteration } from "@components/pages/Promo/helpers/Iteration";
 
 import { VisibilitySwitch } from "@components/common/ui/VisibilitySwitch";
 

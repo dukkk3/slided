@@ -6702,6 +6702,11 @@
   "resolved" "https://registry.npmjs.org/image-size/-/image-size-0.6.3.tgz"
   "version" "0.6.3"
 
+"imagekit-javascript@^1.5.2":
+  "integrity" "sha512-qZquDA8vL4TGrn4VhKzzlnaDqPoYrn1Asrcfzfq0HvAy0w0P9jrPTl8foL6bPbvAGzx7Kj2P2M51HrOQKLX4IQ=="
+  "resolved" "https://registry.npmjs.org/imagekit-javascript/-/imagekit-javascript-1.5.2.tgz"
+  "version" "1.5.2"
+
 "immer@7.0.9":
   "integrity" "sha512-Vs/gxoM4DqNAYR7pugIxi0Xc8XAun/uy7AQu4fLLqaTBHxjOP9pJ266Q9MWA/ly4z6rAFZbvViOtihxUZ7O28A=="
   "resolved" "https://registry.npmjs.org/immer/-/immer-7.0.9.tgz"
@@ -13052,6 +13057,11 @@
   "integrity" "sha1-2pN/emLiH+wf0Y1Js1wpNQZ6bHI="
   "resolved" "https://registry.npmjs.org/urix/-/urix-0.1.0.tgz"
   "version" "0.1.0"
+
+"url-join@^5.0.0":
+  "integrity" "sha512-n2huDr9h9yzd6exQVnH/jU5mr+Pfx08LRXXZhkLLetAMESRj+anQsTAh940iMrIetKAmry9coFuZQ2jY8/p3WA=="
+  "resolved" "https://registry.npmjs.org/url-join/-/url-join-5.0.0.tgz"
+  "version" "5.0.0"
 
 "url-loader@4.1.1":
   "integrity" "sha512-3BTV812+AVHHOJQO8O5MkWgZ5aosP7GnROJwvzLS9hWDj00lZ6Z0wNak423Lp9PBZN05N+Jk/N5Si8jRAlGyWA=="

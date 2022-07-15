@@ -4,8 +4,6 @@ import { Observer } from "mobx-react-lite";
 
 import { Loader as LoaderImpl } from "@components/common/ui/Loader";
 
-import { useLocalStore } from "@core/hooks/useLocalStore";
-
 import { usePromo } from "../../index";
 
 import * as S from "./styled";
@@ -13,24 +11,30 @@ import * as S from "./styled";
 export const Loader: React.FC = () => {
 	const promo = usePromo();
 	const iterationsCountRef = useRef(0);
-	const localStore = useLocalStore({ visible: true });
 
 	const handleAnimationEnded = useCallback(() => {
 		iterationsCountRef.current += 1;
 
-		if (iterationsCountRef.current > 0 && !promo.store.loaderHidden) {
-			localStore.setVisible(false);
+		if (iterationsCountRef.current > 0 && promo.store.loaderVisible && promo.store.contentLoaded) {
+			promo.store.setLoaderVisible(false);
 		}
-	}, [localStore, promo]);
+	}, [promo]);
 
 	return (
 		<Observer>
 			{() => (
 				<Transition
-					items={promo.store.loaderHidden ? false : localStore.visible}
+					items={promo.store.loaderVisible}
 					initial={{ opacity: 1 }}
-					enter={{ opacity: 1 }}
-					leave={{ opacity: 0, onRest: () => promo.store.setLoaderHidden(true) }}>
+					enter={{
+						opacity: 1,
+						onRest: () => {
+							iterationsCountRef.current = 0;
+						},
+					}}
+					leave={{
+						opacity: 0,
+					}}>
 					{(style, item) =>
 						item && (
 							<S.LoaderGroup style={style}>

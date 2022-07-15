@@ -2,7 +2,7 @@ import React, { forwardRef, useCallback } from "react";
 
 import { useIterationsControls } from "@components/providers/IterationsControlsProvider";
 
-import { Iteration } from "@components/common/hoc/Iteration";
+import { Iteration } from "@components/pages/Promo/helpers/Iteration";
 
 import { Button } from "@components/common/ui/Button";
 import { Container } from "@components/common/ui/Container";

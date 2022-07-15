@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useRef } from "react";
-import { a, useSpring } from "react-spring";
+import { useSpring } from "react-spring";
 import { Observer } from "mobx-react-lite";
 import { reaction } from "mobx";
 
@@ -12,12 +12,13 @@ import { useBreakpoint } from "@core/hooks/useBreakpoint";
 import { useResizeObserver } from "@core/hooks/useResizeObserver";
 import { useTransformDifference } from "@core/hooks/useTransformDifference";
 import { interpolations } from "@core/helpers/iteration.helper";
+import { Store } from "@core/helpers/factories/schema.factory.helper";
 
 import { Banner } from "./sections/Banner";
 import { Assistant } from "./sections/Assistant";
 import { LandscapePlug } from "./sections/LandscapePlug";
 import { Designers, TARGET_USER } from "./sections/Designers";
-import { Presentation, presentationFramesDesktop } from "./sections/Presentation";
+import { Presentation, SEQUENCE_DESKTOP } from "./sections/Presentation";
 import { PhoneAssistant } from "./sections/PhoneAssistant";
 import { PhoneTemplates } from "./sections/PhoneTemplates";
 import { GridTemplates } from "./sections/GridTemplates";
@@ -46,20 +47,20 @@ type UseResizeObserverReturnType = ReturnType<typeof useResizeObserver>;
 type UseTransformDifferenceReturnType = ReturnType<typeof useTransformDifference>;
 
 interface Context {
-	store: {
-		readonly canShowContent: boolean;
-		readonly interactiveEnabled: boolean;
-		sequenceLoaded: boolean;
-		loaderHidden: boolean;
+	store: Store.Schema<{
+		loaderVisible: boolean;
+		sequenceCanPlay: boolean;
 		feedbackOpened: boolean;
-		promoBannerOpened: boolean;
-		backgroundAnimationEnded: boolean;
-		setFeedbackOpened: (value: boolean) => void;
-		setLoaderHidden: (value: boolean) => void;
-		setPromoBannerOpened: (value: boolean) => void;
-		setSequenceLoaded: (value: boolean) => void;
-		setBackgroundAnimationEnded: (value: boolean) => void;
-	};
+		presentationCanPlay: boolean;
+		assistantFaceCanPlay: boolean;
+		backgroundOpeningEnded: boolean;
+		promoBannerOpeningEnded: boolean;
+		readonly contentLoaded: boolean;
+		readonly contentCanShow: boolean;
+		readonly interactiveEnabled: boolean;
+		readonly domManipulationsReady: boolean;
+		readonly mobileDeviceTypeWithLandscapeOrientation: boolean;
+	}>;
 	transforms: {
 		executorAndPhoneExecutor: UseTransformDifferenceReturnType;
 		bigTemplateAndPhoneTemplate: UseTransformDifferenceReturnType;
@@ -80,9 +81,9 @@ const context = createContext<Context>(null!);
 
 export const Promo: React.FC = () => {
 	const breakpoint = useBreakpoint();
-	const [promoStyle, promoApi] = useSpring(() => ({ opacity: 0 }));
 	const [feedbackStyle, feedbackApi] = useSpring(() => ({ y: 0 }));
 	const footerContentRef = useRef<any>(null);
+
 	const phoneCardsContainerResizeObserver = useResizeObserver({
 		debounce: 100,
 		calculateSizeWithPaddings: true,
@@ -98,57 +99,72 @@ export const Promo: React.FC = () => {
 	const transformBtwPhoneAssistantAndShiftedAssistant = useTransformDifference();
 	const transformBtwBigTemplateAndPhoneTemplate = useTransformDifference({ resizeType: "rect" });
 
-	const localStore = useLocalStore<Context["store"]>({
-		loaderHidden: false,
-		sequenceLoaded: false,
+	const localStore = useLocalStore({
+		loaderVisible: true,
 		feedbackOpened: false,
-		promoBannerOpened: false,
-		backgroundAnimationEnded: false,
-		setFeedbackOpened: function (value) {
-			this.feedbackOpened = value;
+		sequenceCanPlay: false,
+		presentationCanPlay: false,
+		assistantFaceCanPlay: false,
+		backgroundOpeningEnded: false,
+		promoBannerOpeningEnded: false,
+		get mobileDeviceTypeWithLandscapeOrientation() {
+			return breakpoint.mobile() && breakpoint.landscape();
 		},
-		setLoaderHidden: function (value) {
-			this.loaderHidden = value;
+		get domManipulationsReady() {
+			return [
+				phoneCardResizeObserver,
+				phoneCardsContainerResizeObserver,
+				transformBtwBigTemplateAndPhoneTemplate,
+				transformBtwPhoneTemplateAndGridTemplate,
+				transformBtwBigAssistantAndPhoneAssistant,
+				transformBtwBigAssistantAndPhoneAssistant,
+				transformBtwPhoneAssistantAndShiftedAssistant,
+			].every((transformDifference) => transformDifference.ready());
 		},
-		setBackgroundAnimationEnded: function (value) {
-			this.backgroundAnimationEnded = value;
+		get contentLoaded() {
+			return (
+				this.presentationCanPlay &&
+				this.sequenceCanPlay &&
+				this.domManipulationsReady &&
+				this.assistantFaceCanPlay
+			);
 		},
-		setPromoBannerOpened: function (value) {
-			this.promoBannerOpened = value;
-		},
-		setSequenceLoaded: function (value) {
-			this.sequenceLoaded = value;
+		get contentCanShow() {
+			return (
+				!this.loaderVisible &&
+				this.sequenceCanPlay &&
+				this.presentationCanPlay &&
+				this.domManipulationsReady
+			);
 		},
 		get interactiveEnabled() {
 			return (
-				this.promoBannerOpened &&
-				this.backgroundAnimationEnded &&
-				!(breakpoint.mobile() && breakpoint.landscape())
+				this.domManipulationsReady &&
+				this.domManipulationsReady &&
+				this.backgroundOpeningEnded &&
+				this.promoBannerOpeningEnded &&
+				!this.loaderVisible &&
+				!this.mobileDeviceTypeWithLandscapeOrientation
 			);
-		},
-		get canShowContent() {
-			return this.sequenceLoaded && this.loaderHidden;
 		},
 	});
 
 	useEffect(
 		() =>
 			reaction(
-				() => localStore.canShowContent,
-				(canShow) => {
-					if (canShow) promoApi.start({ opacity: 1 });
+				() => !localStore.contentLoaded,
+				(showLoader) => {
+					if (showLoader) localStore.setLoaderVisible(showLoader);
 				}
 			),
-		[localStore, promoApi]
+		[localStore]
 	);
 
 	useEffect(
 		() =>
 			reaction(
 				() => localStore.feedbackOpened,
-				(opened) => {
-					feedbackApi.start({ y: opened ? 1 : 0 });
-				}
+				(opened) => feedbackApi.start({ y: opened ? 1 : 0 })
 			),
 		[feedbackApi, localStore]
 	);
@@ -172,86 +188,84 @@ export const Promo: React.FC = () => {
 					footerContent: footerContentRef,
 				},
 			}}>
-			<a.div style={promoStyle}>
-				<Observer>
-					{() => (
-						<IterationsControlsProvider
-							defaultDuration={2000}
-							parts={[
-								{ from: 0, to: 1 },
-								{ from: 1, to: 2 },
-								{ from: 2, to: 3 },
-								[
-									{ from: 3, to: 4 },
-									{ from: 4, to: 4.5 },
-									{ from: 4.5, to: 5, duration: 2500 },
-									{ from: 5, to: 6 },
-								],
-								[
-									{ from: 6, to: 7 },
-									{ from: 7, to: 7.5, duration: 5000 },
-									{ from: 7.5, to: 8 },
-								],
-								{ from: 8, to: 9 },
-								[
-									{ from: 9, to: 9.5, duration: 2000 },
-									{ from: 9.5, to: 10 },
-								],
-								{ from: 10, to: 11 },
-								{ from: 11, to: 12 },
-							]}
-							enabled={localStore.interactiveEnabled}>
-							<Layout header={{ onGetStartedClick: () => localStore.setFeedbackOpened(true) }}>
-								<S.Promo>
-									<Background />
-									<PromoContainer>
-										<DebugIterationControls />
-										{/*  */}
-										<Pulses />
-										<Banner />
-										<Assistant />
-										<PhoneAssistant
-											templatesSources={getRasterImagesByNames(
-												"BrightTemplate",
-												"GreenTemplate",
-												"BlueTemplate",
-												"BeigeTemplate",
-												"BlackTemplate"
-											)}
-										/>
-										<Presentation templateSource={CAR_TEMPLATE_SOURCE} />
-										<PhoneTemplates
-											templates={[
-												CAR_TEMPLATE_SOURCE,
-												...getRasterImagesByNames("ColaCharts", "Plug", "Plug", "Plug"),
-											].map((source, index) => ({
-												source,
-												overlaySource: index === 1 ? getRasterImageByName("Plug") : undefined,
-											}))}
-										/>
-										<GridTemplates templatesSources={GRID_TEMPLATES} hidden />
-										<GridTemplates templatesSources={GRID_TEMPLATES} />
-										<Tariffs />
-									</PromoContainer>
-									<Designers />
-									<MovedTemplate templateSource={CAR_TEMPLATE_SOURCE} />
-									<MovedAssistantFace />
-									<MovedDesignerFace avatarSource={TARGET_USER.data.avatarSource} />
-								</S.Promo>
-							</Layout>
-							<S.SlidingGroup
-								style={{ y: feedbackStyle.y.to(interpolations.invert).to((value) => `${value * 100}vh`) }}>
-								<Feedback />
-							</S.SlidingGroup>
-							<S.SlidingGroup style={{ y: feedbackStyle.y.to((value) => `${value * 100}vh`) }}>
-								<Footer ref={footerContentRef} />
-								<Controls />
-							</S.SlidingGroup>
-							<SwipeControls />
-						</IterationsControlsProvider>
-					)}
-				</Observer>
-			</a.div>
+			<Observer>
+				{() => (
+					<IterationsControlsProvider
+						defaultDuration={2000}
+						parts={[
+							{ from: 0, to: 1 },
+							{ from: 1, to: 2 },
+							{ from: 2, to: 3 },
+							[
+								{ from: 3, to: 4 },
+								{ from: 4, to: 4.5 },
+								{ from: 4.5, to: 5, duration: 2500 },
+								{ from: 5, to: 6 },
+							],
+							[
+								{ from: 6, to: 7 },
+								{ from: 7, to: 7.5, duration: 5000 },
+								{ from: 7.5, to: 8 },
+							],
+							{ from: 8, to: 9 },
+							[
+								{ from: 9, to: 9.5, duration: 2000 },
+								{ from: 9.5, to: 10 },
+							],
+							{ from: 10, to: 11 },
+							{ from: 11, to: 12 },
+						]}
+						enabled={localStore.interactiveEnabled}>
+						<Layout header={{ onGetStartedClick: () => localStore.setFeedbackOpened(true) }}>
+							<S.Promo>
+								<Background />
+								<PromoContainer>
+									<DebugIterationControls />
+									{/*  */}
+									<Pulses />
+									<Banner />
+									<Assistant />
+									<PhoneAssistant
+										templatesSources={getRasterImagesByNames(
+											"BrightTemplate",
+											"GreenTemplate",
+											"BlueTemplate",
+											"BeigeTemplate",
+											"BlackTemplate"
+										)}
+									/>
+									<Presentation templateSource={CAR_TEMPLATE_SOURCE} />
+									<PhoneTemplates
+										templates={[
+											CAR_TEMPLATE_SOURCE,
+											...getRasterImagesByNames("ColaCharts", "Plug", "Plug", "Plug"),
+										].map((source, index) => ({
+											source,
+											overlaySource: index === 1 ? getRasterImageByName("Plug") : undefined,
+										}))}
+									/>
+									<GridTemplates templatesSources={GRID_TEMPLATES} hidden />
+									<GridTemplates templatesSources={GRID_TEMPLATES} />
+									<Tariffs />
+								</PromoContainer>
+								<Designers />
+								<MovedTemplate templateSource={CAR_TEMPLATE_SOURCE} />
+								<MovedAssistantFace />
+								<MovedDesignerFace avatarSource={TARGET_USER.data.avatarSource} />
+							</S.Promo>
+						</Layout>
+						<S.SlidingGroup
+							style={{ y: feedbackStyle.y.to(interpolations.invert).to((value) => `${value * 100}vh`) }}>
+							<Feedback />
+						</S.SlidingGroup>
+						<S.SlidingGroup style={{ y: feedbackStyle.y.to((value) => `${value * 100}vh`) }}>
+							<Footer ref={footerContentRef} />
+							<Controls />
+						</S.SlidingGroup>
+						<SwipeControls />
+					</IterationsControlsProvider>
+				)}
+			</Observer>
 			<Observer>
 				{() => (breakpoint.mobile() && breakpoint.landscape() ? <LandscapePlug /> : null)}
 			</Observer>
@@ -264,7 +278,7 @@ export function usePromo() {
 	return useContext(context);
 }
 
-const CAR_TEMPLATE_SOURCE = presentationFramesDesktop[presentationFramesDesktop.length - 1];
+const CAR_TEMPLATE_SOURCE = SEQUENCE_DESKTOP.sources[SEQUENCE_DESKTOP.sources.length - 1];
 
 const GRID_TEMPLATES = [
 	[

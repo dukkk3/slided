@@ -1,18 +1,14 @@
 import { Observer } from "mobx-react-lite";
 
-import { Iteration } from "@components/common/hoc/Iteration";
+import { Iteration } from "@components/pages/Promo/helpers/Iteration";
 
 import { VisibilitySwitch } from "@components/common/ui/VisibilitySwitch";
 
 import { useBreakpoint } from "@core/hooks/useBreakpoint";
 import { interpolations } from "@core/helpers/iteration.helper";
-import { Sequence } from "@core/classes/Sequence";
-import { createArray } from "@core/utils/common.utils";
+import { ImageKitSequence } from "@core/classes/ImageKitSequence";
 
-import { getVideoByName } from "@assets/videos";
-
-// import { PresentationSequence } from "./PresentationSequence";
-import { PresentationVideo } from "./PresentationVideo";
+import { PresentationSequence } from "./PresentationSequence";
 
 import { usePromo } from "../../index";
 
@@ -86,13 +82,15 @@ export const Presentation: React.FC<Props> = ({ templateSource }) => {
 												.to(interpolations.easing("easeInOutCubic"))
 												.to(interpolations.invert),
 										}}>
-										<PresentationVideo
-											source={
-												breakpoint.mobile()
-													? getVideoByName("PresentationMobile")
-													: getVideoByName("Presentation")
+										<Observer>
+											{() =>
+												breakpoint.identified() ? (
+													<PresentationSequence
+														sequence={breakpoint.mobile() ? SEQUENCE_MOBILE : SEQUENCE_DESKTOP}
+													/>
+												) : null
 											}
-										/>
+										</Observer>
 									</S.CardImageGroup>
 								</S.Card>
 							)}
@@ -107,28 +105,5 @@ export const Presentation: React.FC<Props> = ({ templateSource }) => {
 const PERSPECTIVE = 1;
 const IMAGE_ZOOM = 2;
 
-export const presentationFramesDesktop = createArray(125).map(
-	(_, index) =>
-		`https://ik.imagekit.io/64nah4dsw/slided/present_sequence/${String(index + 1).padStart(
-			3,
-			"0"
-		)}.jpg`
-);
-
-export const presentationFramesMobile = createArray(125).map(
-	(_, index) =>
-		`https://ik.imagekit.io/64nah4dsw/slided/present_sequence_mobile/${String(index + 1).padStart(
-			3,
-			"0"
-		)}.jpg`
-);
-
-const SEQUENCE_DESKTOP = new Sequence(
-	presentationFramesDesktop.length,
-	(index) => presentationFramesDesktop[index]
-);
-
-const SEQUENCE_MOBILE = new Sequence(
-	presentationFramesMobile.length,
-	(index) => presentationFramesMobile[index]
-);
+export const SEQUENCE_DESKTOP = new ImageKitSequence(125, "presentation/16x9");
+export const SEQUENCE_MOBILE = new ImageKitSequence(125, "presentation/9x16");

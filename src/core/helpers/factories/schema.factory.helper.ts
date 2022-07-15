@@ -30,7 +30,7 @@ export namespace Store {
 }
 
 export function storeSchemaFactory<T extends Store.Base>(base: T): Store.Schema<T>;
-export function storeSchemaFactory<T extends Store.Schema<any>>(base: T): T;
+export function storeSchemaFactory<T extends Store.Base>(base: Store.Schema<T>): Store.Schema<T>;
 
 export function storeSchemaFactory(object: any) {
 	if (object[SCHEMA_SYMBOL]) return object;

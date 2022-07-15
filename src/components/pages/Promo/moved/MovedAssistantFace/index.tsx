@@ -3,10 +3,12 @@ import { useSpring } from "react-spring";
 import { Observer } from "mobx-react-lite";
 import { reaction } from "mobx";
 
-import { Iteration } from "@components/common/hoc/Iteration";
+import { Iteration } from "@components/pages/Promo/helpers/Iteration";
 
 import { useIteration } from "@core/hooks/useIteration";
+import { useCanvasSequence } from "@core/hooks/useCanvasSequence";
 import { interpolations } from "@core/helpers/iteration.helper";
+import { ImageKitSequence } from "@core/classes/ImageKitSequence";
 
 import { usePromo } from "../../index";
 
@@ -20,6 +22,7 @@ export const MovedAssistantFace: React.FC<Props> = () => {
 	const videoRef = useRef<HTMLVideoElement>(null);
 	const iteration1 = useIteration(1);
 	const iteration6 = useIteration(6);
+	const canvasSequence = useCanvasSequence(SEQUENCE, { resizeObserverDebounce: 100 });
 
 	const [{ value: pulseProgress }, pulseProgressApi] = useSpring(() => ({ value: 0 }));
 
@@ -51,6 +54,20 @@ export const MovedAssistantFace: React.FC<Props> = () => {
 	useEffect(
 		() =>
 			reaction(
+				() => iteration1.ranges.opening(),
+				(progress) => {
+					if (!SEQUENCE.loaded()) return;
+					const currentFrame = Math.floor((SEQUENCE.amount - 1) * progress);
+					canvasSequence.setCurrentFrame(currentFrame);
+					canvasSequence.drawCurrentFrame();
+				}
+			),
+		[canvasSequence, iteration1]
+	);
+
+	useEffect(
+		() =>
+			reaction(
 				() => iteration6.opened(),
 				(opened) => {
 					const video = videoRef.current;
@@ -61,6 +78,12 @@ export const MovedAssistantFace: React.FC<Props> = () => {
 			),
 		[iteration6]
 	);
+
+	useEffect(() => {
+		SEQUENCE.preloadAll().then(() => {
+			promo.store.setAssistantFaceCanPlay(true);
+		});
+	}, [canvasSequence, promo]);
 
 	return (
 		<Iteration
@@ -124,26 +147,22 @@ export const MovedAssistantFace: React.FC<Props> = () => {
 												(value) => 1 - (1 - promo.transforms.bigAssistantAndPhoneAssistant.getScale().y) * value
 											),
 									}}>
-									{(() => {
-										console.log("rendered", iteration1.interpolations.opening.get());
-										return (
-											<Face
-												videoRef={videoRef}
-												openingInterpolation={iteration1.interpolations.opening.to(
-													interpolations.easing("easeInOutCubic")
-												)}
-												swap={iteration1.opened()}
-												pulseInterpolation={
-													iteration1.opened()
-														? pulseInterpolation
-														: iteration1.interpolations.opening.to(interpolations.easing("easeInOutCubic"))
-												}
-												backgroundOpacityInterpolation={iteration5.interpolations.closing
-													.to(interpolations.easing("easeInOutCubic"))
-													.to(interpolations.invert)}
-											/>
-										);
-									})()}
+									<Face
+										canvasRef={canvasSequence.ref}
+										videoRef={videoRef}
+										openingInterpolation={iteration1.interpolations.opening.to(
+											interpolations.easing("easeInOutCubic")
+										)}
+										swap={iteration1.opened()}
+										pulseInterpolation={
+											iteration1.opened()
+												? pulseInterpolation
+												: iteration1.interpolations.opening.to(interpolations.easing("easeInOutCubic"))
+										}
+										backgroundOpacityInterpolation={iteration5.interpolations.closing
+											.to(interpolations.easing("easeInOutCubic"))
+											.to(interpolations.invert)}
+									/>
 								</S.MovedAssistantFace>
 								<S.OverlayBorderGroup
 									style={{
@@ -173,3 +192,5 @@ export const MovedAssistantFace: React.FC<Props> = () => {
 		</Iteration>
 	);
 };
+
+const SEQUENCE = new ImageKitSequence(24, "assistant");

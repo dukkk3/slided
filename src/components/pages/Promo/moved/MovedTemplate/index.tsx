@@ -1,6 +1,6 @@
 import { Observer } from "mobx-react-lite";
 
-import { Iteration } from "@components/common/hoc/Iteration";
+import { Iteration } from "@components/pages/Promo/helpers/Iteration";
 
 import { Image } from "@components/common/ui/Image";
 
