@@ -6,7 +6,7 @@ export const DebugIterationControls = styled.div`
 	flex-direction: column;
 	font-size: 2.4rem;
 	position: fixed;
-	z-index: 9999;
+	z-index: 999999;
 	display: flex;
 	bottom: 4rem;
 	color: white;

@@ -37,7 +37,7 @@ export interface Context {
 		inRange: (a: number, b?: number) => boolean;
 		toRange: (a: number, b: number) => number;
 	};
-	animate: (iteration: number, config?: SpringConfig) => void;
+	animate: (iteration: number, config?: SpringConfig) => any;
 	set: (iteration: number) => void;
 	addEventListener: <T extends keyof Events>(event: T, listener: Events[T]) => () => void;
 	removeEventListener: <T extends keyof Events>(event: T, listener: Events[T]) => void;
@@ -120,6 +120,7 @@ export function useIterationsControlsContextFactory({
 			const progress = toProgress(iteration);
 			animatedProgressApi.set({ value: progress });
 			localStore.setProgress(progress);
+			console.log(localStore.progress);
 		},
 		[animatedProgressApi, localStore, toProgress]
 	);

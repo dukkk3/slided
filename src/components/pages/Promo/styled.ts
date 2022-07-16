@@ -17,5 +17,5 @@ export const SlidingGroup = styled(a.div)`
 	left: 0;
 	width: 100%;
 	position: absolute;
-	z-index: 9999;
+	z-index: 9996;
 `;

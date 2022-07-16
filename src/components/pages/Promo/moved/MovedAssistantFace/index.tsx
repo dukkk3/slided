@@ -90,8 +90,7 @@ export const MovedAssistantFace: React.FC<Props> = () => {
 			iterations={[1, 3, 4, 5, 7]}
 			checkForVisible={([iteration1, , , , iteration7]) =>
 				iteration1.started() && !iteration7.opened()
-			}
-			visibilitySwitch={{ unmountWhenInvisible: false }}>
+			}>
 			{([iteration1, iteration3, iteration4, iteration5]) => (
 				<div>
 					<Observer>

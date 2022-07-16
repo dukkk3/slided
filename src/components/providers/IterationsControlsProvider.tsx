@@ -1,5 +1,5 @@
-import { createContext, useCallback, useContext, useEffect, useMemo } from "react";
-import { easings } from "react-spring";
+import { createContext, memo, useCallback, useContext, useEffect, useMemo } from "react";
+import isEqual from "react-fast-compare";
 
 import {
 	useIterationsControlsContextFactory,
@@ -7,7 +7,8 @@ import {
 } from "@core/hooks/useIterationsContextFactory";
 import { useLocalStore } from "@core/hooks/useLocalStore";
 import { clamp } from "@core/utils/math.utils";
-import { useDebounce } from "@core/hooks/useDebounce";
+import { easings, SpringValue, useSpring } from "react-spring";
+import { resolveSpringAnimation } from "@core/helpers/animation.helper";
 
 interface Part {
 	duration?: number;
@@ -15,373 +16,325 @@ interface Part {
 	to: number;
 }
 
-type PartIndexWithBound = [index: number, bound: number];
+type PartLabel = {
+	index: number;
+	bound: number;
+};
+
+type PartOrMergedParts = Part | Part[];
 
 export interface Props extends React.PropsWithChildren<{}> {
 	enabled?: boolean;
 	defaultDuration?: number;
-	parts: (Part | Part[])[];
+	parts: PartOrMergedParts[];
 }
 
 type Context = IterationsControlsContext & {
 	prev: () => void;
 	next: () => void;
-	getPrevIteration: () => number | null;
-	getTargetIteration: () => number;
+	getNeededIteration: () => number;
+	getLastIdleIteration: () => number | null;
 	getActivePartIndex: () => number;
+	hideContent: () => boolean;
 	getDurationFactorInRange: (start: number, end: number) => number;
-	change: (partIndex: number) => void;
+	change: (partIndex: number) => any;
+	interactiveEnabled(): boolean;
+	hideContentInterpolation: SpringValue<number>;
 	readonly partsAmount: number;
-	readonly enabled: boolean;
 };
 
 const context = createContext<Context>(null!);
 
-export const IterationsControlsProvider: React.FC<Props> = ({
-	parts,
-	children,
-	enabled = true,
-	defaultDuration = 1000,
-}) => {
-	const flattenParts = useMemo(
-		() => parts.flat(1).sort(({ from: a }, { from: b }) => a - b),
-		[parts]
-	);
+export const IterationsControlsProvider: React.FC<React.PropsWithChildren<Props>> = memo(
+	({ children, parts, defaultDuration = 1000, enabled = true }) => {
+		const flatParts = useMemo(() => flat(parts), [parts]);
+		const [{ hide: hideContentInterpolation }, hideContentApi] = useSpring(() => ({ hide: 0 }));
 
-	const partsWithShiftedBound = useMemo(
-		() => [
-			...mapParts(parts, (part) => ({
-				...part,
-				to: part.to - 0.001,
-			})),
-			{
-				from: flattenParts[flattenParts.length - 1].to,
-				to: flattenParts[flattenParts.length - 1].to + 0.001,
+		const partsWithShiftedBoundAndAdditionalPart = useMemo(() => {
+			const eps = 0.001;
+			const partsWithShiftedBound = mapParts(parts, (part) => ({ ...part, to: part.to - eps }));
+			const lastPart = flatParts[flatParts.length - 1];
+			return [...partsWithShiftedBound, { from: lastPart.to, to: lastPart.to + eps }];
+		}, [flatParts, parts]);
+
+		const flatPartsWithShiftedBound = useMemo(
+			() => flat(partsWithShiftedBoundAndAdditionalPart),
+			[partsWithShiftedBoundAndAdditionalPart]
+		);
+
+		const maxIteration = useMemo(() => Math.max(...flatParts.map(({ to }) => to)), [flatParts]);
+		const iterationsControlsContext = useIterationsControlsContextFactory({
+			iterations: maxIteration,
+		});
+
+		const localStore = useLocalStore({
+			direction: 0,
+			contentHidden: false,
+			neededPartLabel: { index: 0, bound: -1 } as PartLabel,
+			currentPartLabel: { index: 0, bound: -1 } as PartLabel,
+			lastIdleIteration: null as number | null,
+			get neededIteration() {
+				return getPartAccessProp(flatParts[this.neededPartLabel.index], this.neededPartLabel.bound);
 			},
-		],
-		[flattenParts, parts]
-	);
-
-	const flattenPartsWithShiftedBound = useMemo(
-		() => partsWithShiftedBound.flat(1).sort(({ from: a }, { from: b }) => a - b),
-		[partsWithShiftedBound]
-	);
-
-	const iterations = useMemo(() => Math.max(...flattenParts.map(({ to }) => to)), [flattenParts]);
-	const iterationsControlsContext = useIterationsControlsContextFactory({
-		iterations,
-	});
-
-	const findPartIndex = useCallback(
-		(
-			partOrIteration: Part | number,
-			{ target = flattenParts, direction }: { direction?: number; target?: Part[] } = {}
-		) => {
-			return typeof partOrIteration === "number"
-				? target.findIndex(
-						({ from, to }) =>
-							(direction === -1 && from < partOrIteration && partOrIteration <= to) ||
-							(direction === 1 && from <= partOrIteration && partOrIteration < to) ||
-							(!direction && from <= partOrIteration && partOrIteration <= to)
-				  )
-				: target.findIndex(
-						({ from, to }) => from === partOrIteration.from && to === partOrIteration.to
-				  );
-		},
-		[flattenParts]
-	);
-
-	const getPartByIndex = useCallback(
-		(index: number) => {
-			return flattenParts[index];
-		},
-		[flattenParts]
-	);
-
-	const localStore = useLocalStore({
-		direction: 0,
-		speedy: false,
-		prevIteration: null as number | null,
-		realPrevIteration: 0,
-		targetPartIndexWithBound: [0, 0] as PartIndexWithBound,
-		currentPartIndexWithBound: [0, -1] as PartIndexWithBound,
-		get targetIteration() {
-			return getPartAccessProp(
-				getPartByIndex(this.targetPartIndexWithBound[0]),
-				this.targetPartIndexWithBound[1]
-			);
-		},
-		get activePartIndex() {
-			const prop = getPartAccessProp(
-				getPartByIndex(this.targetPartIndexWithBound[0]),
-				this.targetPartIndexWithBound[1]
-			);
-			const partIndex = findPartIndex(prop, { target: flattenPartsWithShiftedBound });
-			const part = flattenPartsWithShiftedBound[partIndex];
-			const partSource = findPartSource(part, partsWithShiftedBound);
-			if (!partSource) return -1;
-			return partsWithShiftedBound.indexOf(partSource);
-		},
-	});
-
-	const updateIterations = useDebounce((partIndexWithBound: PartIndexWithBound) => {
-		localStore.setPrevIteration(
-			getPartAccessProp(getPartByIndex(partIndexWithBound[0]), partIndexWithBound[1])
-		);
-	}, 250);
-
-	const bootstrapAnimation = useCallback(
-		(partIndexWithBound: PartIndexWithBound) => {
-			const safelyPartIndexWithBound = [
-				clamp(partIndexWithBound[0], 0, flattenParts.length - 1),
-				partIndexWithBound[1],
-			] as PartIndexWithBound;
-			const neededPartIndexWithBound = safelyPartIndexWithBound;
-
-			const part = getPartByIndex(neededPartIndexWithBound[0]);
-
-			if (!part) return;
-
-			const neededIteration = getPartAccessProp(part, neededPartIndexWithBound[1]);
-			const { iteration: currentIteration } = iterationsControlsContext.store;
-			const durationFactor =
-				Math.abs(currentIteration - neededIteration) / Math.abs(part.from - part.to);
-			const duration = localStore.speedy
-				? (defaultDuration * 2) /
-				  (Math.abs(localStore.targetIteration - localStore.realPrevIteration) || 1)
-				: (part.duration || defaultDuration) * clamp(durationFactor, 0, 1);
-
-			localStore.setCurrentPartIndexWithBound(neededPartIndexWithBound);
-			iterationsControlsContext.animate(neededIteration, {
-				duration,
-				easing: easings.linear,
-			});
-		},
-		[defaultDuration, flattenParts.length, getPartByIndex, iterationsControlsContext, localStore]
-	);
-
-	const change = useCallback(
-		(
-			partIndexWithBound: PartIndexWithBound,
-			{
-				force = false,
-				neededBound = 0,
-				speedy = false,
-			}: { force?: boolean; neededBound?: number; speedy?: boolean } = {}
-		) => {
-			if (!enabled) return;
-
-			const part = getPartByIndex(partIndexWithBound[0]);
-			const partSource = findPartSource(part, parts);
-			const merged = Array.isArray(partSource);
-
-			if (!partSource) return;
-
-			const direction = getDirectionBtwParts(partIndexWithBound, localStore.targetPartIndexWithBound);
-
-			if (direction === 0) return;
-
-			const boundPart = merged
-				? partSource.reduce((acc, part) => {
-						const partProp = getPartAccessProp(part, neededBound || direction);
-						const accProp = getPartAccessProp(acc, neededBound || direction);
-						return ((neededBound || direction) === -1 && partProp < accProp) ||
-							((neededBound || direction) === 1 && partProp > accProp)
-							? part
-							: acc;
-				  }, partSource[0])
-				: partSource;
-			const boundPartIndex = findPartIndex(boundPart);
-			const prevDirection = getDirectionBtwParts(
-				localStore.targetPartIndexWithBound,
-				localStore.currentPartIndexWithBound
-			);
-
-			const nextPartIndexWithBound =
-				direction === -1
-					? getPrevPartIndexWithBound(localStore.currentPartIndexWithBound)
-					: getNextPartIndexWithBound(localStore.currentPartIndexWithBound);
-
-			localStore.setTargetPartIndexWithBound([boundPartIndex, partIndexWithBound[1]]);
-			localStore.setDirection(direction);
-			localStore.setPrevIteration(null);
-			localStore.setRealPrevIteration(
-				getPartAccessProp(
-					getPartByIndex(localStore.currentPartIndexWithBound[0]),
-					localStore.currentPartIndexWithBound[1]
-				)
-			);
-			localStore.setSpeedy(speedy);
-			updateIterations(localStore.currentPartIndexWithBound);
-
-			if (
-				force ||
-				(prevDirection !== 0 &&
-					prevDirection !== direction &&
-					iterationsControlsContext.animated.progress.isAnimating) ||
-				!iterationsControlsContext.animated.progress.isAnimating
-			)
-				bootstrapAnimation(
-					merged || force ? nextPartIndexWithBound : localStore.targetPartIndexWithBound
+			get activePartIndex() {
+				const iteration = getPartAccessProp(
+					flatParts[this.neededPartLabel.index],
+					this.neededPartLabel.bound
 				);
-		},
-		[
-			enabled,
-			getPartByIndex,
-			parts,
-			localStore,
-			findPartIndex,
-			updateIterations,
-			iterationsControlsContext.animated.progress.isAnimating,
-			bootstrapAnimation,
-		]
-	);
-
-	const handleRest = useCallback(() => {
-		const { currentPartIndexWithBound, targetPartIndexWithBound } = localStore;
-		const direction = getDirectionBtwParts(targetPartIndexWithBound, currentPartIndexWithBound);
-		const nextPartIndexWithBound =
-			localStore.direction === -1
-				? getPrevPartIndexWithBound(currentPartIndexWithBound)
-				: getNextPartIndexWithBound(currentPartIndexWithBound);
-
-		if (nextPartIndexWithBound[0] === localStore.targetPartIndexWithBound[0]) {
-			nextPartIndexWithBound[1] = localStore.targetPartIndexWithBound[1];
-		}
-
-		if (direction === 0) {
-			return;
-		}
-
-		bootstrapAnimation(nextPartIndexWithBound);
-	}, [bootstrapAnimation, localStore]);
-
-	const next = useCallback(() => {
-		const animated = iterationsControlsContext.animated.progress.isAnimating;
-		const partIndexWithBound = getNextPartIndexWithBound(
-			animated ? localStore.targetPartIndexWithBound : localStore.currentPartIndexWithBound
-		);
-		change(partIndexWithBound, {
-			force: !animated || localStore.direction !== 1,
-			speedy: animated && localStore.speedy,
+				const partIndex = findPartIndex(flatPartsWithShiftedBound, iteration);
+				const part = flatPartsWithShiftedBound[partIndex];
+				const partSource = findPartSource(partsWithShiftedBoundAndAdditionalPart, part);
+				if (!partSource) return -1;
+				return partsWithShiftedBoundAndAdditionalPart.indexOf(partSource);
+			},
 		});
-	}, [change, localStore, iterationsControlsContext]);
 
-	const prev = useCallback(() => {
-		const animated = iterationsControlsContext.animated.progress.isAnimating;
-		const partIndexWithBound = getPrevPartIndexWithBound(
-			animated ? localStore.targetPartIndexWithBound : localStore.currentPartIndexWithBound
+		const interactiveEnabled = useCallback(() => {
+			return !localStore.contentHidden && enabled;
+		}, [enabled, localStore]);
+
+		const animate = useCallback(
+			(partLabel: PartLabel, force?: boolean) => {
+				const part = flatParts[partLabel.index];
+				const iteration = getPartAccessProp(part, partLabel.bound);
+				const { iteration: currentIteration } = iterationsControlsContext.store;
+				const durationFactor =
+					part.from <= currentIteration && part.to >= currentIteration
+						? Math.abs(currentIteration - iteration) / Math.abs(part.from - part.to)
+						: 1;
+				const duration = (part.duration || defaultDuration) * clamp(durationFactor, 0.01, 1);
+
+				localStore.setCurrentPartLabel(partLabel);
+
+				return force
+					? iterationsControlsContext.set(iteration)
+					: iterationsControlsContext.animate(iteration, { duration, easing: easings.linear });
+			},
+			[defaultDuration, flatParts, iterationsControlsContext, localStore]
 		);
-		change(partIndexWithBound, {
-			force: !animated || localStore.direction !== -1,
-			speedy: animated && localStore.speedy,
-		});
-	}, [change, localStore, iterationsControlsContext]);
 
-	const smartChange = useCallback(
-		(partIndex: number) => {
-			const direction = partsWithShiftedBound.length - 1 === partIndex ? 1 : -1;
-			const part = parts[direction === 1 ? partIndex - 1 : partIndex];
-			const long = Math.abs(localStore.currentPartIndexWithBound[0] - partIndex) > 1;
-			if (!part) return;
-			const boundPart = Array.isArray(part) ? part[0] : part;
-			partIndex = flattenParts.findIndex((part) => isPartsEquals(part, boundPart));
-			change([partIndex, direction], { force: true, neededBound: direction, speedy: long });
-		},
-		[change, flattenParts, localStore.currentPartIndexWithBound, parts, partsWithShiftedBound.length]
-	);
+		const change = useCallback(
+			async (
+				partLabel: PartLabel,
+				{ neededEdgePartBound, force }: { neededEdgePartBound?: number; force?: boolean } = {}
+			) => {
+				const part = flatParts[partLabel.index];
+				const partSource = findPartSource(parts, part);
+				const isMerged = Array.isArray(partSource);
+				const direction = getDirectionBtwPartsLabels(partLabel, localStore.neededPartLabel);
 
-	const getDurationFactorInRange = useCallback(
-		(start: number, end: number) => {
-			const part = flattenParts.find((part) => part.from <= start && part.to >= end);
-			if (!part) return 0;
-			const duration = part.duration || defaultDuration;
-			return duration / defaultDuration;
-		},
-		[defaultDuration, flattenParts]
-	);
+				if (!partSource || direction === 0) return;
 
-	const getActivePartIndex = useCallback(() => {
-		return localStore.activePartIndex;
-	}, [localStore]);
+				const edgePart = isMerged
+					? partSource.reduce((acc, part) => {
+							const targetDirection = neededEdgePartBound || direction;
+							const partProp = getPartAccessProp(part, targetDirection);
+							const accProp = getPartAccessProp(acc, targetDirection);
+							return (targetDirection === -1 && partProp < accProp) ||
+								(targetDirection === 1 && partProp > accProp)
+								? part
+								: acc;
+					  }, partSource[0])
+					: partSource;
+				const edgePartIndex = findPartIndex(flatParts, edgePart);
+				const neededPartLabel = { ...partLabel, index: edgePartIndex };
 
-	const getTargetIteration = useCallback(() => {
-		return localStore.targetIteration;
-	}, [localStore]);
+				const nextPartLabel =
+					direction === -1
+						? getPrevPartLabel(localStore.currentPartLabel)
+						: getNextPartLabel(localStore.currentPartLabel);
 
-	const getPrevIteration = useCallback(() => {
-		return localStore.prevIteration;
-	}, [localStore]);
+				if (
+					!iterationsControlsContext.animated.progress.isAnimating ||
+					force ||
+					direction !== localStore.direction
+				) {
+					localStore.setNeededPartLabel(neededPartLabel);
+					localStore.setDirection(direction);
+					localStore.setLastIdleIteration(force ? null : iterationsControlsContext.store.iteration);
+					return animate(force ? neededPartLabel : nextPartLabel, force);
+				}
+			},
+			[animate, flatParts, iterationsControlsContext, localStore, parts]
+		);
 
-	useEffect(
-		() => iterationsControlsContext.addEventListener("rest", handleRest),
-		[handleRest, iterationsControlsContext]
-	);
+		const smartChange = useCallback(
+			async (partIndex: number) => {
+				if (!interactiveEnabled()) return;
 
-	return (
-		<context.Provider
-			value={{
-				...iterationsControlsContext,
-				getDurationFactorInRange,
-				getTargetIteration,
-				getPrevIteration,
-				change: smartChange,
-				getActivePartIndex,
-				prev,
-				next,
-				enabled,
-				partsAmount: parts.length,
-			}}>
-			{children}
-		</context.Provider>
-	);
-};
+				const direction = partsWithShiftedBoundAndAdditionalPart.length - 1 === partIndex ? 1 : -1;
+				const part = parts[direction === 1 ? partIndex - 1 : partIndex];
+				// eslint-disable-next-line @typescript-eslint/no-unused-vars
+				const long = Math.abs(localStore.currentPartLabel.index - partIndex) > 1;
+				if (!part) return;
+				const edgePart = Array.isArray(part) ? part[0] : part;
+				partIndex = flatParts.findIndex((part) => isEqual(part, edgePart));
+
+				if (long) {
+					localStore.setContentHidden(true);
+					await resolveSpringAnimation(hideContentApi, { hide: 1 });
+					await Promise.resolve(
+						change(
+							{ index: partIndex, bound: direction },
+							{ neededEdgePartBound: direction, force: true }
+						)
+					);
+					await resolveSpringAnimation(hideContentApi, { hide: 0 });
+					localStore.setContentHidden(false);
+				} else {
+					change({ index: partIndex, bound: direction }, { neededEdgePartBound: direction });
+				}
+			},
+			[
+				interactiveEnabled,
+				partsWithShiftedBoundAndAdditionalPart.length,
+				parts,
+				localStore,
+				flatParts,
+				hideContentApi,
+				change,
+			]
+		);
+
+		const next = useCallback(() => {
+			if (!interactiveEnabled()) return;
+			const nextPartLabel = getNextPartLabel(localStore.neededPartLabel);
+			change(nextPartLabel);
+		}, [change, interactiveEnabled, localStore]);
+
+		const prev = useCallback(() => {
+			if (!interactiveEnabled()) return;
+			const prevPartLabel = getPrevPartLabel(localStore.neededPartLabel);
+			change(prevPartLabel);
+		}, [change, interactiveEnabled, localStore]);
+
+		const handleRest = useCallback(() => {
+			const { currentPartLabel, neededPartLabel } = localStore;
+			const direction = getDirectionBtwPartsLabels(neededPartLabel, currentPartLabel);
+			const nextPartLabel =
+				localStore.direction === -1
+					? getPrevPartLabel(currentPartLabel)
+					: getNextPartLabel(currentPartLabel);
+
+			if (nextPartLabel.index === neededPartLabel.index) {
+				nextPartLabel.bound = neededPartLabel.bound;
+			}
+
+			if (direction === 0) {
+				return;
+			}
+
+			animate(nextPartLabel);
+		}, [animate, localStore]);
+
+		const getDurationFactorInRange = useCallback(
+			(start: number, end: number) => {
+				const part = flatParts.find((part) => part.from <= start && part.to >= end);
+				if (!part) return 1;
+				const duration = part.duration || defaultDuration;
+				return duration / defaultDuration;
+			},
+			[defaultDuration, flatParts]
+		);
+
+		const getActivePartIndex = useCallback(() => {
+			return localStore.activePartIndex;
+		}, [localStore]);
+
+		const getNeededIteration = useCallback(() => {
+			return localStore.neededIteration;
+		}, [localStore]);
+
+		const getLastIdleIteration = useCallback(() => {
+			return localStore.lastIdleIteration;
+		}, [localStore]);
+
+		const hideContent = useCallback(() => {
+			return localStore.contentHidden;
+		}, [localStore]);
+
+		useEffect(
+			() => iterationsControlsContext.addEventListener("rest", handleRest),
+			[handleRest, iterationsControlsContext]
+		);
+
+		return (
+			<context.Provider
+				value={{
+					...iterationsControlsContext,
+					partsAmount: parts.length,
+					getDurationFactorInRange,
+					hideContentInterpolation,
+					getLastIdleIteration,
+					getNeededIteration,
+					change: smartChange,
+					getActivePartIndex,
+					interactiveEnabled,
+					hideContent,
+					prev,
+					next,
+				}}>
+				{children}
+			</context.Provider>
+		);
+	}
+);
 
 export function useIterationsControls() {
 	return useContext(context);
 }
 
-const getNextPartIndexWithBound = (
-	[index, bound]: PartIndexWithBound,
-	force: boolean = true
-): PartIndexWithBound => {
-	if (force) return bound === -1 ? [index, 1] : [index + 1, 1];
-	return bound === -1 ? [index, 1] : [index + 1, -1];
-};
+const flat = (parts: PartOrMergedParts[]) =>
+	(parts.flat(Infinity) as Part[]).sort(({ from: a }, { from: b }) => a - b);
 
-const getPrevPartIndexWithBound = (
-	[index, bound]: PartIndexWithBound,
-	force: boolean = true
-): PartIndexWithBound => {
-	if (force) return bound === -1 ? [index - 1, -1] : [index, -1];
-	return bound === -1 ? [index - 1, 1] : [index, -1];
-};
+const mapParts = (parts: PartOrMergedParts[], callback: (part: Part, index: number) => Part) =>
+	parts.map((part, index) => (Array.isArray(part) ? part.map(callback) : callback(part, index)));
 
-const getDirectionBtwParts = (a: PartIndexWithBound, b: PartIndexWithBound): number => {
+const findPartIndex = (parts: Part[], partLabelOrIteration: Part | number) =>
+	typeof partLabelOrIteration === "number"
+		? parts.findIndex(({ from, to }) => from <= partLabelOrIteration && partLabelOrIteration <= to)
+		: parts.findIndex(
+				({ from, to }) => from === partLabelOrIteration.from && to === partLabelOrIteration.to
+		  );
+
+// const iterationToPartLabel = (parts: Part[], iteration: number): PartLabel => {
+// 	const partIndex = findPartIndex(parts, iteration);
+// 	const part = parts[partIndex];
+// 	const center = part.from + Math.abs(part.from - part.to);
+// 	const bound = iteration > center ? 1 : -1;
+// 	return {
+// 		index: partIndex,
+// 		bound,
+// 	};
+// };
+
+const getPartAccessProp = (part: Part, direction: number): number =>
+	part[direction === 1 ? "to" : "from"];
+
+const findPartSource = (parts: PartOrMergedParts[], part: Part) =>
+	parts.find(
+		(p) =>
+			(Array.isArray(p) && p.some((part2) => isEqual(part, part2))) ||
+			(!Array.isArray(p) && isEqual(p, part))
+	) as PartOrMergedParts | undefined;
+
+const getDirectionBtwPartsLabels = (a: PartLabel, b: PartLabel): number => {
 	switch (true) {
-		case a[0] > b[0] || (a[0] === b[0] && a[1] > b[1]):
+		case a.index > b.index || (a.index === b.index && a.bound > b.bound):
 			return 1;
-		case a[0] < b[0] || (a[0] === b[0] && a[1] < b[1]):
+		case a.index < b.index || (a.index === b.index && a.bound < b.bound):
 			return -1;
 		default:
 			return 0;
 	}
 };
 
-const findPartSource = (part: Part, targetParts: (Part | Part[])[]) => {
-	return targetParts.find(
-		(p) =>
-			(Array.isArray(p) && p.some((part2) => isPartsEquals(part, part2))) ||
-			(!Array.isArray(p) && isPartsEquals(p, part))
-	) as Part[] | Part | undefined;
+const getNextPartLabel = ({ index, bound }: PartLabel, force: boolean = true): PartLabel => {
+	if (force) return bound === -1 ? { index, bound: 1 } : { bound, index: index + 1 };
+	return bound === -1 ? { index, bound: 1 } : { index: index + 1, bound: -1 };
 };
 
-const isPartsEquals = (a: Part, b: Part) => a && b && a.from === b.from && a.to === b.to;
-const getPartAccessProp = (part: Part, direction: number): number =>
-	part[direction === 1 ? "to" : "from"];
-
-const mapParts = (parts: (Part | Part[])[], callback: (part: Part, index: number) => Part) => {
-	return parts.map((part, index) =>
-		Array.isArray(part) ? part.map(callback) : callback(part, index)
-	);
+const getPrevPartLabel = ({ index, bound }: PartLabel, force: boolean = true): PartLabel => {
+	if (force) return bound === -1 ? { index: index - 1, bound: -1 } : { index, bound: -1 };
+	return bound === -1 ? { index: index - 1, bound: 1 } : { index, bound: -1 };
 };

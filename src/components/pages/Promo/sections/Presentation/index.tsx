@@ -25,11 +25,10 @@ export const Presentation: React.FC<Props> = ({ templateSource }) => {
 	return (
 		<Iteration
 			iterations={[7, 8]}
-			checkForVisible={([iteration7, iteration8]) => iteration7.started() && !iteration8.opened()}
-			visibilitySwitch={{ unmountWhenInvisible: false }}>
+			checkForVisible={([iteration7, iteration8]) => iteration7.started() && !iteration8.opened()}>
 			{([iteration7, iteration8]) => (
 				<div data-iteration-name='Presentation'>
-					<VisibilitySwitch visible={false} unmountWhenInvisible={false}>
+					<VisibilitySwitch visible={false}>
 						<S.EndContainer ref={promo.transforms.bigTemplateAndPhoneTemplate.startRef} />
 					</VisibilitySwitch>
 					<S.EndContainer style={{ perspective: `${PERSPECTIVE}rem` }}>

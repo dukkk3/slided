@@ -60,8 +60,8 @@ export function useResizeObserver({
 
 	const windowResizeCallback = useCallback(() => {
 		const target = prevTargetRef.current;
+		localStore.setReady(false);
 		if (!target) {
-			localStore.setReady(false);
 			return;
 		}
 		updateStore(target);

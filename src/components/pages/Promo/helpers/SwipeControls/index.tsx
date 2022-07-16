@@ -59,7 +59,7 @@ export const SwipeControls: React.FC = () => {
 			onWheel: (state) => {
 				const footer = promo.refs.footerContent.current;
 
-				if (!iterationsControls.enabled || promo.store.feedbackOpened) return;
+				if (!iterationsControls.interactiveEnabled() || promo.store.feedbackOpened) return;
 				if (lastIteration.started() && footer && footer.scrollTop > 0) return;
 
 				return handleWheel(state);
@@ -68,7 +68,7 @@ export const SwipeControls: React.FC = () => {
 				const footer = promo.refs.footerContent.current;
 
 				if (
-					!iterationsControls.enabled ||
+					!iterationsControls.interactiveEnabled() ||
 					!breakpoint.range("mobile", "laptop") ||
 					promo.store.feedbackOpened
 				)

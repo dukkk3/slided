@@ -57,8 +57,7 @@ export const PhoneAssistant = forwardRef<HTMLDivElement, Props>(({ templatesSour
 			iterations={[3, 4, 5, 6, 7, 8]}
 			checkForVisible={([iteration3, , , , , iteration8]) =>
 				iteration3.started() && !iteration8.started()
-			}
-			visibilitySwitch={{ unmountWhenInvisible: false }}>
+			}>
 			{([iteration3, iteration4, iteration5, iteration6, iteration7]) => (
 				<S.PhoneGroup
 					data-iteration-name='PhoneAssistant'
@@ -94,9 +93,7 @@ export const PhoneAssistant = forwardRef<HTMLDivElement, Props>(({ templatesSour
 								<Observer>
 									{() => (
 										<S.DescriptionGroup>
-											<VisibilitySwitch
-												visible={iteration3.started() && !iteration4.ended()}
-												unmountWhenInvisible={false}>
+											<VisibilitySwitch visible={iteration3.started() && !iteration4.ended()}>
 												<S.Description>
 													<Observer>
 														{() => (
@@ -158,9 +155,7 @@ export const PhoneAssistant = forwardRef<HTMLDivElement, Props>(({ templatesSour
 							</div>
 							<Observer>
 								{() => (
-									<VisibilitySwitch
-										visible={iteration3.started() && !iteration7.ended()}
-										unmountWhenInvisible={false}>
+									<VisibilitySwitch visible={iteration3.started() && !iteration7.ended()}>
 										<S.CardsGroup ref={promo.resizeObservers.phoneCardsContainer.ref}>
 											<Observer>
 												{() => (
@@ -228,7 +223,9 @@ export const PhoneAssistant = forwardRef<HTMLDivElement, Props>(({ templatesSour
 							<Observer>
 								{() => (
 									<S.ButtonWrapper>
-										<VisibilitySwitch visible={iteration3.closeStarted() && !iteration4.ended()}>
+										<VisibilitySwitch
+											visible={iteration3.closeStarted() && !iteration4.ended()}
+											unmountWhenInvisible>
 											<a.div
 												className='unit'
 												style={{
@@ -239,16 +236,12 @@ export const PhoneAssistant = forwardRef<HTMLDivElement, Props>(({ templatesSour
 																.to(interpolations.easing("easeInOutCubic"))
 																.to(interpolations.invert),
 												}}>
-												<Button
-													onClick={() => {
-														iterationsControls.next();
-														iterationsControls.next();
-													}}>
-													Choose
-												</Button>
+												<Button>Choose</Button>
 											</a.div>
 										</VisibilitySwitch>
-										<VisibilitySwitch visible={iteration4.closeStarted() && !iteration5.ended()}>
+										<VisibilitySwitch
+											visible={iteration4.closeStarted() && !iteration5.ended()}
+											unmountWhenInvisible>
 											<Observer>
 												{() =>
 													!breakpoint.mobile() ? (
@@ -271,7 +264,7 @@ export const PhoneAssistant = forwardRef<HTMLDivElement, Props>(({ templatesSour
 												}
 											</Observer>
 										</VisibilitySwitch>
-										<VisibilitySwitch visible={iteration6.started()}>
+										<VisibilitySwitch visible={iteration6.started()} unmountWhenInvisible>
 											<a.div
 												className='unit'
 												style={{

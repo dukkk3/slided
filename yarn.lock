@@ -7947,6 +7947,11 @@
     "array-includes" "^3.1.2"
     "object.assign" "^4.1.2"
 
+"k2-media@^0.4.3":
+  "integrity" "sha512-tP/6SlaYeCE5E4Gof5aqRJodyQ2PqetpRNFAkg0Ufo3pZpntsTwZ5MXL9xu1c996vbWhFrJnaub0y96I1GiGcA=="
+  "resolved" "https://registry.npmjs.org/k2-media/-/k2-media-0.4.3.tgz"
+  "version" "0.4.3"
+
 "killable@^1.0.1":
   "integrity" "sha512-LzqtLKlUwirEUyl/nicirVmNiPvYs7l5n8wOPP7fyJVpUPkvCnW/vuiXGpylGUlnPDnB7311rARzAt3Mhswpjg=="
   "resolved" "https://registry.npmjs.org/killable/-/killable-1.0.1.tgz"

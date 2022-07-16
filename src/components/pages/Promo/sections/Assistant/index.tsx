@@ -18,20 +18,18 @@ export const Assistant: React.FC = () => {
 	return (
 		<Iteration
 			iterations={[1, 2]}
-			visibilitySwitch={{ unmountWhenInvisible: false }}
 			checkForVisible={([iteration1, iteration2]) => iteration1.started() && !iteration2.ended()}>
 			{() => (
 				<S.Assistant data-iteration-name='Assistant'>
 					<S.FaceWrapper ref={promo.transforms.bigAssistantAndPhoneAssistant.startRef} />
 					<Iteration
 						iterations={[1, 2]}
-						checkForVisible={([iteration1, iteration2]) => iteration1.visible() || iteration2.visible()}
-						visibilitySwitch={{ unmountWhenInvisible: false }}>
+						checkForVisible={([iteration1, iteration2]) => iteration1.visible() || iteration2.visible()}>
 						{([iteration1, iteration2]) => (
 							<S.DescriptionWrapper>
 								<Observer>
 									{() => (
-										<VisibilitySwitch visible={iteration1.visible()} unmountWhenInvisible={false}>
+										<VisibilitySwitch visible={iteration1.visible()}>
 											<S.Description>
 												<AnimatedSplitChars
 													text={["Let’s see how it works.", "Upload your content."]}
@@ -49,7 +47,7 @@ export const Assistant: React.FC = () => {
 								</Observer>
 								<Observer>
 									{() => (
-										<VisibilitySwitch visible={iteration2.visible()} unmountWhenInvisible={false}>
+										<VisibilitySwitch visible={iteration2.visible()}>
 											<S.Description>
 												<AnimatedSplitChars
 													text={["I’m here to organize it all", "into a neat structure"]}

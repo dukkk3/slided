@@ -34,7 +34,7 @@ export function useBreakpoint() {
 
 	const localStore = useLocalStore({
 		get mobile() {
-			return range("mobile", "tablet");
+			return range("mobile", "mobile.m");
 		},
 		get tablet() {
 			return range("tablet", "laptop");

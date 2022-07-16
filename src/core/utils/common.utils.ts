@@ -226,3 +226,13 @@ export function unlockOrientation() {
 		d.msExitFullscreen();
 	}
 }
+
+export function pick<T extends object, K extends keyof T>(object: T, ...keys: K[]) {
+	return keys.reduce((acc, key) => ({ ...acc, [key]: object[key] }), {} as Pick<T, K>);
+}
+
+export function exclude<T extends object, K extends keyof T>(object: T, ...keys: K[]) {
+	return (Object.keys(object) as (keyof T)[])
+		.filter((key) => !keys.includes(key as any))
+		.reduce((acc, key) => ({ ...acc, [key]: object[key] }), {} as Exclude<T, K>);
+}

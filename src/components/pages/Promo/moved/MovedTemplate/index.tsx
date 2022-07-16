@@ -18,10 +18,7 @@ export const MovedTemplate: React.FC<Props> = ({ templateSource }) => {
 	const promo = usePromo();
 
 	return (
-		<Iteration
-			iterations={9}
-			checkForVisible={([iteration9]) => iteration9.visible("closing")}
-			visibilitySwitch={{ unmountWhenInvisible: false }}>
+		<Iteration iterations={9} checkForVisible={([iteration9]) => iteration9.visible("closing")}>
 			{([iteration9]) => (
 				<div>
 					<Observer>

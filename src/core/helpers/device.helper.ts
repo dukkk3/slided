@@ -39,17 +39,17 @@ export function getMatchMediaQuery(
 	offset: number = 0
 ) {
 	if (Array.isArray(range))
-		return [getMatchMediaQuery(range[0], "min"), getMatchMediaQuery(range[1], "max", -0.01)].join(
-			" and "
-		);
+		return [getMatchMediaQuery(range[0], "min"), getMatchMediaQuery(range[1], "max", -0.01)]
+			.filter(Boolean)
+			.join(" and ");
 
 	const breakpointName = range as BreakpointNameKind;
 
 	switch (type) {
 		case "min":
-			return `(min-width: ${Math.max(breakpoints[breakpointName] + offset, 0)}px)`;
+			return `(min-device-width: ${Math.max(breakpoints[breakpointName] + offset, 0)}px)`;
 		case "max":
-			return `(max-width: ${Math.max(breakpoints[breakpointName] + offset, 0)}px)`;
+			return `(max-device-width: ${Math.max(breakpoints[breakpointName] + offset, 0)}px)`;
 		case "equal":
 			return [
 				getMatchMediaQuery(breakpointName, "min", -0.01),
@@ -58,4 +58,10 @@ export function getMatchMediaQuery(
 	}
 
 	return "";
+}
+
+function rangeIncludes(range: any, ...strings: string[]): boolean {
+	return Array.isArray(range)
+		? range.some((item) => rangeIncludes(item, ...strings))
+		: strings.some((string) => range.includes(string));
 }

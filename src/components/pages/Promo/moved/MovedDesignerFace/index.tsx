@@ -20,8 +20,7 @@ export const MovedDesignerFace: React.FC<Props> = ({ avatarSource }) => {
 	return (
 		<Iteration
 			iterations={[5, 8]}
-			checkForVisible={([iteration5, iteration8]) => iteration5.opened() && !iteration8.started()}
-			visibilitySwitch={{ unmountWhenInvisible: false }}>
+			checkForVisible={([iteration5, iteration8]) => iteration5.opened() && !iteration8.started()}>
 			{([iteration5]) => (
 				<div>
 					<Observer>

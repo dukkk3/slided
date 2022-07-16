@@ -13,6 +13,7 @@ import { useLocalStore } from "@core/hooks/useLocalStore";
 import { useBreakpoint } from "@core/hooks/useBreakpoint";
 import { ImageKitSequence } from "@core/classes/ImageKitSequence";
 import { interpolations } from "@core/helpers/iteration.helper";
+import { clamp } from "@core/utils/math.utils";
 
 import { getRasterImageByName } from "@assets/images";
 
@@ -91,6 +92,7 @@ const BackgroundDesktop: React.FC = () => {
 
 	const updateCurrentFrame = useCallback(
 		(index: number) => {
+			if (!SEQUENCE.items[index]) return;
 			background.canvasSequence.setCurrentFrame(index);
 			background.canvasSequence.drawCurrentFrame();
 		},
@@ -110,13 +112,13 @@ const BackgroundDesktop: React.FC = () => {
 	}, [background]);
 
 	const updateFrameRelativeCurrentIteration = useCallback(() => {
-		if (iterationsControls.store.iteration > ITERATIONS.length - 1) return;
+		// if (iterationsControls.store.iteration > ITERATIONS.length - 1) return;
 
 		const currentIteration = Math.floor(iterationsControls.store.iteration);
 		const nextIteration = Math.min(Math.floor(currentIteration + 1), ITERATIONS.length - 1);
 
-		const startFrame = ITERATIONS[currentIteration];
-		const endFrame = ITERATIONS[nextIteration];
+		const startFrame = ITERATIONS[clamp(currentIteration, 0, ITERATIONS.length - 1)];
+		const endFrame = ITERATIONS[clamp(nextIteration, 0, ITERATIONS.length - 1)];
 
 		const progress = iterationsControls.store.toRange(
 			currentIteration,
@@ -232,5 +234,3 @@ const BackgroundMobile: React.FC = () => {
 const FPS = 25;
 const ITERATIONS = [80, 160, 239, 283];
 const SEQUENCE = new ImageKitSequence(ITERATIONS[ITERATIONS.length - 1] + 1, "table");
-
-console.log(SEQUENCE.sources);

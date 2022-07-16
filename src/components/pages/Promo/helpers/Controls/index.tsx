@@ -39,8 +39,8 @@ export const Controls: React.FC = () => {
 		<S.Dots>
 			<Observer>
 				{() => {
-					const prevIteration = iterationsControls.getPrevIteration();
-					const targetIteration = iterationsControls.getTargetIteration();
+					const prevIteration = iterationsControls.getLastIdleIteration();
+					const targetIteration = iterationsControls.getNeededIteration();
 
 					const from = prevIteration === null ? 0 : Math.min(prevIteration, targetIteration);
 					const to = prevIteration === null ? 0 : Math.max(prevIteration, targetIteration);

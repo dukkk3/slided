@@ -13,7 +13,10 @@ import * as S from "./styled";
 export const Pulses: React.FC = () => {
 	return (
 		<S.Pulses>
-			<Iteration iterations={6} checkForVisible={([iteration6]) => iteration6.visible("closing")}>
+			<Iteration
+				iterations={6}
+				checkForVisible={([iteration6]) => iteration6.visible("closing")}
+				visibilitySwitch={{ unmountWhenInvisible: true }}>
 				{([iteration6]) => (
 					<S.PulseCircle
 						style={{
@@ -23,7 +26,9 @@ export const Pulses: React.FC = () => {
 					/>
 				)}
 			</Iteration>
-			<Iteration iterations={5}>{([iteration5]) => <Locator iteration={iteration5} />}</Iteration>
+			<Iteration iterations={5} visibilitySwitch={{ unmountWhenInvisible: true }}>
+				{([iteration5]) => <Locator iteration={iteration5} />}
+			</Iteration>
 		</S.Pulses>
 	);
 };

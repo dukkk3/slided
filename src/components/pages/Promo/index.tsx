@@ -1,11 +1,14 @@
-import { createContext, useContext, useEffect, useRef } from "react";
-import { useSpring } from "react-spring";
+import React, { createContext, useContext, useEffect, useRef } from "react";
+import { a, useSpring } from "react-spring";
 import { Observer } from "mobx-react-lite";
 import { reaction } from "mobx";
 
 import { Layout } from "@components/containers/Layout";
 
-import { IterationsControlsProvider } from "@components/providers/IterationsControlsProvider";
+import {
+	IterationsControlsProvider,
+	useIterationsControls,
+} from "@components/providers/IterationsControlsProvider";
 
 import { useLocalStore } from "@core/hooks/useLocalStore";
 import { useBreakpoint } from "@core/hooks/useBreakpoint";
@@ -42,6 +45,7 @@ import { PromoContainer } from "./shared/PromoContainer";
 import { getRasterImagesByNames, getRasterImageByName } from "@assets/images";
 
 import * as S from "./styled";
+import { useGlobalStore } from "@core/hooks/useGlobalStore";
 
 type UseResizeObserverReturnType = ReturnType<typeof useResizeObserver>;
 type UseTransformDifferenceReturnType = ReturnType<typeof useTransformDifference>;
@@ -81,6 +85,7 @@ const context = createContext<Context>(null!);
 
 export const Promo: React.FC = () => {
 	const breakpoint = useBreakpoint();
+	const appStore = useGlobalStore((store) => store.app);
 	const [feedbackStyle, feedbackApi] = useSpring(() => ({ y: 0 }));
 	const footerContentRef = useRef<any>(null);
 
@@ -217,42 +222,43 @@ export const Promo: React.FC = () => {
 						]}
 						enabled={localStore.interactiveEnabled}>
 						<Layout header={{ onGetStartedClick: () => localStore.setFeedbackOpened(true) }}>
-							<S.Promo>
-								<Background />
-								<PromoContainer>
-									<DebugIterationControls />
-									{/*  */}
-									<Pulses />
-									<Banner />
-									<Assistant />
-									<PhoneAssistant
-										templatesSources={getRasterImagesByNames(
-											"BrightTemplate",
-											"GreenTemplate",
-											"BlueTemplate",
-											"BeigeTemplate",
-											"BlackTemplate"
-										)}
-									/>
-									<Presentation templateSource={CAR_TEMPLATE_SOURCE} />
-									<PhoneTemplates
-										templates={[
-											CAR_TEMPLATE_SOURCE,
-											...getRasterImagesByNames("ColaCharts", "Plug", "Plug", "Plug"),
-										].map((source, index) => ({
-											source,
-											overlaySource: index === 1 ? getRasterImageByName("Plug") : undefined,
-										}))}
-									/>
-									<GridTemplates templatesSources={GRID_TEMPLATES} hidden />
-									<GridTemplates templatesSources={GRID_TEMPLATES} />
-									<Tariffs />
-								</PromoContainer>
-								<Designers />
-								<MovedTemplate templateSource={CAR_TEMPLATE_SOURCE} />
-								<MovedAssistantFace />
-								<MovedDesignerFace avatarSource={TARGET_USER.data.avatarSource} />
-							</S.Promo>
+							<HiddenContent>
+								<S.Promo>
+									<Background />
+									<PromoContainer>
+										{/*  */}
+										<Pulses />
+										<Banner />
+										<Assistant />
+										<PhoneAssistant
+											templatesSources={getRasterImagesByNames(
+												"BrightTemplate",
+												"GreenTemplate",
+												"BlueTemplate",
+												"BeigeTemplate",
+												"BlackTemplate"
+											)}
+										/>
+										<Presentation templateSource={CAR_TEMPLATE_SOURCE} />
+										<PhoneTemplates
+											templates={[
+												CAR_TEMPLATE_SOURCE,
+												...getRasterImagesByNames("ColaCharts", "Plug", "Plug", "Plug"),
+											].map((source, index) => ({
+												source,
+												overlaySource: index === 1 ? getRasterImageByName("Plug") : undefined,
+											}))}
+										/>
+										<GridTemplates templatesSources={GRID_TEMPLATES} hidden />
+										<GridTemplates templatesSources={GRID_TEMPLATES} />
+										<Tariffs />
+									</PromoContainer>
+									<Designers />
+									<MovedTemplate templateSource={CAR_TEMPLATE_SOURCE} />
+									<MovedAssistantFace />
+									<MovedDesignerFace avatarSource={TARGET_USER.data.avatarSource} />
+								</S.Promo>
+							</HiddenContent>
 						</Layout>
 						<S.SlidingGroup
 							style={{ y: feedbackStyle.y.to(interpolations.invert).to((value) => `${value * 100}vh`) }}>
@@ -263,11 +269,16 @@ export const Promo: React.FC = () => {
 							<Controls />
 						</S.SlidingGroup>
 						<SwipeControls />
+						<DebugIterationControls />
 					</IterationsControlsProvider>
 				)}
 			</Observer>
 			<Observer>
-				{() => (breakpoint.mobile() && breakpoint.landscape() ? <LandscapePlug /> : null)}
+				{() =>
+					(breakpoint.mobile() || breakpoint.tablet()) && breakpoint.landscape() ? (
+						<LandscapePlug />
+					) : null
+				}
 			</Observer>
 			<Loader />
 		</context.Provider>
@@ -278,10 +289,23 @@ export function usePromo() {
 	return useContext(context);
 }
 
+const HiddenContent: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
+	const iterationsControls = useIterationsControls();
+	return (
+		<a.div style={{ opacity: iterationsControls.hideContentInterpolation.to(interpolations.invert) }}>
+			{children}
+		</a.div>
+	);
+};
+
 const CAR_TEMPLATE_SOURCE = SEQUENCE_DESKTOP.sources[SEQUENCE_DESKTOP.sources.length - 1];
 
 const GRID_TEMPLATES = [
 	[
+		getRasterImageByName("Work4"),
+		getRasterImageByName("Work4"),
+		getRasterImageByName("Work4"),
+		getRasterImageByName("Work4"),
 		getRasterImageByName("Work4"),
 		getRasterImageByName("Work1"),
 		getRasterImageByName("Work10"),
@@ -290,16 +314,23 @@ const GRID_TEMPLATES = [
 	],
 	[
 		getRasterImageByName("Work10"),
+		getRasterImageByName("Work10"),
 		getRasterImageByName("Work5"),
 		CAR_TEMPLATE_SOURCE,
 		getRasterImageByName("Work6"),
 		getRasterImageByName("Work3"),
+		getRasterImageByName("Work10"),
+		getRasterImageByName("Work10"),
 	],
 	[
 		getRasterImageByName("Work7"),
 		getRasterImageByName("Work9"),
 		getRasterImageByName("Work2"),
 		getRasterImageByName("Work8"),
+		getRasterImageByName("Work7"),
+		getRasterImageByName("Work7"),
+		getRasterImageByName("Work7"),
+		getRasterImageByName("Work7"),
 		getRasterImageByName("Work7"),
 	],
 ];

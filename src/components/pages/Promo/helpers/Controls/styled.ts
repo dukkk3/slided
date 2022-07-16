@@ -4,10 +4,10 @@ import styled from "styled-components";
 import { mobile } from "@styles/breakpoint";
 
 export const Dots = styled.div`
-	z-index: 99999;
+	z-index: 9997;
 	display: flex;
 	visibility: hidden;
-	position: absolute;
+	position: fixed;
 	flex-direction: column;
 	justify-content: center;
 	top: var(--header-height);

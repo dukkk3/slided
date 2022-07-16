@@ -12,7 +12,7 @@ export const Tariffs: React.FC = () => {
 	const breakpoint = useBreakpoint();
 
 	return (
-		<Iteration iterations={11} visibilitySwitch={{ unmountWhenInvisible: false }}>
+		<Iteration iterations={11}>
 			{([iteration11]) => (
 				<S.Tariffs data-iteration-name='Tariffs'>
 					<S.Head

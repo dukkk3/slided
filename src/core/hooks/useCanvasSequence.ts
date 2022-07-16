@@ -59,8 +59,8 @@ export function useCanvasSequence(sequence: Sequence, { resizeObserverDebounce }
 		const canvas = canvasRef.current;
 		const context = contextRef.current;
 
-		canvas.width = width * dpr;
-		canvas.height = height * dpr;
+		canvas.width = Math.floor(width * dpr);
+		canvas.height = Math.floor(height * dpr);
 
 		context.scale(dpr, dpr);
 

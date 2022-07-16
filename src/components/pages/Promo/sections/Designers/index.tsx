@@ -42,7 +42,7 @@ const DesignersMobile: React.FC<Props> = ({ faceContainerRef }) => {
 	const promo = usePromo();
 
 	return (
-		<Iteration iterations={5} visibilitySwitch={{ unmountWhenInvisible: false }}>
+		<Iteration iterations={5}>
 			{([iteration5]) => (
 				<div data-iteration-name='Designers'>
 					<Observer>
@@ -53,7 +53,7 @@ const DesignersMobile: React.FC<Props> = ({ faceContainerRef }) => {
 									...promo.resizeObservers.phoneCardsContainer.getOffset(),
 								}}>
 								<S.Content>
-									<VisibilitySwitch visible={false} unmountWhenInvisible={false}>
+									<VisibilitySwitch visible={false}>
 										<S.ProfileCardGroup
 											style={{
 												top: 0,
@@ -125,13 +125,13 @@ const DesignersMobile: React.FC<Props> = ({ faceContainerRef }) => {
 
 const DesignersDesktop: React.FC<Props> = ({ faceContainerRef }) => {
 	return (
-		<Iteration iterations={5} visibilitySwitch={{ unmountWhenInvisible: false }}>
+		<Iteration iterations={5}>
 			{([iteration5]) => (
 				<PromoContainer
 					data-iteration-name='Designers'
 					style={{ top: 0, left: 0, position: "absolute", width: "100%" }}>
 					<S.Designers>
-						<VisibilitySwitch visible={false} unmountWhenInvisible={false}>
+						<VisibilitySwitch visible={false}>
 							<S.ProfileCardGroup
 								style={{
 									top: `${normalize(TARGET_USER.position.y) * 100}%`,

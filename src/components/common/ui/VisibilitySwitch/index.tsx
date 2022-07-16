@@ -7,7 +7,7 @@ export interface Props {
 }
 
 export const VisibilitySwitch: React.FC<React.PropsWithChildren<Props>> = memo(
-	({ children, visible = true, interactive = true, unmountWhenInvisible = true }) => {
+	({ children, visible = true, interactive = true, unmountWhenInvisible = false }) => {
 		if (!children || (unmountWhenInvisible && !visible)) {
 			return null;
 		}

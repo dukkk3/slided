@@ -36,7 +36,6 @@ export const Footer = forwardRef<HTMLDivElement, Props>((_, ref) => {
 	return (
 		<Iteration
 			iterations={iterationsControls.iterations - 1}
-			visibilitySwitch={{ unmountWhenInvisible: false }}
 			checkForVisible={([lastIteration]) => lastIteration.started()}>
 			{([lastIteration]) => (
 				<S.Footer

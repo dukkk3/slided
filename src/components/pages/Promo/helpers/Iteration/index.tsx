@@ -1,6 +1,8 @@
 import { memo, useCallback, useMemo } from "react";
 import { Observer } from "mobx-react-lite";
 
+import { useIterationsControls } from "@components/providers/IterationsControlsProvider";
+
 import {
 	VisibilitySwitch,
 	Props as VisibilitySwitchProps,
@@ -24,7 +26,8 @@ export interface Props {
 export const Iteration: React.FC<Props> = memo(
 	({ children, iterations, checkForVisible, visibilitySwitch = true }) => {
 		const promo = usePromo();
-		const asUseIterationParams = useMemo(() => {
+		const iterationsControls = useIterationsControls();
+		const asUseIterationParams = useMemo<any>(() => {
 			switch (true) {
 				case typeof iterations === "number":
 					return [[iterations]];
@@ -53,7 +56,11 @@ export const Iteration: React.FC<Props> = memo(
 					<VisibilitySwitch
 						{...(typeof visibilitySwitch === "object" ? visibilitySwitch : {})}
 						visible={visible()}
-						unmountWhenInvisible={promo.store.domManipulationsReady}>
+						// unmountWhenInvisible={
+						// false
+						// promo.store.domManipulationsReady && !iterationsControls.hideContent()
+						// }
+					>
 						{children(iterationInstances)}
 					</VisibilitySwitch>
 				)}

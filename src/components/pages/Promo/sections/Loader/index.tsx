@@ -22,28 +22,32 @@ export const Loader: React.FC = () => {
 
 	return (
 		<Observer>
-			{() => (
-				<Transition
-					items={promo.store.loaderVisible}
-					initial={{ opacity: 1 }}
-					enter={{
-						opacity: 1,
-						onRest: () => {
-							iterationsCountRef.current = 0;
-						},
-					}}
-					leave={{
-						opacity: 0,
-					}}>
-					{(style, item) =>
-						item && (
-							<S.LoaderGroup style={style}>
-								<LoaderImpl onAnimationEnded={handleAnimationEnded} />
-							</S.LoaderGroup>
-						)
-					}
-				</Transition>
-			)}
+			{() => {
+				console.log(promo.store.loaderVisible);
+				return (
+					<Transition
+						items={promo.store.loaderVisible}
+						initial={{ opacity: 1 }}
+						enter={{
+							opacity: 1,
+							onRest: () => {
+								console.log("oj");
+								iterationsCountRef.current = 0;
+							},
+						}}
+						leave={{
+							opacity: 0,
+						}}>
+						{(style, item) =>
+							item && (
+								<S.LoaderGroup style={style}>
+									<LoaderImpl onAnimationEnded={handleAnimationEnded} />
+								</S.LoaderGroup>
+							)
+						}
+					</Transition>
+				);
+			}}
 		</Observer>
 	);
 };

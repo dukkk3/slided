@@ -43,8 +43,7 @@ export const PhoneTemplates = forwardRef<HTMLDivElement, Props>(({ templates }, 
 			iterations={[7, 8, 9]}
 			checkForVisible={([iteration7, , iteration9]) =>
 				iteration7.closeStarted() && !iteration9.ended()
-			}
-			visibilitySwitch={{ unmountWhenInvisible: false }}>
+			}>
 			{([iteration7, iteration8, iteration9]) => (
 				<S.PhoneGroup
 					data-iteration-name='PhoneTemplates'
@@ -63,7 +62,7 @@ export const PhoneTemplates = forwardRef<HTMLDivElement, Props>(({ templates }, 
 						<S.DescriptionGroup>
 							<Observer>
 								{() => (
-									<VisibilitySwitch visible={iteration8.visible()} unmountWhenInvisible={false}>
+									<VisibilitySwitch visible={iteration8.visible()}>
 										<S.Description>
 											<AnimatedSplitChars
 												text={
@@ -85,7 +84,7 @@ export const PhoneTemplates = forwardRef<HTMLDivElement, Props>(({ templates }, 
 							</Observer>
 							<Observer>
 								{() => (
-									<VisibilitySwitch visible={iteration9.visible()} unmountWhenInvisible={false}>
+									<VisibilitySwitch visible={iteration9.visible()}>
 										<S.Description $overlay>
 											<AnimatedSplitChars
 												text={
@@ -108,10 +107,10 @@ export const PhoneTemplates = forwardRef<HTMLDivElement, Props>(({ templates }, 
 						</S.DescriptionGroup>
 						<Observer>
 							{() => (
-								<VisibilitySwitch visible={!iteration9.ended()} unmountWhenInvisible={false}>
+								<VisibilitySwitch visible={!iteration9.ended()}>
 									<S.CardsWrapper>
 										<S.ReadyTemplatesCards>
-											<VisibilitySwitch visible={false} unmountWhenInvisible={false}>
+											<VisibilitySwitch visible={false}>
 												<S.CardWrapper $overlay>
 													<S.Card>
 														<S.CardImage
@@ -123,7 +122,7 @@ export const PhoneTemplates = forwardRef<HTMLDivElement, Props>(({ templates }, 
 													</S.Card>
 												</S.CardWrapper>
 											</VisibilitySwitch>
-											<VisibilitySwitch visible={false} unmountWhenInvisible={false}>
+											<VisibilitySwitch visible={false}>
 												<S.CardWrapper $overlay>
 													<S.Card style={{ y: getCardTranslate(1, 0, localStore.cardOffset) }}>
 														<S.CardImage ref={promo.transforms.phoneTemplateAndGridTemplate.startRef} />

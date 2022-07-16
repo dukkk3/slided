@@ -36,8 +36,7 @@ export const GridTemplates: React.FC<Props> = ({ templatesSources, hidden }) => 
 			iterations={[9, 10]}
 			checkForVisible={([iteration9, iteration10]) =>
 				hidden ? false : iteration9.closeStarted() && !iteration10.ended()
-			}
-			visibilitySwitch={{ unmountWhenInvisible: false }}>
+			}>
 			{([iteration9, iteration10]) => (
 				<S.GridTemplates
 					style={
@@ -77,7 +76,7 @@ export const GridTemplates: React.FC<Props> = ({ templatesSources, hidden }) => 
 													<S.TemplateWrapper
 														style={{ perspective: `${PERSPECTIVE}rem`, perspectiveOrigin: origin }}>
 														{rowIndex === centerRow && templateIndex === centerColumn && (
-															<VisibilitySwitch visible={false} unmountWhenInvisible={false}>
+															<VisibilitySwitch visible={false}>
 																<S.Template
 																	ref={hidden ? promo.transforms.phoneTemplateAndGridTemplate.endRef : undefined}
 																	style={{
@@ -148,7 +147,7 @@ export const GridTemplates: React.FC<Props> = ({ templatesSources, hidden }) => 
 						{() => (
 							<>
 								{!hidden && !breakpoint.mobile() && (
-									<VisibilitySwitch visible={iteration10.visible()} unmountWhenInvisible={false}>
+									<VisibilitySwitch visible={iteration10.visible()}>
 										<S.Layer>
 											<S.Title>
 												<AnimatedSplitChars
