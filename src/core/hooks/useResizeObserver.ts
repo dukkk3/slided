@@ -49,7 +49,7 @@ export function useResizeObserver({
 
 	const resizeObserverCallback = useCallback(
 		(entries: ResizeObserverEntry[]) => {
-			const entry = entries[0];
+			const entry = entries[entries.length - 1];
 
 			if (entry) {
 				updateStore(entry);

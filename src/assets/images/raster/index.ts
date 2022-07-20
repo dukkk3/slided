@@ -17,6 +17,12 @@ export { default as Work8 } from "./works/work8.jpg";
 export { default as Work9 } from "./works/work9.jpg";
 export { default as Work10 } from "./works/work10.jpg";
 export { default as Work11 } from "./works/work11.jpg";
+export { default as Work12 } from "./works/work12.jpg";
+export { default as Work13 } from "./works/work13.jpg";
+export { default as Work14 } from "./works/work14.jpg";
+export { default as Work15 } from "./works/work15.jpg";
+export { default as Work16 } from "./works/work16.jpg";
+export { default as Work17 } from "./works/work17.jpg";
 
 export { default as Man1 } from "./designers/man1.jpg";
 export { default as Man2 } from "./designers/man2.jpg";

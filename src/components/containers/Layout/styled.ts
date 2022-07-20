@@ -11,7 +11,7 @@ export const HeaderWrapper = styled(a.header)`
 	left: 0;
 	width: 100vw;
 	position: fixed;
-	z-index: 9998;
+	z-index: 999;
 `;
 
 export const FeedbackWrapper = styled(a.div)`
@@ -19,7 +19,7 @@ export const FeedbackWrapper = styled(a.div)`
 	height: 100vh;
 	/* height: calc(100vh - var(--header-height)); */
 	position: fixed;
-	z-index: 9999;
+	z-index: 999;
 	top: 0;
 	left: 0;
 `;

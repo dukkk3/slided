@@ -23,7 +23,6 @@ export const Loader: React.FC = () => {
 	return (
 		<Observer>
 			{() => {
-				console.log(promo.store.loaderVisible);
 				return (
 					<Transition
 						items={promo.store.loaderVisible}
@@ -31,7 +30,6 @@ export const Loader: React.FC = () => {
 						enter={{
 							opacity: 1,
 							onRest: () => {
-								console.log("oj");
 								iterationsCountRef.current = 0;
 							},
 						}}

@@ -120,7 +120,6 @@ export function useIterationsControlsContextFactory({
 			const progress = toProgress(iteration);
 			animatedProgressApi.set({ value: progress });
 			localStore.setProgress(progress);
-			console.log(localStore.progress);
 		},
 		[animatedProgressApi, localStore, toProgress]
 	);

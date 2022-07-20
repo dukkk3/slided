@@ -1,10 +1,11 @@
+import { a } from "react-spring";
 import styled from "styled-components";
 
 import { mobile } from "@styles/breakpoint";
 
 export const Banner = styled.div`
 	width: 100%;
-	height: 1px;
+	height: 100%;
 	display: flex;
 	position: absolute;
 	text-align: center;
@@ -44,4 +45,16 @@ export const Head = styled.div`
 	${mobile`
 		margin-top: 0;
 	`}
+`;
+
+export const MouseIconGroup = styled(a.div)`
+	left: 0;
+	bottom: 4rem;
+	height: 1px;
+	width: 100%;
+	display: flex;
+	pointer-events: none;
+	position: absolute;
+	align-items: flex-end;
+	justify-content: center;
 `;

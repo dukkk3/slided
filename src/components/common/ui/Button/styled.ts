@@ -54,4 +54,15 @@ export const Button = styled.button<ButtonProps>`
 	border-radius: 0.5rem;
 	text-align: center;
 	font-weight: 600;
+	transition: background 0.3s ease, transform 0.3s ease;
+
+	&:not(:disabled) {
+		&:hover {
+			background: #bef200;
+		}
+
+		&:active {
+			transform: translateY(0.4rem);
+		}
+	}
 `;

@@ -21,7 +21,7 @@ export const Container = styled(ContainerImpl)`
 	`}
 `;
 
-export const Logo = styled.div`
+export const Logo = styled.button`
 	height: 4.8rem;
 
 	${Image} {
@@ -86,5 +86,6 @@ export const NavItem = styled.div`
 
 export const NavLink = styled.p`
 	font-size: 1.6rem;
+	cursor: pointer;
 	font-weight: 600;
 `;

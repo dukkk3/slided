@@ -29,7 +29,7 @@ export function clamp(number: number, min: number, max: number) {
 	return number;
 }
 
-export type CompareOperatorKind = "gte" | "gt" | "lt" | "lte";
+export type CompareOperatorKind = "gte" | "gt" | "lt" | "lte" | "equal";
 
 export function compare(value: number, a: number, operator: CompareOperatorKind) {
 	switch (operator) {
@@ -39,6 +39,8 @@ export function compare(value: number, a: number, operator: CompareOperatorKind)
 			return a >= value;
 		case "lt":
 			return a < value;
+		case "equal":
+			return a === value;
 		case "lte":
 			return a <= value;
 	}

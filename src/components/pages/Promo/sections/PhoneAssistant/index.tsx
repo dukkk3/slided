@@ -257,7 +257,9 @@ export const PhoneAssistant = forwardRef<HTMLDivElement, Props>(({ templatesSour
 																				.to(interpolations.easing("easeInOutCubic"))
 																				.to(interpolations.invert),
 																}}>
-																<Button theme='grey'>Searching the best...</Button>
+																<Button theme='grey' disabled>
+																	Searching the best...
+																</Button>
 															</a.div>
 														</div>
 													) : null

@@ -45,7 +45,6 @@ import { PromoContainer } from "./shared/PromoContainer";
 import { getRasterImagesByNames, getRasterImageByName } from "@assets/images";
 
 import * as S from "./styled";
-import { useGlobalStore } from "@core/hooks/useGlobalStore";
 
 type UseResizeObserverReturnType = ReturnType<typeof useResizeObserver>;
 type UseTransformDifferenceReturnType = ReturnType<typeof useTransformDifference>;
@@ -73,6 +72,7 @@ interface Context {
 		phoneAssistantAndShiftedAssistant: UseTransformDifferenceReturnType;
 	};
 	resizeObservers: {
+		gridRow: UseResizeObserverReturnType;
 		phoneCard: UseResizeObserverReturnType;
 		phoneCardsContainer: UseResizeObserverReturnType;
 	};
@@ -85,7 +85,6 @@ const context = createContext<Context>(null!);
 
 export const Promo: React.FC = () => {
 	const breakpoint = useBreakpoint();
-	const appStore = useGlobalStore((store) => store.app);
 	const [feedbackStyle, feedbackApi] = useSpring(() => ({ y: 0 }));
 	const footerContentRef = useRef<any>(null);
 
@@ -97,10 +96,11 @@ export const Promo: React.FC = () => {
 		debounce: 100,
 		calculateSizeWithPaddings: true,
 	});
+	const gridRowResizeObserver = useResizeObserver({ debounce: 100 });
 
 	const transformBtwExecutorAndPhoneExecutor = useTransformDifference();
 	const transformBtwPhoneTemplateAndGridTemplate = useTransformDifference();
-	const transformBtwBigAssistantAndPhoneAssistant = useTransformDifference();
+	const transformBtwBigAssistantAndPhoneAssistant = useTransformDifference({ logging: true });
 	const transformBtwPhoneAssistantAndShiftedAssistant = useTransformDifference();
 	const transformBtwBigTemplateAndPhoneTemplate = useTransformDifference({ resizeType: "rect" });
 
@@ -117,6 +117,7 @@ export const Promo: React.FC = () => {
 		},
 		get domManipulationsReady() {
 			return [
+				gridRowResizeObserver,
 				phoneCardResizeObserver,
 				phoneCardsContainerResizeObserver,
 				transformBtwBigTemplateAndPhoneTemplate,
@@ -130,7 +131,7 @@ export const Promo: React.FC = () => {
 			return (
 				this.presentationCanPlay &&
 				this.sequenceCanPlay &&
-				this.domManipulationsReady &&
+				(this.domManipulationsReady || breakpoint.mobile() || breakpoint.tablet()) &&
 				this.assistantFaceCanPlay
 			);
 		},
@@ -144,7 +145,6 @@ export const Promo: React.FC = () => {
 		},
 		get interactiveEnabled() {
 			return (
-				this.domManipulationsReady &&
 				this.domManipulationsReady &&
 				this.backgroundOpeningEnded &&
 				this.promoBannerOpeningEnded &&
@@ -179,6 +179,7 @@ export const Promo: React.FC = () => {
 			value={{
 				store: localStore,
 				resizeObservers: {
+					gridRow: gridRowResizeObserver,
 					phoneCard: phoneCardResizeObserver,
 					phoneCardsContainer: phoneCardsContainerResizeObserver,
 				},
@@ -226,7 +227,6 @@ export const Promo: React.FC = () => {
 								<S.Promo>
 									<Background />
 									<PromoContainer>
-										{/*  */}
 										<Pulses />
 										<Banner />
 										<Assistant />
@@ -266,19 +266,15 @@ export const Promo: React.FC = () => {
 						</S.SlidingGroup>
 						<S.SlidingGroup style={{ y: feedbackStyle.y.to((value) => `${value * 100}vh`) }}>
 							<Footer ref={footerContentRef} />
-							<Controls />
 						</S.SlidingGroup>
+						<Controls />
 						<SwipeControls />
 						<DebugIterationControls />
 					</IterationsControlsProvider>
 				)}
 			</Observer>
 			<Observer>
-				{() =>
-					(breakpoint.mobile() || breakpoint.tablet()) && breakpoint.landscape() ? (
-						<LandscapePlug />
-					) : null
-				}
+				{() => (breakpoint.mobile() && breakpoint.landscape() ? <LandscapePlug /> : null)}
 			</Observer>
 			<Loader />
 		</context.Provider>
@@ -302,10 +298,10 @@ const CAR_TEMPLATE_SOURCE = SEQUENCE_DESKTOP.sources[SEQUENCE_DESKTOP.sources.le
 
 const GRID_TEMPLATES = [
 	[
-		getRasterImageByName("Work4"),
-		getRasterImageByName("Work4"),
-		getRasterImageByName("Work4"),
-		getRasterImageByName("Work4"),
+		getRasterImageByName("Work1"),
+		getRasterImageByName("Work2"),
+		getRasterImageByName("Work9"),
+		getRasterImageByName("Work5"),
 		getRasterImageByName("Work4"),
 		getRasterImageByName("Work1"),
 		getRasterImageByName("Work10"),
@@ -313,24 +309,25 @@ const GRID_TEMPLATES = [
 		getRasterImageByName("Work2"),
 	],
 	[
-		getRasterImageByName("Work10"),
-		getRasterImageByName("Work10"),
-		getRasterImageByName("Work5"),
+		getRasterImageByName("Work16"),
+		getRasterImageByName("Work14"),
+		getRasterImageByName("Work15"),
+		getRasterImageByName("Work17"),
 		CAR_TEMPLATE_SOURCE,
 		getRasterImageByName("Work6"),
 		getRasterImageByName("Work3"),
-		getRasterImageByName("Work10"),
-		getRasterImageByName("Work10"),
+		getRasterImageByName("Work13"),
+		getRasterImageByName("Work12"),
 	],
 	[
 		getRasterImageByName("Work7"),
 		getRasterImageByName("Work9"),
 		getRasterImageByName("Work2"),
 		getRasterImageByName("Work8"),
-		getRasterImageByName("Work7"),
-		getRasterImageByName("Work7"),
-		getRasterImageByName("Work7"),
-		getRasterImageByName("Work7"),
-		getRasterImageByName("Work7"),
+		getRasterImageByName("Work10"),
+		getRasterImageByName("Work11"),
+		getRasterImageByName("Work12"),
+		getRasterImageByName("Work16"),
+		getRasterImageByName("Work17"),
 	],
 ];

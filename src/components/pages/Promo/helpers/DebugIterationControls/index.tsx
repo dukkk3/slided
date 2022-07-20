@@ -25,33 +25,12 @@ export const DebugIterationControls: React.FC = memo(() => {
 				</span>
 			</p>
 			<p>
-				<Observer>
-					{() => (
-						<span>
-							Store Progress: <a.span>{Number(iterationsControls.store.progress).toFixed(4)}</a.span>
-						</span>
-					)}
-				</Observer>
-			</p>
-			<p>
 				<span>
 					Iteration:{" "}
 					<a.span>
 						{
 							iterationsControls.animated.progress.to((value) =>
 								(value * iterationsControls.iterations).toFixed(4)
-							) as unknown as number
-						}
-					</a.span>
-				</span>
-			</p>
-			<p>
-				<span>
-					Iteration №:{" "}
-					<a.span>
-						{
-							iterationsControls.animated.progress.to((value) =>
-								Math.floor(value * iterationsControls.iterations)
 							) as unknown as number
 						}
 					</a.span>

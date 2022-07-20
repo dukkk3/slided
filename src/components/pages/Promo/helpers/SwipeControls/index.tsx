@@ -69,7 +69,7 @@ export const SwipeControls: React.FC = () => {
 
 				if (
 					!iterationsControls.interactiveEnabled() ||
-					!breakpoint.range("mobile", "laptop") ||
+					!(breakpoint.mobile() || breakpoint.tablet()) ||
 					promo.store.feedbackOpened
 				)
 					return;

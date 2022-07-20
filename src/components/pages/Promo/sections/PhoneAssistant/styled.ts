@@ -90,6 +90,7 @@ export const ButtonWrapper = styled.div`
 	position: relative;
 	height: var(--height);
 	flex: 0 0 var(--height);
+	z-index: 1;
 
 	--height: 6rem;
 

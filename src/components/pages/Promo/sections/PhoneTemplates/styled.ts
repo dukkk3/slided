@@ -20,6 +20,7 @@ export const ButtonWrapper = styled(a.div)`
 	left: var(--phone-padding);
 	bottom: var(--phone-padding);
 	width: calc(100% - var(--phone-padding) * 2);
+	z-index: 10;
 	will-change: transform, opacity;
 
 	--height: 6rem;
@@ -35,7 +36,6 @@ export const ButtonWrapper = styled(a.div)`
 		left: 0;
 		width: 100%;
 		height: 100%;
-		cursor: default;
 		border-radius: 90rem;
 		position: absolute;
 	}

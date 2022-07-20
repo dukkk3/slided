@@ -9,12 +9,17 @@ import { calculateCoord, calculateScale } from "@core/utils/math.utils";
 
 export interface Options {
 	debounce?: number;
+	logging?: boolean;
 	resizeType?: "scale" | "rect";
 }
 
-export function useTransformDifference({ debounce = 100, resizeType = "scale" }: Options = {}) {
-	const startResizeObserver = useResizeObserver({ debounce });
-	const endResizeObserver = useResizeObserver({ debounce });
+export function useTransformDifference({
+	debounce = 100,
+	resizeType = "scale",
+	logging,
+}: Options = {}) {
+	const startResizeObserver = useResizeObserver({ debounce, withOffset: true });
+	const endResizeObserver = useResizeObserver({ debounce, withOffset: true });
 
 	const localStore = useLocalStore({
 		scale: { x: 1, y: 1 },

@@ -99,18 +99,6 @@ const BackgroundDesktop: React.FC = () => {
 		[background]
 	);
 
-	const preloadSequenceIteration = useCallback(() => {
-		const currentFrame = background.canvasSequence.getCurrentFrame();
-		const currentIteration = ITERATIONS.reduce(
-			(acc, iteration, index) =>
-				iteration - Math.min(2 * FPS, iteration / 2) <= currentFrame ? index : acc,
-			0
-		);
-		const nextIteration = Math.min(currentIteration + 1, ITERATIONS.length - 1);
-
-		SEQUENCE.preload(ITERATIONS[currentIteration], ITERATIONS[nextIteration]);
-	}, [background]);
-
 	const updateFrameRelativeCurrentIteration = useCallback(() => {
 		// if (iterationsControls.store.iteration > ITERATIONS.length - 1) return;
 
@@ -132,6 +120,7 @@ const BackgroundDesktop: React.FC = () => {
 
 	const preloadSequence = useCallback(async () => {
 		if (promo.store.sequenceCanPlay || SEQUENCE.loaded()) {
+			updateFrameRelativeCurrentIteration();
 			background.canvasSequence.drawCurrentFrame(true);
 			promo.store.setSequenceCanPlay(true);
 			return;
@@ -139,7 +128,7 @@ const BackgroundDesktop: React.FC = () => {
 		await SEQUENCE.preloadAll();
 		background.canvasSequence.drawCurrentFrame(true);
 		promo.store.setSequenceCanPlay(true);
-	}, [background, promo]);
+	}, [background.canvasSequence, promo.store, updateFrameRelativeCurrentIteration]);
 
 	useAnimationFrame(() => {
 		const currentFrame = background.canvasSequence.getCurrentFrame();
@@ -173,14 +162,12 @@ const BackgroundDesktop: React.FC = () => {
 			reaction(
 				() => background.canvasSequence.getCurrentFrame(),
 				(currentFrame) => {
-					preloadSequenceIteration();
-
 					if (currentFrame >= ITERATIONS[0]) {
 						promo.store.setBackgroundOpeningEnded(true);
 					}
 				}
 			),
-		[background, preloadSequenceIteration, promo]
+		[background, promo]
 	);
 
 	useEffect(

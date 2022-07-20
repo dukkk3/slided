@@ -12,9 +12,7 @@ export const VisibilitySwitch: React.FC<React.PropsWithChildren<Props>> = memo(
 			return null;
 		}
 
-		if (visible) {
-			return children as any;
-		}
+		if (visible && interactive) return <>{children}</>;
 
 		return (
 			<>

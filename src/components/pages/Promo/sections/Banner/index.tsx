@@ -7,6 +7,7 @@ import { AnimatedSplitWords } from "@components/pages/Promo/helpers/AnimatedSpli
 
 import { Iteration } from "@components/pages/Promo/helpers/Iteration";
 
+import { MouseIcon } from "@components/common/ui/MouseIcon";
 import { Button } from "@components/common/ui/Button";
 
 import { interpolations } from "@core/helpers/iteration.helper";
@@ -20,6 +21,7 @@ import * as S from "./styled";
 export const Banner: React.FC = () => {
 	const promo = usePromo();
 	const [buttonStyle, buttonStyleApi] = useSpring(() => ({ progress: 0 }));
+	const [mouseIconStyle, mouseIconApi] = useSpring(() => ({ progress: 0 }));
 	const [titleWordsStyles, titleWordsApi] = useSprings(TITLE_WORDS_AMOUNT, () => ({ progress: 0 }));
 
 	const animate = useCallback(
@@ -30,8 +32,9 @@ export const Banner: React.FC = () => {
 					delay: index * 50,
 				})),
 				resolveSpringAnimation(buttonStyleApi, { progress: 1 }),
+				resolveSpringAnimation(mouseIconApi, { progress: 1 }),
 			]),
-		[buttonStyleApi, titleWordsApi]
+		[buttonStyleApi, titleWordsApi, mouseIconApi]
 	);
 
 	useEffect(
@@ -78,11 +81,27 @@ export const Banner: React.FC = () => {
 													.to(interpolations.invert)
 											: buttonStyle.progress,
 									}}>
-									<Button size='m'>Get started</Button>
+									<Button size='m' onClick={() => promo.store.setFeedbackOpened(true)}>
+										Get started
+									</Button>
 								</a.div>
 							)}
 						</Observer>
 					</div>
+					<Observer>
+						{() => (
+							<S.MouseIconGroup
+								style={{
+									opacity: promo.store.interactiveEnabled
+										? iteration0.interpolations.closing
+												.to(interpolations.easing("easeInOutCubic"))
+												.to(interpolations.invert)
+										: mouseIconStyle.progress,
+								}}>
+								<MouseIcon />
+							</S.MouseIconGroup>
+						)}
+					</Observer>
 				</S.Banner>
 			)}
 		</Iteration>

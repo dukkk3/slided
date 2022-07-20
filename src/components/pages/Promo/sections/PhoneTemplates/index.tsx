@@ -1,6 +1,8 @@
 import { forwardRef } from "react";
 import { Observer } from "mobx-react-lite";
 
+import { useIterationsControls } from "@components/providers/IterationsControlsProvider";
+
 import { Iteration } from "@components/pages/Promo/helpers/Iteration";
 
 import { VisibilitySwitch } from "@components/common/ui/VisibilitySwitch";
@@ -31,6 +33,7 @@ export interface Props {
 export const PhoneTemplates = forwardRef<HTMLDivElement, Props>(({ templates }, ref) => {
 	const promo = usePromo();
 	const breakpoint = useBreakpoint();
+	const iterationsControls = useIterationsControls();
 
 	const localStore = useLocalStore({
 		get cardOffset() {
@@ -207,7 +210,7 @@ export const PhoneTemplates = forwardRef<HTMLDivElement, Props>(({ templates }, 
 												.to((value) => `${5 * value}rem`),
 											opacity: iteration9.interpolations.opening.to(interpolations.easing("easeInOutCubic")),
 										}}>
-										<Button>Download</Button>
+										<Button onClick={() => iterationsControls.next()}>Download</Button>
 									</S.ButtonWrapper>
 								</VisibilitySwitch>
 							)}

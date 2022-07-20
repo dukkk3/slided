@@ -4,6 +4,7 @@ import isEqual from "react-fast-compare";
 import {
 	useIterationsControlsContextFactory,
 	Context as IterationsControlsContext,
+	Listener,
 } from "@core/hooks/useIterationsContextFactory";
 import { useLocalStore } from "@core/hooks/useLocalStore";
 import { clamp } from "@core/utils/math.utils";
@@ -39,6 +40,8 @@ type Context = IterationsControlsContext & {
 	getDurationFactorInRange: (start: number, end: number) => number;
 	change: (partIndex: number) => any;
 	interactiveEnabled(): boolean;
+	addPartChangeListener: (listener: Listener) => () => void;
+	removePartChangeListener: (listener: Listener) => void;
 	hideContentInterpolation: SpringValue<number>;
 	readonly partsAmount: number;
 };
@@ -48,6 +51,7 @@ const context = createContext<Context>(null!);
 export const IterationsControlsProvider: React.FC<React.PropsWithChildren<Props>> = memo(
 	({ children, parts, defaultDuration = 1000, enabled = true }) => {
 		const flatParts = useMemo(() => flat(parts), [parts]);
+		const listeners = useMemo(() => ({ partChange: new Set<Listener>() }), []);
 		const [{ hide: hideContentInterpolation }, hideContentApi] = useSpring(() => ({ hide: 0 }));
 
 		const partsWithShiftedBoundAndAdditionalPart = useMemo(() => {
@@ -89,6 +93,21 @@ export const IterationsControlsProvider: React.FC<React.PropsWithChildren<Props>
 			},
 		});
 
+		const removePartChangeListener = useCallback(
+			(listener: Listener) => {
+				listeners.partChange.delete(listener);
+			},
+			[listeners]
+		);
+
+		const addPartChangeListener = useCallback(
+			(listener: Listener) => {
+				listeners.partChange.add(listener);
+				return () => removePartChangeListener(listener);
+			},
+			[listeners, removePartChangeListener]
+		);
+
 		const interactiveEnabled = useCallback(() => {
 			return !localStore.contentHidden && enabled;
 		}, [enabled, localStore]);
@@ -107,7 +126,7 @@ export const IterationsControlsProvider: React.FC<React.PropsWithChildren<Props>
 				localStore.setCurrentPartLabel(partLabel);
 
 				return force
-					? iterationsControlsContext.set(iteration)
+					? iterationsControlsContext.animate(iteration, { duration: 100 })
 					: iterationsControlsContext.animate(iteration, { duration, easing: easings.linear });
 			},
 			[defaultDuration, flatParts, iterationsControlsContext, localStore]
@@ -144,6 +163,8 @@ export const IterationsControlsProvider: React.FC<React.PropsWithChildren<Props>
 						? getPrevPartLabel(localStore.currentPartLabel)
 						: getNextPartLabel(localStore.currentPartLabel);
 
+				listeners.partChange.forEach((callback) => callback());
+
 				if (
 					!iterationsControlsContext.animated.progress.isAnimating ||
 					force ||
@@ -155,7 +176,7 @@ export const IterationsControlsProvider: React.FC<React.PropsWithChildren<Props>
 					return animate(force ? neededPartLabel : nextPartLabel, force);
 				}
 			},
-			[animate, flatParts, iterationsControlsContext, localStore, parts]
+			[animate, flatParts, iterationsControlsContext, listeners, localStore, parts]
 		);
 
 		const smartChange = useCallback(
@@ -165,7 +186,11 @@ export const IterationsControlsProvider: React.FC<React.PropsWithChildren<Props>
 				const direction = partsWithShiftedBoundAndAdditionalPart.length - 1 === partIndex ? 1 : -1;
 				const part = parts[direction === 1 ? partIndex - 1 : partIndex];
 				// eslint-disable-next-line @typescript-eslint/no-unused-vars
-				const long = Math.abs(localStore.currentPartLabel.index - partIndex) > 1;
+				const currentPart = flatParts[localStore.currentPartLabel.index];
+				const currentPartSource = findPartSource(parts, currentPart);
+				if (!currentPartSource) return;
+				const currentPartSourceIndex = parts.indexOf(currentPartSource);
+				const long = Math.abs(currentPartSourceIndex - partIndex) > 1;
 				if (!part) return;
 				const edgePart = Array.isArray(part) ? part[0] : part;
 				partIndex = flatParts.findIndex((part) => isEqual(part, edgePart));
@@ -265,7 +290,9 @@ export const IterationsControlsProvider: React.FC<React.PropsWithChildren<Props>
 					partsAmount: parts.length,
 					getDurationFactorInRange,
 					hideContentInterpolation,
+					removePartChangeListener,
 					getLastIdleIteration,
+					addPartChangeListener,
 					getNeededIteration,
 					change: smartChange,
 					getActivePartIndex,

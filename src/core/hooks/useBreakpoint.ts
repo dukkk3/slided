@@ -1,55 +1,48 @@
 import { useCallback } from "react";
 
 import { useGlobalStore } from "./useGlobalStore";
-import { breakpoints, BreakpointNameKind } from "@core/helpers/device.helper";
 import { useLocalStore } from "./useLocalStore";
-
-const breakpointsKeys = Object.keys(breakpoints) as BreakpointNameKind[];
+import { MediaQueryKeyKind } from "@core/helpers/device.helper";
 
 export function useBreakpoint() {
 	const appStore = useGlobalStore((store) => store.app);
 
 	const getMediaMatches = useCallback(() => {
-		return appStore.mediaMatches;
+		return appStore.media.matches;
 	}, [appStore]);
 
 	const getMediaMatch = useCallback(
-		(key: BreakpointNameKind) => {
+		(key: MediaQueryKeyKind) => {
 			return getMediaMatches()[key];
 		},
 		[getMediaMatches]
 	);
 
-	const range = useCallback(
-		(a: BreakpointNameKind, b?: BreakpointNameKind) => {
-			const aIndex = breakpointsKeys.indexOf(a);
-
-			if (!b) return breakpointsKeys.slice(aIndex).some(getMediaMatch);
-
-			const bIndex = breakpointsKeys.indexOf(b);
-			return breakpointsKeys.slice(aIndex, bIndex).some(getMediaMatch);
+	const some = useCallback(
+		(...keys: MediaQueryKeyKind[]) => {
+			return keys.some(getMediaMatch);
 		},
 		[getMediaMatch]
 	);
 
 	const localStore = useLocalStore({
 		get mobile() {
-			return range("mobile", "mobile.m");
+			return some("mobile");
 		},
 		get tablet() {
-			return range("tablet", "laptop");
+			return !this.mobile && some("tablet");
 		},
-		get laptop() {
-			return range("laptop");
+		get desktop() {
+			return !this.tablet && some("desktop");
 		},
 		get identified() {
 			return Object.values(getMediaMatches()).some(Boolean);
 		},
 		get landscape() {
-			return appStore.orientation === "landscape";
+			return appStore.media.orientation === "landscape";
 		},
 		get portrait() {
-			return appStore.orientation === "portrait";
+			return appStore.media.orientation === "portrait";
 		},
 	});
 
@@ -61,8 +54,8 @@ export function useBreakpoint() {
 		return localStore.tablet;
 	}, [localStore]);
 
-	const laptop = useCallback(() => {
-		return localStore.laptop;
+	const desktop = useCallback(() => {
+		return localStore.desktop;
 	}, [localStore]);
 
 	const identified = useCallback(() => {
@@ -83,9 +76,8 @@ export function useBreakpoint() {
 		identified,
 		landscape,
 		portrait,
-		laptop,
+		desktop,
 		mobile,
 		tablet,
-		range,
 	};
 }

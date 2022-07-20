@@ -20,7 +20,7 @@ export class ImageKitSequence extends Sequence {
 					{
 						width: String(maxWidth),
 						height: String(maxHeight),
-						crop: "at_max",
+						crop: "at_least",
 						quality: "90",
 					},
 				],
