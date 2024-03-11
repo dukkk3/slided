@@ -1,7 +1,5 @@
-import { useEffect, useLayoutEffect } from "react";
-
-import { IterationTest } from "./test-iteration";
+import { MainPage } from "@pages/main-page";
 
 export const App = () => {
-	return <IterationTest />;
+	return <MainPage />;
 };

@@ -5,13 +5,18 @@ export interface Item {
 	duration: number;
 }
 
+export type IterationsChain = Item[] & {
+	rightBound: number;
+	leftBound: number;
+};
+
 export const create = () => {
 	const iterationsChain: Item[] = [];
 
 	let accumulatedFrom: number = 0;
 
 	const controls = {
-		next: (to: number, duration: number) => {
+		next: (to: number, { duration }: { duration: number }) => {
 			const isToAlreadyUsed = iterationsChain.some((item) => item.from >= to || item.to >= to);
 
 			if (isToAlreadyUsed) throw new Error(`To ${to} already used`);
@@ -34,7 +39,7 @@ export const create = () => {
 
 			return controls;
 		},
-		get: () => {
+		get: (): IterationsChain => {
 			return Object.assign(iterationsChain, {
 				leftBound: iterationsChain.at(0)!.from,
 				rightBound: iterationsChain.at(-1)!.to,

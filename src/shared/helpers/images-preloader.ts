@@ -33,7 +33,7 @@ export class ImagesPreloader {
 
 		let loadedItemsCount = 0;
 		const diff = Math.abs(to - from) + 1;
-		const promises: Promise<any>[] = [];
+		const promises: Promise<Item>[] = [];
 
 		for (let i = from; i <= to; i++) {
 			const item = this._items[i];
@@ -44,13 +44,13 @@ export class ImagesPreloader {
 				continue;
 			}
 
-			const promise = new Promise((resolve) => {
+			const promise = new Promise<Item>((resolve) => {
 				item.image.src = source;
 				item.isLoading = true;
 				item.image.onload = () => {
 					item.isLoaded = true;
 					item.isLoading = false;
-					resolve(true);
+					resolve(item);
 				};
 			});
 
@@ -58,7 +58,7 @@ export class ImagesPreloader {
 		}
 
 		if (loadedItemsCount === diff) {
-			return true;
+			return this._items.slice(from, to);
 		}
 
 		return Promise.all(promises);

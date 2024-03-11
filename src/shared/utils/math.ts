@@ -4,6 +4,11 @@ export const toRange = (value: number, a: number, b: number) => {
 	return value < a ? 0 : value >= b ? 1 : (value - a) / (b - a);
 };
 
+export const toInt = (value: number, from: number, to: number) => {
+	const size = Math.abs(from - to);
+	return Math.floor(from + value * size);
+};
+
 export const toStatus = (value: number) => value > 0 && value <= 1;
 export const toInFlight = (value: number) => value > 0 && value <= 1 - EPSILON;
 
