@@ -1,3 +1,5 @@
+import { easings, type InterpolatorConfig } from "@react-spring/web";
+
 import { math } from "../utils";
 
 type ValueSchema<Value> = { value: Value };
@@ -37,7 +39,7 @@ export const withInFlight = createInterpolator((value: number) => ({
 	inFlight: math.toInFlight(value),
 }));
 
-export const optimizeStyleRendering = <Style extends object>(
+export const optimizeStyleForRendering = <Style extends object>(
 	style: Style
 ): Style & { willChange?: string } => {
 	const willChange: string[] = [];
@@ -87,3 +89,10 @@ export const optimizeStyleRendering = <Style extends object>(
 		willChange: willChange.length ? willChange.join(",") : "",
 	};
 };
+
+export const toEase = (ease: keyof typeof easings): InterpolatorConfig<number> => ({
+	range: [0, 1],
+	output: [0, 1],
+	// @ts-expect-error
+	easing: easings[ease],
+});

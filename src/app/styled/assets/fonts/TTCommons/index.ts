@@ -1,0 +1,9 @@
+export { default as black } from "./Black.ttf";
+export { default as bold } from "./Bold.ttf";
+export { default as semiBold } from "./DemiBold.ttf";
+export { default as extraBold } from "./ExtraBold.ttf";
+export { default as extraLight } from "./ExtraLight.ttf";
+export { default as light } from "./Light.ttf";
+export { default as medium } from "./Medium.ttf";
+export { default as regular } from "./Regular.ttf";
+export { default as thin } from "./Thin.ttf";

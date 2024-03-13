@@ -11,6 +11,7 @@ export const toInt = (value: number, from: number, to: number) => {
 
 export const toStatus = (value: number) => value > 0 && value <= 1;
 export const toInFlight = (value: number) => value > 0 && value <= 1 - EPSILON;
+export const toStep = (edge: number) => (value: number) => step(value, edge);
 
 export const step = (value: number, edge: number) => {
 	return value < edge ? 0 : 1;

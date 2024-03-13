@@ -1,10 +1,10 @@
+import type { SpringValue, Interpolation } from "@react-spring/web";
+import { createEvent, createStore, sample, combine } from "effector";
+import { useUnit } from "effector-react";
 import { useMemo, useEffect } from "react";
-import useMeasure, { RectReadOnly } from "react-use-measure";
-import { createEvent, createStore, sample } from "effector";
-import { SpringValue, Interpolation } from "@react-spring/web";
+import useMeasure, { type RectReadOnly } from "react-use-measure";
 
 import { math, array } from "../utils";
-import { useUnit } from "effector-react";
 
 const calculateRectInterpolation = (progress: number, from: number, to: number) => {
 	return from + (to - from) * progress;
@@ -33,15 +33,14 @@ interface Config<Key extends string> {
 	to: RectReadOnly | Key | null;
 }
 
-const create = <Alias extends string>() => {
-	const rects = new Map<Alias, RectReadOnly>();
-
+export const create = <Alias extends string>(initialState: Alias) => {
 	const attached = createEvent<{
 		from?: RectReadOnly | Alias | null;
 		to: RectReadOnly | Alias;
 		progress: SpringValue<number> | Interpolation<any, number>;
 	}>();
 
+	const $rects = createStore<Record<Alias, RectReadOnly>>({} as any);
 	const $config = createStore<Config<Alias>>({
 		progress: null,
 		from: null,
@@ -49,33 +48,38 @@ const create = <Alias extends string>() => {
 	});
 
 	const resolveRect = (rect: RectReadOnly | Alias | null) => {
-		if (typeof rect === "string") return rects.get(rect as Alias) || null;
+		if (typeof rect === "string") return $rects.getState()[rect as Alias] || null;
 		return rect;
 	};
 
-	const $style = $config.map((config) => {
+	const $style = combine({ config: $config, rects: $rects }).map(({ config, rects }) => {
+		const { from, to, progress } = config;
+
 		const orderedRects = array.orderBy(
-			[resolveRect(config.from)!, resolveRect(config.to)!].filter(Boolean),
+			from || to
+				? [resolveRect(config.from)!, resolveRect(config.to)!].filter(Boolean)
+				: (Object.values(rects).filter(Boolean) as RectReadOnly[]),
 			[
 				{ by: "width", sort: "desc" },
 				{ by: "height", sort: "desc" },
 			]
 		);
 
+		const initialStateRect = rects[initialState];
 		const baseRect = orderedRects.length
 			? {
 					width: orderedRects[0].width,
 					height: orderedRects[0].height,
+					top: initialStateRect?.top,
+					left: initialStateRect?.left,
 			  }
 			: null;
-
-		const { from, to, progress } = config;
 
 		const fromRect = resolveRect(from);
 		const toRect = resolveRect(to);
 
 		if (!fromRect || !baseRect) {
-			return {};
+			return baseRect || {};
 		}
 
 		if (!toRect) {
@@ -101,22 +105,19 @@ const create = <Alias extends string>() => {
 		};
 	});
 
-	const removeRect = (key: Alias) => {
-		rects.delete(key);
-	};
-
-	const setRect = (key: Alias, rect: RectReadOnly) => {
-		rects.set(key, rect);
-	};
+	const rectRemoved = createEvent<Alias>();
+	const rectSetted = createEvent<{ key: Alias; rect: RectReadOnly }>();
 
 	const useStyle = () => useUnit($style);
 
 	const useRect = (key: Alias) => {
 		const [ref, rect] = useMeasure({ debounce: 100 });
 		useEffect(() => {
-			setRect(key, rect);
-			return () => removeRect(key);
-		}, [rect]);
+			rectSetted({ key, rect });
+			return () => {
+				rectRemoved(key);
+			};
+		}, [key, rect]);
 		return useMemo(() => [ref, rect] as const, [ref, rect]);
 	};
 
@@ -149,6 +150,24 @@ const create = <Alias extends string>() => {
 			};
 		},
 		target: $config,
+	});
+
+	sample({
+		clock: rectSetted,
+		source: $rects,
+		fn: (rects, { key, rect }) => ({ ...rects, [key]: rect }),
+		target: $rects,
+	});
+
+	sample({
+		clock: rectRemoved,
+		source: $rects,
+		fn: (rects, key) => {
+			const newRects = { ...rects };
+			delete newRects[key];
+			return newRects;
+		},
+		target: $rects,
 	});
 
 	return {

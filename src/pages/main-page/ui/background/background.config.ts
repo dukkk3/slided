@@ -1,8 +1,8 @@
-import { iterationsChain, ImageKitPreloader } from "@shared/helpers";
+import { ImageKitPreloader } from "@shared/helpers";
 
-import * as model from "../../main-page.model";
+import * as config from "../../main-page.config";
 
-export const { ITERATIONS_CHAIN } = model;
+export const { ITERATIONS_CHAIN } = config;
 export const PRELOADED_IMAGES_COUNT_PER_STEP = 30;
 export const LAST_OPENING_IMAGE_INDEX = 80;
 export const IMAGES_PARTS: { iterationIndex: number; toImageIndex: number }[] = [

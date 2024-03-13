@@ -1,7 +1,10 @@
 import { attach, createEffect, createEvent, createStore, sample } from "effector";
 import { createGate } from "effector-react";
 
-import { storeUtils, canvas } from "@shared/helpers";
+import { storeUtils, imageDrawer } from "@shared/helpers";
+import { math } from "@shared/utils";
+
+import * as model from "../../main-page.model";
 
 import {
 	ITERATIONS_CHAIN,
@@ -10,8 +13,6 @@ import {
 	IMAGES_PRELOADER,
 	PRELOADED_IMAGES_COUNT_PER_STEP,
 } from "./background.config";
-import * as model from "../../main-page.model";
-import { math } from "@shared/utils";
 
 const ticker = storeUtils.createTicker(30);
 const endedOpening = createEvent();
@@ -27,7 +28,7 @@ const loadOpeningFx = attach({
 });
 
 export const $openingEnded = createStore(false);
-export const { Canvas, settedImage: settedCanvasImage } = canvas.create();
+export const { Canvas, settedImage: settedCanvasImage } = imageDrawer.create();
 export const Gate = createGate();
 
 export const parentModel = model;

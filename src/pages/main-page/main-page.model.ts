@@ -1,12 +1,9 @@
-import { iterationControls, iterationsChain } from "@shared/helpers";
+import type { Store } from "effector";
 
-export const ITERATIONS_CHAIN = iterationsChain
-	.create()
-	.next(1, { duration: 2000 })
-	.next(2, { duration: 2000 })
-	.next(3, { duration: 2000 })
-	.next(4, { duration: 2000 })
-	.get();
+import { iterationControls, iterationUtils } from "@shared/helpers";
+import type { LikeSpringValue, Range } from "@shared/types";
+
+import { ITERATIONS_CHAIN } from "./main-page.config";
 
 export const {
 	progress,
@@ -22,3 +19,35 @@ export const {
 } = iterationControls.create({
 	iterationsChain: ITERATIONS_CHAIN,
 });
+
+export const createStoreUtilsOfFlowIteration = (
+	flowIteration: number,
+	config: Omit<iterationUtils.SharedCreateFlowIterationUtilsProps<Store<number>>, "progress"> = {}
+) =>
+	iterationUtils.createStoreUtilsOfFlowIteration(flowIteration, { ...config, progress: $progress });
+
+export const createSpringUtilsOfFlowIteration = (
+	flowIteration: number,
+	config: Omit<
+		iterationUtils.SharedCreateFlowIterationUtilsProps<LikeSpringValue<number>>,
+		"progress"
+	> = {}
+) => iterationUtils.createSpringUtilsOfFlowIteration(flowIteration, { ...config, progress });
+
+export const createStoreUtils = (
+	rangeOrIterationIndex: Range | number,
+	config: Omit<iterationUtils.SharedCreateIterationUtilsProps<Store<number>>, "progress"> = {}
+) =>
+	iterationUtils.createStoreUtils(rangeOrIterationIndex, ITERATIONS_CHAIN, {
+		...config,
+		progress: $progress,
+	});
+
+export const createSpringUtils = (
+	rangeOrIterationIndex: Range | number,
+	config: Omit<
+		iterationUtils.SharedCreateIterationUtilsProps<LikeSpringValue<number>>,
+		"progress"
+	> = {}
+) =>
+	iterationUtils.createSpringUtils(rangeOrIterationIndex, ITERATIONS_CHAIN, { ...config, progress });

@@ -1,9 +1,10 @@
-import { combine, createStore, createEvent, sample, Store } from "effector";
 import { SpringValue } from "@react-spring/web";
+import { combine, createStore, createEvent, sample } from "effector";
 import { previous } from "patronum";
 
-import { IterationsChain, findItem, getBoundPropByDirection } from "./iterations-chain";
 import { math } from "../utils";
+
+import { type IterationsChain, findItem, getBoundPropByDirection } from "./iterations-chain";
 
 const calculateDistance = (from: number, to: number) => Math.abs(to - from);
 const isBiggestDistance = (distance: number) => distance > 1;
