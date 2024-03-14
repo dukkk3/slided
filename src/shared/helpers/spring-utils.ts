@@ -34,6 +34,9 @@ export const createInterpolator = <ExpectedValue, Response>(
 // 	return _if.to((value) => (value ? then : _else));
 // };
 
+export const withEnded = createInterpolator((value: number) => ({
+	ended: value > 0 && !math.toInFlight(value),
+}));
 export const withStatus = createInterpolator((value: number) => ({ status: math.toStatus(value) }));
 export const withInFlight = createInterpolator((value: number) => ({
 	inFlight: math.toInFlight(value),

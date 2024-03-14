@@ -5,7 +5,7 @@
 /.pnp
 .pnp.js
 
-.swc
+/.swc
 
 prisma/*
 !prisma/index.d.ts

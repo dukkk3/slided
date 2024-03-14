@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { forwardRef } from "react";
 
 import { AssignComponentProps } from "../assign-component-props";
 
@@ -16,9 +16,9 @@ export interface ImageProps extends React.ComponentProps<"picture"> {
 }
 
 export const Image = AssignComponentProps(
-	memo(({ src, sources = [], alt = "", ...rest }: ImageProps) => {
+	forwardRef<HTMLPictureElement, ImageProps>(({ src, sources = [], alt = "", ...rest }, ref) => {
 		return (
-			<S.Picture {...rest}>
+			<S.Picture {...rest} ref={ref}>
 				{sources.map(({ src, media }) => (
 					<source key={src} media={media} srcSet={src} />
 				))}

@@ -2,6 +2,8 @@ import styled from "styled-components";
 
 import { styledMixin } from "@shared/styled";
 
+import { TextAnimation } from "../../text-animation";
+
 export const AssistantSpeech = styled.div`
 	top: 0;
 	left: 0;
@@ -22,12 +24,9 @@ export const DescriptionWrapper = styled.div`
 	position: relative;
 `;
 
-export const Description = styled.div`
+export const Description = styled(TextAnimation)`
+	${styledMixin.textMixin}
 	top: 0;
-	color: black;
-	font-size: 32px;
-	line-height: 100%;
-	font-weight: 600;
 	text-align: center;
 	position: absolute;
 	transform: translateX(-50%);

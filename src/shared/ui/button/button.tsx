@@ -1,4 +1,4 @@
-import { memo } from "react";
+import { forwardRef } from "react";
 
 import { AssignComponentProps } from "../assign-component-props";
 
@@ -11,12 +11,14 @@ export interface ButtonProps extends React.ComponentProps<"button"> {
 }
 
 export const Button = AssignComponentProps(
-	memo(({ children, type = "button", size = "s", variant = "primary", ...rest }: ButtonProps) => {
-		return (
-			<S.Button {...rest} type={type} $variant={variant} $size={size}>
-				{children}
-			</S.Button>
-		);
-	}),
+	forwardRef<HTMLButtonElement, ButtonProps>(
+		({ children, type = "button", size = "s", variant = "primary", ...rest }, ref) => {
+			return (
+				<S.Button {...rest} ref={ref} type={type} $variant={variant} $size={size}>
+					{children}
+				</S.Button>
+			);
+		}
+	),
 	{ S }
 );

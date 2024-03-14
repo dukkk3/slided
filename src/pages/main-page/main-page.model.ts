@@ -22,17 +22,29 @@ export const {
 
 export const createStoreUtilsOfFlowIteration = (
 	flowIteration: number,
-	config: Omit<iterationUtils.SharedCreateFlowIterationUtilsProps<Store<number>>, "progress"> = {}
+	config: Omit<
+		iterationUtils.SharedCreateFlowIterationUtilsProps<Store<number>>,
+		"progress" | "iterationsChain"
+	> = {}
 ) =>
-	iterationUtils.createStoreUtilsOfFlowIteration(flowIteration, { ...config, progress: $progress });
+	iterationUtils.createStoreUtilsOfFlowIteration(flowIteration, {
+		...config,
+		progress: $progress,
+		iterationsChain: ITERATIONS_CHAIN,
+	});
 
 export const createSpringUtilsOfFlowIteration = (
 	flowIteration: number,
 	config: Omit<
 		iterationUtils.SharedCreateFlowIterationUtilsProps<LikeSpringValue<number>>,
-		"progress"
+		"progress" | "iterationsChain"
 	> = {}
-) => iterationUtils.createSpringUtilsOfFlowIteration(flowIteration, { ...config, progress });
+) =>
+	iterationUtils.createSpringUtilsOfFlowIteration(flowIteration, {
+		...config,
+		progress,
+		iterationsChain: ITERATIONS_CHAIN,
+	});
 
 export const createStoreUtils = (
 	rangeOrIterationIndex: Range | number,

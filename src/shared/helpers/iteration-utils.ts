@@ -4,11 +4,14 @@ import type { LikeSpringValue, Range } from "@shared/types";
 
 import { math } from "../utils";
 
-import { type IterationsChain } from "./iterations-chain";
+import { type IterationsChain, findItemByRange } from "./iterations-chain";
 
 const toRange = (from: number, to: number) => math.carriedToRange(from, to);
 
-const resolveRange = (rangeOrIterationIndex: Range | number, iterationsChain: IterationsChain) => {
+const resolveRange = (
+	rangeOrIterationIndex: Range | number,
+	iterationsChain: IterationsChain
+): Range => {
 	if (typeof rangeOrIterationIndex === "number") {
 		const iteration = iterationsChain[rangeOrIterationIndex];
 		return [iteration.from, iteration.to] as const;
@@ -31,8 +34,13 @@ export interface SharedCreateIterationUtilsProps<Progress> {
 
 export interface SharedCreateFlowIterationUtilsProps<Value>
 	extends Pick<SharedCreateIterationUtilsProps<Value>, "progress"> {
+	iterationsChain: IterationsChain;
 	offsetFromCenter?: number;
 }
+
+const getDurationFactor = (defaultDuration: number, duration: number | undefined = 0) => {
+	return duration / defaultDuration;
+};
 
 const createCommonStoreUtils = (
 	rangeOrIterationIndex: Range | number,
@@ -40,6 +48,9 @@ const createCommonStoreUtils = (
 	progress: Store<number>
 ) => {
 	const range = resolveRange(rangeOrIterationIndex, iterationsChain);
+	const iterationItem = findItemByRange(iterationsChain, range);
+	const durationFactor = getDurationFactor(iterationsChain.defaultDuration, iterationItem?.duration);
+
 	const $iterationProgress = progress.map(toRange(...range));
 	const $status = $iterationProgress.map(math.toStatus);
 	const $inFlight = $iterationProgress.map(math.toInFlight);
@@ -51,6 +62,7 @@ const createCommonStoreUtils = (
 
 	return {
 		range,
+		durationFactor,
 		$status,
 		$started,
 		$ended,
@@ -59,22 +71,25 @@ const createCommonStoreUtils = (
 	};
 };
 
+export type StoreUtilsOfFlowIteration = ReturnType<typeof createStoreUtilsOfFlowIteration>;
+
 export const createStoreUtilsOfFlowIteration = (
 	flowIteration: number,
 	{
 		progress,
+		iterationsChain,
 		offsetFromCenter = DEFAULT_OFFSET_FROM_CENTER,
 	}: SharedCreateFlowIterationUtilsProps<Store<number>>
 ) => {
 	return {
 		opening: createCommonStoreUtils(
 			[flowIteration - offsetFromCenter + DEFAULT_OFFSET_AROUND_CENTER, flowIteration],
-			[] as any,
+			iterationsChain,
 			progress
 		),
 		closing: createCommonStoreUtils(
 			[flowIteration, flowIteration + offsetFromCenter - DEFAULT_OFFSET_AROUND_CENTER],
-			[] as any,
+			iterationsChain,
 			progress
 		),
 	};
@@ -122,28 +137,34 @@ const createCommonSpringUtils = (
 ) => {
 	const range = resolveRange(rangeOrIterationIndex, iterationsChain);
 	const iterationProgress = progress.to(toRange(...range));
+	const iterationItem = findItemByRange(iterationsChain, range);
+	const durationFactor = getDurationFactor(iterationsChain.defaultDuration, iterationItem?.duration);
 	return {
 		range,
+		durationFactor,
 		progress: iterationProgress,
 	};
 };
+
+export type SpringUtilsOfFlowIteration = ReturnType<typeof createSpringUtilsOfFlowIteration>;
 
 export const createSpringUtilsOfFlowIteration = (
 	flowIteration: number,
 	{
 		progress,
+		iterationsChain,
 		offsetFromCenter = DEFAULT_OFFSET_FROM_CENTER,
 	}: SharedCreateFlowIterationUtilsProps<LikeSpringValue<number>>
 ) => {
 	return {
 		opening: createCommonSpringUtils(
 			[flowIteration - offsetFromCenter + DEFAULT_OFFSET_AROUND_CENTER, flowIteration],
-			[] as any,
+			iterationsChain,
 			progress
 		),
 		closing: createCommonSpringUtils(
 			[flowIteration, flowIteration + offsetFromCenter - DEFAULT_OFFSET_AROUND_CENTER],
-			[] as any,
+			iterationsChain,
 			progress
 		),
 	};

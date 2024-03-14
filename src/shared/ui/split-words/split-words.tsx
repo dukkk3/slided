@@ -1,6 +1,7 @@
 import { memo, useMemo, Fragment } from "react";
 
 import { toStringsArray, getIndex } from "./split-words.lib";
+import * as S from "./split-words.styled";
 
 export interface WordWrapperProps {
 	value: string;
@@ -8,7 +9,8 @@ export interface WordWrapperProps {
 	count: number;
 }
 
-export interface SplitWordsProps<Props extends WordWrapperProps = WordWrapperProps> {
+export interface SplitWordsProps<Props extends WordWrapperProps = WordWrapperProps>
+	extends React.ComponentProps<"div"> {
 	words: string | string[];
 	mapWordParams?: (props: WordWrapperProps) => Props;
 	rowWrapper: (props: { children?: React.ReactNode }) => React.ReactElement | null;
@@ -23,12 +25,13 @@ export const SplitWords = memo(
 		rowWrapper: RowWrapper,
 		wordWrapper: WordWrapper,
 		mapWordParams = defaultMapWordParams,
+		...rest
 	}: SplitWordsProps) => {
 		const wordsArray = useMemo(() => toStringsArray(words), [words]);
 		const wordsCount = useMemo(() => wordsArray.flat(Infinity).length, [wordsArray]);
 
 		return (
-			<>
+			<S.SplitWords {...rest}>
 				{wordsArray.map((row, rowIndex) => (
 					<RowWrapper key={rowIndex}>
 						{row.map((word, index) => (
@@ -44,7 +47,7 @@ export const SplitWords = memo(
 						))}
 					</RowWrapper>
 				))}
-			</>
+			</S.SplitWords>
 		);
 	}
 ) as <Props extends WordWrapperProps = WordWrapperProps>(

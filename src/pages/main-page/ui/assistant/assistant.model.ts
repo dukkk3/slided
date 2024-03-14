@@ -11,7 +11,9 @@ import { IMAGES_PRELOADER } from "./assistant.config";
 
 const pulse = new SpringValue(0);
 
-export const assistantShapeInterpolator = shapeInterpolator.create<"initial" | "phone">("initial");
+export const assistantShapeInterpolator = shapeInterpolator.create<"initial" | "in-phone">(
+	"initial"
+);
 export const iteration1 = model.createSpringUtilsOfFlowIteration(1);
 
 export const $iteration1 = model.createStoreUtilsOfFlowIteration(1);

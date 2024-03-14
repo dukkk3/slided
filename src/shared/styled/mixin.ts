@@ -12,6 +12,13 @@ export const generateOutsideBorderMixin = (borderSize: string) => {
 	`;
 };
 
+export const textMixin = css`
+	color: black;
+	font-size: 32px;
+	font-weight: 600;
+	line-height: 100%;
+`;
+
 export const fixedSize = (size: string, rectProp: "height" | "width" = "width") => css`
    flex: 0 0 ${size};
    ${rectProp}: ${size};

@@ -1,3 +1,5 @@
+import type { Range } from "@shared/types";
+
 export interface Item {
 	from: number;
 	to: number;
@@ -8,15 +10,16 @@ export interface Item {
 export type IterationsChain = Item[] & {
 	rightBound: number;
 	leftBound: number;
+	defaultDuration: number;
 };
 
-export const create = () => {
+export const create = (defaultDuration: number) => {
 	const iterationsChain: Item[] = [];
 
 	let accumulatedFrom: number = 0;
 
 	const controls = {
-		next: (to: number, { duration }: { duration: number }) => {
+		next: (to: number, { duration = defaultDuration }: { duration?: number } = {}) => {
 			const isToAlreadyUsed = iterationsChain.some((item) => item.from >= to || item.to >= to);
 
 			if (isToAlreadyUsed) throw new Error(`To ${to} already used`);
@@ -43,6 +46,7 @@ export const create = () => {
 			return Object.assign(iterationsChain, {
 				leftBound: iterationsChain.at(0)!.from,
 				rightBound: iterationsChain.at(-1)!.to,
+				defaultDuration,
 			});
 		},
 	};
@@ -50,7 +54,11 @@ export const create = () => {
 	return controls;
 };
 
-export const findItem = (chain: Item[], progress: number, direction: number) => {
+export const findItemByRange = (chain: Item[], [from, to]: Range) => {
+	return chain.find((item) => item.in(from, { gte: true }) && item.in(to, { lte: true })) || null;
+};
+
+export const findItemByDirection = (chain: Item[], progress: number, direction: number) => {
 	const items = chain.filter((item) => item.in(progress, { gte: true, lte: true }));
 
 	let item: Item;

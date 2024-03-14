@@ -4,7 +4,11 @@ import { previous } from "patronum";
 
 import { math } from "../utils";
 
-import { type IterationsChain, findItem, getBoundPropByDirection } from "./iterations-chain";
+import {
+	type IterationsChain,
+	findItemByDirection,
+	getBoundPropByDirection,
+} from "./iterations-chain";
 
 const calculateDistance = (from: number, to: number) => Math.abs(to - from);
 const isBiggestDistance = (distance: number) => distance > 1;
@@ -20,7 +24,7 @@ const calculateDistanceOfStep = (
 };
 
 export const create = ({ iterationsChain }: { iterationsChain: IterationsChain }) => {
-	const progress = new SpringValue(0, {
+	const progress = new SpringValue(3, {
 		onChange: (value) => settedProgress(value as unknown as number),
 	});
 
@@ -51,7 +55,7 @@ export const create = ({ iterationsChain }: { iterationsChain: IterationsChain }
 	const $currentIterationIndex = combine(
 		{ progress: $progress, iterationRunDirection: $iterationRunDirection },
 		({ progress, iterationRunDirection }) => {
-			const iterationItem = findItem(iterationsChain, progress, iterationRunDirection);
+			const iterationItem = findItemByDirection(iterationsChain, progress, iterationRunDirection);
 			return iterationsChain.indexOf(iterationItem);
 		}
 	);
@@ -74,7 +78,7 @@ export const create = ({ iterationsChain }: { iterationsChain: IterationsChain }
 
 		progress.stop();
 
-		const currentIterationItem = findItem(iterationsChain, currentProgress, direction);
+		const currentIterationItem = findItemByDirection(iterationsChain, currentProgress, direction);
 
 		const distanceToBound = calculateDistance(
 			currentProgress,

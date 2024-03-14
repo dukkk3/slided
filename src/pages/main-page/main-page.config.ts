@@ -1,9 +1,12 @@
 import { iterationsChain } from "@shared/helpers";
 
 export const ITERATIONS_CHAIN = iterationsChain
-	.create()
-	.next(1, { duration: 2000 })
-	.next(2, { duration: 2000 })
-	.next(3, { duration: 2000 })
-	.next(4, { duration: 2000 })
+	.create(2000)
+	.next(1)
+	.next(2)
+	.next(3)
+	.next(4)
+	.next(6)
+	.next(7)
+	.next(8)
 	.get();

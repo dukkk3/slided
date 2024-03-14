@@ -9,6 +9,13 @@ export const toInt = (value: number, from: number, to: number) => {
 	return Math.floor(from + value * size);
 };
 
+export const toScale =
+	(factor: number, bound: "in" | "out" = "in") =>
+	(value: number) => {
+		factor = Math.min(1, factor);
+		return toRange(value, bound === "in" || factor === 1 ? 0 : factor, bound === "in" ? factor : 1);
+	};
+
 export const toStatus = (value: number) => value > 0 && value <= 1;
 export const toInFlight = (value: number) => value > 0 && value <= 1 - EPSILON;
 export const toStep = (edge: number) => (value: number) => step(value, edge);
