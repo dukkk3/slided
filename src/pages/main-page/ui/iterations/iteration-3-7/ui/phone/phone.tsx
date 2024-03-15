@@ -1,6 +1,6 @@
 import { memo } from "react";
 
-import { interpolations, springUtils } from "@shared/helpers";
+import { interpolators, springUtils } from "@shared/helpers";
 import type { LikeSpringValue } from "@shared/types";
 import { AssignComponentProps } from "@shared/ui";
 
@@ -21,9 +21,9 @@ export const Phone = AssignComponentProps(
 					className='safari-border-radius-overflow-bugfix'
 					style={springUtils.optimizeStyleForRendering({
 						y: openingProgress
-							.to(interpolations.toInverted)
-							.to(interpolations.toScaled(-50))
-							.to(interpolations.toPercents),
+							.to(interpolators.toInverted)
+							.to(interpolators.toScaledOn(-50))
+							.to(interpolators.toPercents),
 						opacity: openingProgress,
 					})}
 				/>

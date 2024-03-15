@@ -3,7 +3,7 @@ import { useDrag } from "@use-gesture/react";
 import { forwardRef, useRef } from "react";
 import useMeasure from "react-use-measure";
 
-import { interpolations, springUtils } from "@shared/helpers";
+import { interpolators, springUtils } from "@shared/helpers";
 import { AssignComponentProps } from "@shared/ui";
 import { common, math } from "@shared/utils";
 
@@ -62,13 +62,13 @@ export const Slider = AssignComponentProps(
 			<S.Slide {...rest} ref={common.mergeRefs(ref, measureRef, sliderRef)}>
 				<S.SlideContent
 					style={springUtils.optimizeStyleForRendering({
-						x: buttonStyle.x.to(interpolations.toScaled(100)).to(interpolations.toPercents),
+						x: buttonStyle.x.to(interpolators.toScaledOn(100)).to(interpolators.toPercents),
 					})}>
 					<S.SlideButton>
 						<S.SlideButtonImage src={assets.logoRay} />
 					</S.SlideButton>
 				</S.SlideContent>
-				<S.SlideButtonLabelGroup style={{ opacity: buttonStyle.x.to(interpolations.toInverted) }}>
+				<S.SlideButtonLabelGroup style={{ opacity: buttonStyle.x.to(interpolators.toInverted) }}>
 					<S.SlideButtonLabel>Slide to answer</S.SlideButtonLabel>
 				</S.SlideButtonLabelGroup>
 			</S.Slide>

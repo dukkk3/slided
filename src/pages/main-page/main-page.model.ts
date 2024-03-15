@@ -12,9 +12,9 @@ export const {
 	$currentIterationIndex,
 	$iterationRunDirection,
 	$smoothedDistanceOfBiggestStep,
-	runToIteration,
-	runToProgress,
-	slideIteration,
+	runnedToProgress,
+	runnedToIteration,
+	slidedIteration,
 	smoothedDistanceOfBiggestStep,
 } = iterationControls.create({
 	iterationsChain: ITERATIONS_CHAIN,

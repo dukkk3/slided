@@ -2,9 +2,11 @@ import { animated } from "@react-spring/web";
 import styled from "styled-components";
 
 export const MainPage = styled.div`
-	width: 100vw;
-	height: 100vh;
-	position: relative;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	position: sticky;
 `;
 
 export const Content = styled.div`

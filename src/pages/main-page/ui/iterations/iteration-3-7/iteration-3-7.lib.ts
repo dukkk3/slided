@@ -1,4 +1,4 @@
-import { type iterationUtils, interpolations } from "@shared/helpers";
+import { type iterationUtils, interpolators } from "@shared/helpers";
 import { common } from "@shared/utils";
 
 export const calculateTemplateCardProps = (index: number, cardsAmount: number) => {
@@ -22,23 +22,23 @@ export const getTemplateCardStyle = ({
 		z: -5 * offsetAroundCenter - 0.01,
 		zIndex: center - offset,
 		rotateY: iteration.closing.progress
-			.to(interpolations.toEased("easeInOutCubic"))
-			.to(interpolations.toInverted)
-			.to(interpolations.toScaled(-0.25 * offsetAroundCenter * sign)),
-		opacity: iteration.opening.progress.to(interpolations.toEased("easeInOutCubic")),
+			.to(interpolators.toEased("easeInOutCubic"))
+			.to(interpolators.toInverted)
+			.to(interpolators.toScaledOn(-0.25 * offsetAroundCenter * sign)),
+		opacity: iteration.opening.progress.to(interpolators.toEased("easeInOutCubic")),
 		translateX: common.variant({
 			if: !isSwapped,
 			then: iteration.opening.progress
-				.to(interpolations.toEased("easeInOutCubic"))
-				.to(interpolations.toInverted)
-				.to(interpolations.toScaled(200 * offsetAroundCenter * sign + 120 * offsetAroundCenter * sign))
-				.to(interpolations.toPercents),
+				.to(interpolators.toEased("easeInOutCubic"))
+				.to(interpolators.toInverted)
+				.to(interpolators.toScaledOn(200 * offsetAroundCenter * sign + 120 * offsetAroundCenter * sign))
+				.to(interpolators.toPercents),
 			else: iteration.closing.progress
-				.to(interpolations.toEased("easeInOutCubic"))
-				.to(interpolations.toInverted)
-				.to(interpolations.toScaled(200 * offsetAroundCenter * sign))
-				.to(interpolations.toPercents),
+				.to(interpolators.toEased("easeInOutCubic"))
+				.to(interpolators.toInverted)
+				.to(interpolators.toScaledOn(200 * offsetAroundCenter * sign))
+				.to(interpolators.toPercents),
 		}),
-		scale: iteration.opening.progress.to(interpolations.toEased("easeInOutCubic")),
+		scale: iteration.opening.progress.to(interpolators.toEased("easeInOutCubic")),
 	};
 };

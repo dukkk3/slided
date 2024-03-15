@@ -1,9 +1,9 @@
 import { memo } from "react";
 
-import { springUtils } from "@shared/helpers";
+import { interpolators, springUtils } from "@shared/helpers";
 import type { LikeSpringValue } from "@shared/types";
 import { SplitWords, type SplitWordsProps, type WordWrapperProps } from "@shared/ui";
-import { math } from "@shared/utils";
+import { common, math } from "@shared/utils";
 
 import * as S from "./text-animation.styled";
 
@@ -20,15 +20,23 @@ interface WordProps
 		Pick<TextAnimationProps, "isOpening" | "closingProgress" | "openingProgress"> {}
 
 const Word = memo(
-	({ isOpening, closingProgress, openingProgress, value, index, count }: WordProps) => {
+	({ isOpening = false, closingProgress, openingProgress, value, index, count }: WordProps) => {
 		return (
 			<S.Word
 				style={springUtils.optimizeStyleForRendering({
-					y: (isOpening
-						? openingProgress?.to(math.invert)
-						: closingProgress?.to(math.carriedToRange(index / count, 1))
-					)?.to((value) => `-${100 * value}%`),
-					opacity: isOpening ? openingProgress : closingProgress?.to(math.invert),
+					y: common
+						.variant({
+							if: isOpening,
+							then: openingProgress?.to(math.invert),
+							else: closingProgress?.to(math.carriedToRange(index / count, 1)),
+						})
+						?.to(interpolators.toScaledOn(-100))
+						.to(interpolators.toPercents),
+					opacity: common.variant({
+						if: isOpening,
+						then: openingProgress,
+						else: closingProgress?.to(interpolators.toInverted),
+					}),
 				})}>
 				{value}
 			</S.Word>

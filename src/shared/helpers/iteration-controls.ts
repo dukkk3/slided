@@ -1,5 +1,5 @@
 import { SpringValue } from "@react-spring/web";
-import { combine, createStore, createEvent, sample } from "effector";
+import { combine, createStore, createEvent, sample, createEffect } from "effector";
 import { previous } from "patronum";
 
 import { math } from "../utils";
@@ -27,6 +27,10 @@ export const create = ({ iterationsChain }: { iterationsChain: IterationsChain }
 	const progress = new SpringValue(3, {
 		onChange: (value) => settedProgress(value as unknown as number),
 	});
+
+	const runnedToProgress = createEvent<number>();
+	const runnedToIteration = createEvent<{ index: number; toEnd?: boolean }>();
+	const slidedIteration = createEvent<{ direction: number; toEnd?: boolean }>();
 
 	const settedProgress = createEvent<number>();
 	const settedTargetProgress = createEvent<number>();
@@ -137,6 +141,30 @@ export const create = ({ iterationsChain }: { iterationsChain: IterationsChain }
 		target: $progress,
 	});
 
+	sample({
+		clock: runnedToProgress,
+		target: createEffect(runToProgress),
+	});
+
+	sample({
+		clock: runnedToIteration,
+		filter: ({ index }) => index >= 0 && index < iterationsChain.length,
+		fn: ({ index, toEnd }) => {
+			return iterationsChain[index][toEnd ? "to" : "from"];
+		},
+		target: runnedToProgress,
+	});
+
+	sample({
+		clock: slidedIteration,
+		source: $currentIterationIndex,
+		fn: (currentIterationIndex, { direction, toEnd }) => ({
+			index: currentIterationIndex + direction,
+			toEnd,
+		}),
+		target: runnedToIteration,
+	});
+
 	return {
 		progress,
 		$progress,
@@ -145,8 +173,8 @@ export const create = ({ iterationsChain }: { iterationsChain: IterationsChain }
 		smoothedDistanceOfBiggestStep,
 		$iterationRunDirection,
 		$currentIterationIndex,
-		runToIteration,
-		runToProgress,
-		slideIteration,
+		runnedToProgress,
+		runnedToIteration,
+		slidedIteration,
 	};
 };

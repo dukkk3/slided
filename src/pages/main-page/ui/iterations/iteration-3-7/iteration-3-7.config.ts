@@ -3,7 +3,7 @@ import * as assets from "./assets";
 export const TEMPLATES = [
 	assets.templateBright,
 	assets.templateGreen,
-	assets.templatePacificBlue,
+	assets.templatePacificBlueText,
 	assets.templateBeige,
 	assets.templateBlack,
 ];

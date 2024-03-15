@@ -6,4 +6,4 @@ export * as iterationControls from "./iteration-controls";
 export * as imageDrawer from "./image-drawer";
 export * as storeUtils from "./store-utils";
 export * from "./images-preloader";
-export * as interpolations from "./interpolations";
+export * as interpolators from "./interpolators";

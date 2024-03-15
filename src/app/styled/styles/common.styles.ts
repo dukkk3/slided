@@ -6,4 +6,8 @@ export const commonStyles = css`
 		height: 100vh;
 		overflow: hidden;
 	}
+
+	.border-radius-overflow-bugfix {
+		-webkit-mask-image: -webkit-radial-gradient(white, black);
+	}
 `;

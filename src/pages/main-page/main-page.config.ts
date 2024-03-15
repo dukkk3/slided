@@ -10,3 +10,5 @@ export const ITERATIONS_CHAIN = iterationsChain
 	.next(7)
 	.next(8)
 	.get();
+
+export const MAX_ITERATION_NUMBER = ITERATIONS_CHAIN.rightBound;

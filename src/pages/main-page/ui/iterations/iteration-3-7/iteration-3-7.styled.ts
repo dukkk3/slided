@@ -77,13 +77,13 @@ export const TemplateCardsWrapper = styled(animated.div)`
 
 export const Slider = styled(animated(_Slider))`
 	width: 100%;
-	${styledMixin.fixedSize("80px", "height")}
+	${styledMixin.fixedSize("60px", "height")}
 `;
 
 export const Button = styled(animated(_Button))`
 	width: 100%;
 	border-radius: 900px;
-	${styledMixin.fixedSize("80px", "height")}
+	${styledMixin.fixedSize("60px", "height")}
 `;
 
 export const PhoneFooter = styled.div`
@@ -126,6 +126,7 @@ export const TemplateCardImageWrapper = styled(animated.div)`
 export const Descriptions = styled.div`
 	position: relative;
 	margin-top: 2.8rem;
+	text-align: center;
 	width: 100%;
 `;
 
@@ -140,5 +141,4 @@ export const Description = styled(TextAnimation)<{ $withAbsolutePosition?: boole
 
 export const BoldDescription = styled(Description)`
 	font-size: 42px;
-	line-height: 70%;
 `;

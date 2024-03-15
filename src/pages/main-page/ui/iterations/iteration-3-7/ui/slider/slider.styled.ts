@@ -4,9 +4,12 @@ import styled from "styled-components";
 import { styledMixin } from "@shared/styled";
 import { Image } from "@shared/ui";
 
+const HEIGHT = "60px";
+const DOT_SIZE = "50px";
+
 export const Slide = styled.div`
 	width: 100%;
-	height: 80px;
+	height: ${HEIGHT};
 	position: absolute;
 	bottom: 0;
 	left: 0;
@@ -18,7 +21,7 @@ export const Slide = styled.div`
 `;
 
 export const SlideContent = styled(animated.div)`
-	width: calc(100% - 80px);
+	width: calc(100% - ${HEIGHT});
 	height: 100%;
 	position: relative;
 	pointer-events: none;
@@ -27,9 +30,9 @@ export const SlideContent = styled(animated.div)`
 
 	&:after {
 		top: 0;
-		right: calc(100% - 70px * 2);
+		right: calc(100% - ${DOT_SIZE} * 2);
 		content: "";
-		width: calc(100% + 70px * 3);
+		width: calc(100% + ${DOT_SIZE} * 3);
 		height: 100%;
 		border-radius: inherit;
 		position: absolute;
@@ -38,15 +41,15 @@ export const SlideContent = styled(animated.div)`
 `;
 
 export const SlideButton = styled.div`
-	top: 5px;
-	left: 5px;
+	top: calc((${HEIGHT} - ${DOT_SIZE}) / 2);
+	left: calc((${HEIGHT} - ${DOT_SIZE}) / 2);
 	z-index: 1;
 	padding: 6px;
 	box-sizing: border-box;
 	position: absolute;
 	border-radius: 50%;
 	background: white;
-	${styledMixin.square("70px")}
+	${styledMixin.square(DOT_SIZE)}
 `;
 
 export const SlideButtonImage = styled(Image)`
@@ -57,14 +60,14 @@ export const SlideButtonImage = styled(Image)`
 
 export const SlideButtonLabelGroup = styled(animated.div)`
 	top: 0;
-	left: 80px;
+	left: ${HEIGHT};
 	height: 100%;
 	display: flex;
 	position: absolute;
 	align-items: center;
 	pointer-events: none;
 	justify-content: center;
-	width: calc(100% - 80px);
+	width: calc(100% - ${HEIGHT});
 `;
 
 export const SlideButtonLabel = styled.p`
