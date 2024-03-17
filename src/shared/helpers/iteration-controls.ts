@@ -24,16 +24,16 @@ const calculateDistanceOfStep = (
 };
 
 export const create = ({ iterationsChain }: { iterationsChain: IterationsChain }) => {
-	const progress = new SpringValue(3, {
-		onChange: (value) => settedProgress(value as unknown as number),
+	const progress = new SpringValue(7, {
+		onChange: (value) => progressSetted(value as unknown as number),
 	});
 
-	const runnedToProgress = createEvent<number>();
-	const runnedToIteration = createEvent<{ index: number; toEnd?: boolean }>();
-	const slidedIteration = createEvent<{ direction: number; toEnd?: boolean }>();
+	const toProgressRunned = createEvent<number>();
+	const toIterationRunned = createEvent<{ index: number; toEnd?: boolean }>();
+	const iterationSlided = createEvent<{ direction: number; toEnd?: boolean }>();
 
-	const settedProgress = createEvent<number>();
-	const settedTargetProgress = createEvent<number>();
+	const progressSetted = createEvent<number>();
+	const targetProgressSetted = createEvent<number>();
 
 	const $progress = createStore(progress.get());
 	const $previousProgress = previous($progress, 0);
@@ -111,7 +111,7 @@ export const create = ({ iterationsChain }: { iterationsChain: IterationsChain }
 			? nextIterationItem.duration
 			: currentIterationItem.duration;
 
-		settedTargetProgress(targetProgress);
+		targetProgressSetted(targetProgress);
 
 		if (!isBiggestDistance(distanceToTargetProgress)) {
 			progress.start({
@@ -130,39 +130,39 @@ export const create = ({ iterationsChain }: { iterationsChain: IterationsChain }
 	};
 
 	sample({
-		clock: settedTargetProgress,
+		clock: targetProgressSetted,
 		source: $progress,
 		fn: (progress, target) => ({ from: progress, to: target }),
 		target: $settedProgressData,
 	});
 
 	sample({
-		clock: settedProgress,
+		clock: progressSetted,
 		target: $progress,
 	});
 
 	sample({
-		clock: runnedToProgress,
+		clock: toProgressRunned,
 		target: createEffect(runToProgress),
 	});
 
 	sample({
-		clock: runnedToIteration,
+		clock: toIterationRunned,
 		filter: ({ index }) => index >= 0 && index < iterationsChain.length,
 		fn: ({ index, toEnd }) => {
 			return iterationsChain[index][toEnd ? "to" : "from"];
 		},
-		target: runnedToProgress,
+		target: toProgressRunned,
 	});
 
 	sample({
-		clock: slidedIteration,
+		clock: iterationSlided,
 		source: $currentIterationIndex,
 		fn: (currentIterationIndex, { direction, toEnd }) => ({
 			index: currentIterationIndex + direction,
 			toEnd,
 		}),
-		target: runnedToIteration,
+		target: toIterationRunned,
 	});
 
 	return {
@@ -173,8 +173,8 @@ export const create = ({ iterationsChain }: { iterationsChain: IterationsChain }
 		smoothedDistanceOfBiggestStep,
 		$iterationRunDirection,
 		$currentIterationIndex,
-		runnedToProgress,
-		runnedToIteration,
-		slidedIteration,
+		toIterationRunned,
+		toProgressRunned,
+		iterationSlided,
 	};
 };

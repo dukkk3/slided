@@ -1,4 +1,4 @@
-export const EPSILON = 0.00001;
+export const EPSILON = 0.000000001;
 
 export const toRange = (value: number, a: number, b: number) => {
 	return value < a ? 0 : value >= b ? 1 : (value - a) / (b - a);

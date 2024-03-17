@@ -28,7 +28,7 @@ const loadOpeningFx = attach({
 });
 
 export const $openingEnded = createStore(false);
-export const { Canvas, settedImage: settedCanvasImage } = imageDrawer.create();
+export const { Canvas, imageSetted: canvasImageSetted } = imageDrawer.create();
 export const Gate = createGate();
 
 export const parentModel = model;
@@ -67,7 +67,7 @@ sample({
 			);
 
 			const item = IMAGES_PRELOADER.items[imageIndex];
-			settedCanvasImage(item.image);
+			canvasImageSetted(item.image);
 		}
 	),
 });
@@ -107,7 +107,7 @@ sample({
 	source: ticker.$ticks,
 	target: createEffect((ticks: number) => {
 		const item = IMAGES_PRELOADER.items[ticks];
-		settedCanvasImage(item.image);
+		canvasImageSetted(item.image);
 	}),
 });
 

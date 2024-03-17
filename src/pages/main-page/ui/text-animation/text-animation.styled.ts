@@ -8,7 +8,7 @@ export const Word = styled(animated.span)`
 
 export const RowWrapper = styled.p`
 	margin: 0;
+	display: block;
 	overflow: hidden;
 	white-space: pre;
-	display: inline-block;
 `;

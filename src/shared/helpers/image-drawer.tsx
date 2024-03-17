@@ -11,9 +11,9 @@ export const create = () => {
 	const $context = createStore<CanvasRenderingContext2D | null>(null);
 	const $rect = createStore<{ width: number; height: number } | null>(null);
 
-	const settedImage = createEvent<HTMLImageElement | null>();
-	const settedContext = createEvent<CanvasRenderingContext2D | null>();
-	const settedRect = createEvent<{ width: number; height: number }>();
+	const imageSetted = createEvent<HTMLImageElement | null>();
+	const contextSetted = createEvent<CanvasRenderingContext2D | null>();
+	const rectSetted = createEvent<{ width: number; height: number }>();
 
 	const drawCurrentImageFx = attach({
 		source: { context: $context, image: $image, rect: $rect },
@@ -35,7 +35,7 @@ export const create = () => {
 			const context = node?.getContext("2d");
 			contextRef.current = context || null;
 			canvasRef.current = node || null;
-			settedContext(context || null);
+			contextSetted(context || null);
 		}, []);
 
 		useEffect(() => {
@@ -51,24 +51,24 @@ export const create = () => {
 
 			context.scale(dpr, dpr);
 
-			settedRect({ width, height });
+			rectSetted({ width, height });
 		}, [rect]);
 
 		return <canvas {...props} ref={common.mergeRefs(ref, measureRef, handleRef)} />;
 	});
 
 	sample({
-		clock: settedContext,
+		clock: contextSetted,
 		target: $context,
 	});
 
 	sample({
-		clock: settedImage,
+		clock: imageSetted,
 		target: $image,
 	});
 
 	sample({
-		clock: settedRect,
+		clock: rectSetted,
 		target: $rect,
 	});
 
@@ -79,6 +79,6 @@ export const create = () => {
 
 	return {
 		Canvas,
-		settedImage,
+		imageSetted,
 	};
 };

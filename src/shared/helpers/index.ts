@@ -7,3 +7,4 @@ export * as imageDrawer from "./image-drawer";
 export * as storeUtils from "./store-utils";
 export * from "./images-preloader";
 export * as interpolators from "./interpolators";
+export * as sharedRect from "./shared-rect";

@@ -1,6 +1,7 @@
 import { useGate, useUnit } from "effector-react";
 
 import { springUtils } from "@shared/helpers";
+import { VisibilityToggler } from "@shared/ui";
 import { common, math } from "@shared/utils";
 
 import * as model from "./assistant.model";
@@ -8,18 +9,19 @@ import * as S from "./assistant.styled";
 
 export const Assistant = () => {
 	const assistantStyle = model.assistantShapeInterpolator.useStyle();
+	const isVisible = useUnit(model.$inRange1_7);
 
 	useGate(model.Gate);
 
 	return (
-		<>
+		<VisibilityToggler isHidden={!isVisible}>
 			<S.Assistant style={springUtils.optimizeStyleForRendering(assistantStyle)}>
 				<Face />
 			</S.Assistant>
 			<S.BorderWrapper style={{ opacity: 0 }}>
 				<S.Border />
 			</S.BorderWrapper>
-		</>
+		</VisibilityToggler>
 	);
 };
 

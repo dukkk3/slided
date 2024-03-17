@@ -1,3 +1,5 @@
+import { designerConfig } from "../../designer";
+
 import * as assets from "./assets";
 import type { UserProps } from "./ui";
 
@@ -11,7 +13,7 @@ export const FOCUSED_USER_INDEX = 0;
 export const USERS: UserData[] = [
 	{
 		inQueueIndex: 0,
-		props: { avatarSrc: assets.designer1, name: "Mark", rating: 4.5 },
+		props: { avatarSrc: designerConfig.DESIGNER_AVATAR, name: "Mark", rating: 4.5 },
 		position: { x: -0.7, y: 0.1 },
 	},
 	{

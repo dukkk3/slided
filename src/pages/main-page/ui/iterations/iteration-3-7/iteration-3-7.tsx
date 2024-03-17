@@ -1,5 +1,5 @@
 import { useUnit } from "effector-react";
-import { memo } from "react";
+import { memo, useEffect } from "react";
 
 import { interpolators, springUtils } from "@shared/helpers";
 import { VisibilityToggler } from "@shared/ui";
@@ -46,8 +46,8 @@ export const Iteration3_7 = () => {
 
 const Description = memo(() => {
 	const iteration3Status = useUnit(model.$iteration3Status);
-	const iteration5OpeningStatus = useUnit(model.$iteration5.opening.$status);
-	const iteration6OpeningStatus = useUnit(model.$iteration6.opening.$status);
+	const iteration5OpeningStatus = useUnit(model.$iteration5.opening.$inFlight);
+	const iteration6OpeningStatus = useUnit(model.$iteration6.opening.$inFlight);
 	const iteration5Status = useUnit(model.$iteration5Status);
 	const inRange3_4 = useUnit(model.$inRange3_4);
 	const inRange6_7 = useUnit(model.$inRange6_7);
@@ -89,13 +89,15 @@ const Description = memo(() => {
 });
 
 const Face = memo(() => {
-	const [inPhoneRef] = model.useAssistantShapeRect("in-phone");
+	const [assistantInPhoneRef] = model.useAssistantShapeRect("in-phone");
+	const [assistantInPhonePairRef] = model.useAssistantShapeRect("in-phone-pair");
+	const [designerRef] = model.useDesignerShapeRect("in-phone");
 
 	return (
 		<S.Face>
-			<S.FaceContainer ref={inPhoneRef} />
-			<S.FaceContainer style={{ transform: "translateX(-40%)" }} />
-			<S.FaceContainer style={{ transform: "translateX(40%)" }} />
+			<S.FaceContainer ref={assistantInPhoneRef} />
+			<S.FaceContainer ref={assistantInPhonePairRef} style={{ transform: "translateX(-40%)" }} />
+			<S.FaceContainer ref={designerRef} style={{ transform: "translateX(40%)" }} />
 		</S.Face>
 	);
 });
@@ -113,12 +115,10 @@ const Ray = memo(() => {
 
 const PhoneFooter = memo(() => {
 	const iteration3Status = useUnit(model.$iteration3Status);
-	const iteration4ClosingStatus = useUnit(model.$iteration4.closing.$status);
+	const iteration4ClosingStatus = useUnit(model.$iteration4.closing.$inFlight);
 	const iteration6ClosingStarted = useUnit(model.$iteration6.closing.$started);
 	const iteration6OpeningStarted = useUnit(model.$iteration6.opening.$started);
-	const isIteration4ClosingStartedAndBeforeIteration6 = useUnit(
-		model.$isIteration4ClosingStartedAndBeforeIteration6
-	);
+	const inRange4_5 = useUnit(model.$inRange4_5);
 	const inRange3_4 = useUnit(model.$inRange3_4);
 
 	return (
@@ -138,7 +138,7 @@ const PhoneFooter = memo(() => {
 					Choose
 				</S.Button>
 			</VisibilityToggler>
-			<VisibilityToggler isHidden={!isIteration4ClosingStartedAndBeforeIteration6}>
+			<VisibilityToggler isHidden={!inRange4_5}>
 				<S.Button
 					variant='grey'
 					disabled
@@ -148,7 +148,7 @@ const PhoneFooter = memo(() => {
 							then: model.iteration4.closing.progress
 								.to(interpolators.toRanged(0, 0.5))
 								.to(interpolators.toEased("easeInOutCubic")),
-							else: model.iteration4.closing.progress
+							else: model.iteration5.closing.progress
 								.to(interpolators.toEased("easeInOutCubic"))
 								.to(interpolators.toInverted),
 						}),
@@ -162,7 +162,7 @@ const PhoneFooter = memo(() => {
 					onSwipeEnd={() => console.log("Swiped ended")}
 					style={springUtils.optimizeStyleForRendering({
 						opacity: common.variant({
-							if: iteration6ClosingStarted,
+							if: iteration6OpeningStarted,
 							then: model.iteration6.opening.progress.to(interpolators.toEased("easeInOutCubic")),
 							else: 1,
 						}),
@@ -203,7 +203,7 @@ const TemplateCards = memo(() => {
 										cardProps,
 									})
 								)}>
-								<S.TemplateCardImageWrapper
+								<S.TemplateCardImage
 									style={springUtils.optimizeStyleForRendering({
 										scale: common.variant({
 											if: index === cardProps.center,
@@ -214,9 +214,9 @@ const TemplateCards = memo(() => {
 												.to((value) => 1 + value),
 											else: 1,
 										}),
-									})}>
-									<S.TemplateCardImage src={src} />
-								</S.TemplateCardImageWrapper>
+									})}
+									src={src}
+								/>
 							</S.TemplateCard>
 						);
 					})}

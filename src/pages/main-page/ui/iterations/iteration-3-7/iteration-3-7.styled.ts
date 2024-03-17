@@ -4,9 +4,10 @@ import styled from "styled-components";
 import { styledMixin } from "@shared/styled";
 import { Button as _Button, Image } from "@shared/ui";
 
+import { Phone as _Phone } from "../../phone";
 import { TextAnimation } from "../../text-animation";
 
-import { Phone as _Phone, Slider as _Slider } from "./ui";
+import { Slider as _Slider } from "./ui";
 
 export const PhoneWrapper = styled(animated.div)``;
 
@@ -60,17 +61,6 @@ export const RayImage = styled(animated(Image))`
 	}
 `;
 
-export const TemplateCardImage = styled(Image)`
-	width: 100%;
-	height: 100%;
-
-	${Image.S.Image} {
-		width: 100%;
-		height: 100%;
-		object-fit: cover;
-	}
-`;
-
 export const TemplateCardsWrapper = styled(animated.div)`
 	margin: 20px 0;
 `;
@@ -118,9 +108,16 @@ export const TemplateCard = styled(animated.div)`
 	backface-visibility: hidden;
 `;
 
-export const TemplateCardImageWrapper = styled(animated.div)`
+export const TemplateCardImage = styled(animated(Image))`
 	width: 100%;
 	height: 100%;
+	display: block;
+
+	${Image.S.Image} {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
 `;
 
 export const Descriptions = styled.div`

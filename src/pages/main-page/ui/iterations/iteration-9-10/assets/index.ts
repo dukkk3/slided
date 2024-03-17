@@ -1,0 +1,17 @@
+export { default as presentation1 } from "./work1.jpg";
+export { default as presentation2 } from "./work2.jpg";
+export { default as presentation3 } from "./work3.jpg";
+export { default as presentation4 } from "./work4.jpg";
+export { default as presentation5 } from "./work5.jpg";
+export { default as presentation6 } from "./work6.jpg";
+export { default as presentation7 } from "./work7.jpg";
+export { default as presentation8 } from "./work8.jpg";
+export { default as presentation9 } from "./work9.jpg";
+export { default as presentation10 } from "./work10.jpg";
+export { default as presentation11 } from "./work11.jpg";
+export { default as presentation12 } from "./work12.jpg";
+export { default as presentation13 } from "./work13.jpg";
+export { default as presentation14 } from "./work14.jpg";
+export { default as presentation15 } from "./work15.jpg";
+export { default as presentation16 } from "./work16.jpg";
+export { default as presentation17 } from "./work17.jpg";

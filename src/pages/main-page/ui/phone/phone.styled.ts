@@ -68,6 +68,7 @@ export const ContentWrapper = styled.div`
 export const Content = styled.div`
 	width: 100%;
 	height: 100%;
+	position: relative;
 `;
 
 export const DescriptionGroup = styled.div`

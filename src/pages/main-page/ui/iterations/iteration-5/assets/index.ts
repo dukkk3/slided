@@ -7,4 +7,3 @@ export { default as designer6 } from "./designer-6.jpg";
 export { default as designer7 } from "./designer-7.jpg";
 export { default as designer8 } from "./designer-8.jpg";
 export { default as designer9 } from "./designer-9.jpg";
-export { default as designer10 } from "./designer-10.jpg";

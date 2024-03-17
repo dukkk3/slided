@@ -1,8 +1,10 @@
-import type { SpringValue, Interpolation } from "@react-spring/web";
-import { createEvent, createStore, sample, combine } from "effector";
+import { createEvent, createStore, sample, combine, type Store } from "effector";
 import { useUnit } from "effector-react";
+import { previous } from "patronum";
 import { useMemo, useEffect } from "react";
 import useMeasure, { type RectReadOnly } from "react-use-measure";
+
+import type { LikeSpringValue } from "@shared/types";
 
 import { math, array } from "../utils";
 
@@ -28,129 +30,133 @@ const DEFAULT_RECT: RectReadOnly = {
 };
 
 interface Config<Key extends string> {
-	progress: SpringValue<number> | Interpolation<any, number> | null;
-	from: RectReadOnly | Key | null;
-	to: RectReadOnly | Key | null;
+	progress: LikeSpringValue<number> | null;
+	current: Key | null;
+	to: Key | null;
 }
 
-export const create = <Alias extends string>(initialState: Alias) => {
-	const attached = createEvent<{
-		from?: RectReadOnly | Alias | null;
-		to: RectReadOnly | Alias;
-		progress: SpringValue<number> | Interpolation<any, number>;
-	}>();
+interface InterpolationChain<Key> {
+	from: Key;
+	to: Key;
+	progress: LikeSpringValue<number>;
+	filter: Store<boolean>;
+}
 
-	const $rects = createStore<Record<Alias, RectReadOnly>>({} as any);
-	const $config = createStore<Config<Alias>>({
-		progress: null,
-		from: null,
-		to: null,
+export const create = <Key extends string>(initialState: Key, chain: InterpolationChain<Key>[]) => {
+	const $rects = createStore<Record<Key, RectReadOnly>>({} as any);
+	const $chainIndex = combine(
+		chain.map(({ filter }) => filter),
+		(filters) => {
+			return filters.findLastIndex((filter) => filter);
+		}
+	);
+
+	const $baseRect = $rects.map((rects) => {
+		const orderedRects = array.orderBy(Object.values(rects).filter(Boolean) as RectReadOnly[], [
+			{ by: "width", sort: "desc" },
+			{ by: "height", sort: "desc" },
+		]);
+
+		return (orderedRects[0] || null) as RectReadOnly | null;
 	});
 
-	const resolveRect = (rect: RectReadOnly | Alias | null) => {
-		if (typeof rect === "string") return $rects.getState()[rect as Alias] || null;
-		return rect;
-	};
+	const $rectsRange = combine(
+		{
+			rects: $rects,
+			chainIndex: $chainIndex,
+		},
+		({ rects, chainIndex }) => {
+			if (chainIndex < 0) return null;
+			const chainItem = chain[chainIndex];
+			return {
+				from: rects[chainItem.from] || null,
+				to: rects[chainItem.to] || null,
+			};
+		}
+	);
 
-	const $style = combine({ config: $config, rects: $rects }).map(({ config, rects }) => {
-		const { from, to, progress } = config;
+	const $style = combine({
+		chainIndex: $chainIndex,
+		rects: $rects,
+		rectsRange: $rectsRange,
+		baseRect: $baseRect,
+	}).map(({ chainIndex, rects, rectsRange, baseRect }) => {
+		const from = {
+			width: 0,
+			height: 0,
+			top: 0,
+			left: 0,
+		};
 
-		const orderedRects = array.orderBy(
-			from || to
-				? [resolveRect(config.from)!, resolveRect(config.to)!].filter(Boolean)
-				: (Object.values(rects).filter(Boolean) as RectReadOnly[]),
-			[
-				{ by: "width", sort: "desc" },
-				{ by: "height", sort: "desc" },
-			]
-		);
+		const to = {
+			width: rectsRange?.to?.width || 0,
+			height: rectsRange?.to?.height || 0,
+			top: rectsRange?.to?.top || 0,
+			left: rectsRange?.to?.left || 0,
+		};
 
-		const initialStateRect = rects[initialState];
-		const baseRect = orderedRects.length
-			? {
-					width: orderedRects[0].width,
-					height: orderedRects[0].height,
-					top: initialStateRect?.top,
-					left: initialStateRect?.left,
-			  }
-			: null;
-
-		const fromRect = resolveRect(from);
-		const toRect = resolveRect(to);
-
-		if (!fromRect || !baseRect) {
-			return baseRect || {};
+		if (chainIndex < 0) {
+			from.top = rects[initialState]?.top || 0;
+			from.left = rects[initialState]?.left || 0;
+			from.width = rects[initialState]?.width || 0;
+			from.height = rects[initialState]?.height || 0;
+		} else {
+			from.top = rectsRange?.from?.top || 0;
+			from.left = rectsRange?.from?.left || 0;
+			from.width = rectsRange?.from?.width || 0;
+			from.height = rectsRange?.from?.height || 0;
 		}
 
-		if (!toRect) {
-			return fromRect;
+		if (!rectsRange?.to) {
+			return {
+				...from,
+				width: baseRect?.width,
+				height: baseRect?.height,
+			};
 		}
+
+		const chainItem = chain[chainIndex];
 
 		return {
 			width: baseRect?.width,
 			height: baseRect?.height,
 			transformOrigin: "left top",
-			x: progress?.to((value) => {
-				return calculateRectInterpolation(value, fromRect.left, toRect.left);
+			x: chainItem?.progress?.to((value) => {
+				return calculateRectInterpolation(value, from.left, to.left);
 			}),
-			y: progress?.to((value) => {
-				return calculateRectInterpolation(value, fromRect.top, toRect.top);
+			y: chainItem?.progress?.to((value) => {
+				return calculateRectInterpolation(value, from.top, to.top);
 			}),
-			scaleX: progress?.to((value) => {
-				return calculateScaleInterpolation(value, baseRect.width, fromRect.width, toRect.width);
+			scaleX: chainItem?.progress?.to((value) => {
+				return calculateScaleInterpolation(value, baseRect?.width || 0, from.width, to.width);
 			}),
-			scaleY: progress?.to((value) => {
-				return calculateScaleInterpolation(value, baseRect.height, fromRect.height, toRect.height);
+			scaleY: chainItem?.progress?.to((value) => {
+				return calculateScaleInterpolation(value, baseRect?.height || 0, from.height, to.height);
 			}),
 		};
 	});
 
-	const rectRemoved = createEvent<Alias>();
-	const rectSetted = createEvent<{ key: Alias; rect: RectReadOnly }>();
+	const rectRemoved = createEvent<Key>();
+	const rectSetted = createEvent<{ key: Key; rect: RectReadOnly }>();
 
 	const useStyle = () => useUnit($style);
 
-	const useRect = (key: Alias) => {
+	const useRect = (key: Key) => {
 		const [ref, rect] = useMeasure({ debounce: 100 });
+
 		useEffect(() => {
+			if (Object.keys(rect).every((key) => !rect[key])) return;
 			rectSetted({ key, rect });
-			return () => {
-				rectRemoved(key);
-			};
 		}, [key, rect]);
+
+		useEffect(() => {
+			return () => {
+				// rectRemoved(key);
+			};
+		}, [key]);
+
 		return useMemo(() => [ref, rect] as const, [ref, rect]);
 	};
-
-	sample({
-		clock: attached,
-		source: $config,
-		fn: (config, { from, to, progress }) => {
-			let _rect: RectReadOnly | Alias;
-
-			const { progress: _progress, to: _to, from: _from } = config;
-			const _toRect = resolveRect(_to);
-			const _fromRect = resolveRect(_from);
-
-			if (!from && from !== null && _fromRect && _toRect && _progress) {
-				const rectKeys = Object.keys(_toRect);
-				_rect = array.record(rectKeys, (key) =>
-					calculateRectInterpolation(_progress.get(), _fromRect[key], _toRect[key])
-				) as RectReadOnly;
-			} else if (from === null) {
-				_rect = DEFAULT_RECT;
-			} else {
-				_rect = from || _to || DEFAULT_RECT;
-			}
-
-			return {
-				...config,
-				to,
-				from: _rect,
-				progress: progress,
-			};
-		},
-		target: $config,
-	});
 
 	sample({
 		clock: rectSetted,
@@ -171,7 +177,6 @@ export const create = <Alias extends string>(initialState: Alias) => {
 	});
 
 	return {
-		attach: attached,
 		useRect,
 		useStyle,
 	};

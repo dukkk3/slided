@@ -5,8 +5,10 @@ export const variant = <Then = undefined, Else = undefined>(config: {
 	then?: Then;
 	else?: Else;
 }) => {
-	return config.if ? config.then : config.else;
+	return config.if ? (config.then as Then) : (config.else as Else);
 };
+
+export const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export const isFunction = (arg: unknown): arg is Function => arg instanceof Function;
 

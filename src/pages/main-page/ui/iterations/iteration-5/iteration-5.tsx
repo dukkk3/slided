@@ -3,27 +3,32 @@ import { memo } from "react";
 
 import { interpolators } from "@shared/helpers";
 import { VisibilityToggler } from "@shared/ui";
-import { common } from "@shared/utils";
+import { common, math } from "@shared/utils";
 
 import { USERS, FOCUSED_USER_INDEX } from "./iteration-5.config";
+import { normalize } from "./iteration-5.lib";
 import * as model from "./iteration-5.model";
 import * as S from "./iteration-5.styled";
 
 export const Iteration5 = memo(() => {
 	const isSectionVisible = useUnit(model.$iteration5Status);
 	const iteration5OpeningStatus = useUnit(model.$iteration5.opening.$inFlight);
+	const [designerRef] = model.useDesignerRect("initial");
 
 	return (
 		<VisibilityToggler isHidden={!isSectionVisible}>
 			<S.Designers>
-				{/* <S.ProfileCardGroup
-					style={{
-						top: `${normalize(TARGET_USER.position.y) * 100}%`,
-						left: `${normalize(TARGET_USER.position.x) * 100}%`,
-						transform: `translate3d(-50%, -50%, 0)`,
-					}}>
-					<ProfileCard {...TARGET_USER.data} avatarRef={faceContainerRef} />
-				</S.ProfileCardGroup> */}
+				<VisibilityToggler isHidden>
+					<S.User
+						{...USERS[FOCUSED_USER_INDEX].props}
+						avatarRef={designerRef}
+						style={{
+							top: `${normalize(USERS[FOCUSED_USER_INDEX].position.y) * 100}%`,
+							left: `${normalize(USERS[FOCUSED_USER_INDEX].position.x) * 100}%`,
+							transform: `translate3d(-50%, -50%, 0)`,
+						}}
+					/>
+				</VisibilityToggler>
 				{USERS.map(({ position, props, inQueueIndex }, index) => (
 					<S.User
 						key={index}
@@ -55,7 +60,7 @@ export const Iteration5 = memo(() => {
 						openingProgress={common.variant({
 							if: index === FOCUSED_USER_INDEX,
 							then: model.iteration5.closing.progress
-								.to(interpolators.toStepped(0.001))
+								.to(interpolators.toStepped(math.EPSILON))
 								.to(interpolators.toEased("easeInOutQuart"))
 								.to(interpolators.toInverted),
 						})}

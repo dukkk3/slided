@@ -1,9 +1,12 @@
 import type { Store } from "effector";
 
-import { iterationControls, iterationUtils } from "@shared/helpers";
+import { iterationControls, iterationUtils, sharedRect } from "@shared/helpers";
 import type { LikeSpringValue, Range } from "@shared/types";
 
 import { ITERATIONS_CHAIN } from "./main-page.config";
+
+export const { useRect: usePresentationCardRect, useRectOf: usePresentationCardRectOf } =
+	sharedRect.create();
 
 export const {
 	progress,
@@ -12,9 +15,9 @@ export const {
 	$currentIterationIndex,
 	$iterationRunDirection,
 	$smoothedDistanceOfBiggestStep,
-	runnedToProgress,
-	runnedToIteration,
-	slidedIteration,
+	toProgressRunned,
+	toIterationRunned,
+	iterationSlided,
 	smoothedDistanceOfBiggestStep,
 } = iterationControls.create({
 	iterationsChain: ITERATIONS_CHAIN,
