@@ -1,6 +1,11 @@
-import { interpolators, shapeInterpolator } from "@shared/helpers";
+import { imageDrawer, interpolators, shapeInterpolator } from "@shared/helpers";
 
 import * as model from "../../main-page.model";
+
+import * as config from "./presentation.config";
+
+export const { Canvas: PresentationCanvas, imageSetted: presentationImageSetted } =
+	imageDrawer.create();
 
 export const iteration8 = model.createSpringUtilsOfFlowIteration(8);
 export const $iteration8 = model.createStoreUtilsOfFlowIteration(8);
@@ -34,3 +39,5 @@ export const presentationShapeInterpolator = shapeInterpolator.create<
 		filter: $iteration9.closing.$started,
 	},
 ]);
+
+presentationImageSetted(config.PRESENTATION_POSTER);

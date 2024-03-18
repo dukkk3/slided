@@ -16,7 +16,7 @@ export const textMixin = css`
 	color: black;
 	font-size: 32px;
 	font-weight: 600;
-	line-height: 100%;
+	line-height: 120%;
 `;
 
 export const fixedSize = (size: string, rectProp: "height" | "width" = "width") => css`

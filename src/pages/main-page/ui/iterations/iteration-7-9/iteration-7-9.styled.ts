@@ -15,7 +15,7 @@ export const Phone = styled(_Phone)`
 
 export const Descriptions = styled.div`
 	position: relative;
-	margin-top: 28px;
+	margin-top: 20px;
 	text-align: center;
 	width: 100%;
 `;
@@ -32,20 +32,21 @@ export const Description = styled(TextAnimation)<{ $withAbsolutePosition?: boole
 
 export const Button = styled(animated(_Button))`
 	width: 100%;
-	bottom: 20px;
-	position: absolute;
+	height: 100%;
 	border-radius: 900px;
-	${styledMixin.fixedSize("60px", "height")}
 `;
 
 export const PhoneFooter = styled.div`
-	z-index: 1;
+	z-index: 10;
 	width: 100%;
-	position: relative;
+	bottom: 20px;
+	position: absolute;
+	${styledMixin.fixedSize("60px", "height")}
 
 	> * {
 		left: 0;
 		bottom: 0;
+		height: 100%;
 		position: absolute;
 	}
 `;

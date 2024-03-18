@@ -48,17 +48,12 @@ export const TemplateCardsContainer = styled.div`
 
 export const RayImage = styled(animated(Image))`
 	width: 100%;
-	top: -30px;
 	display: flex;
 	align-items: center;
-	height: 100%;
+	height: 140px;
+	top: calc(50% - 70px);
 	position: absolute;
 	justify-content: center;
-
-	svg {
-		height: calc(100% - 80px);
-		max-height: 140px;
-	}
 `;
 
 export const TemplateCardsWrapper = styled(animated.div)`
@@ -67,23 +62,23 @@ export const TemplateCardsWrapper = styled(animated.div)`
 
 export const Slider = styled(animated(_Slider))`
 	width: 100%;
-	${styledMixin.fixedSize("60px", "height")}
 `;
 
 export const Button = styled(animated(_Button))`
 	width: 100%;
 	border-radius: 900px;
-	${styledMixin.fixedSize("60px", "height")}
 `;
 
 export const PhoneFooter = styled.div`
 	z-index: 1;
 	width: 100%;
 	position: relative;
+	${styledMixin.fixedSize("60px", "height")}
 
 	> * {
 		left: 0;
 		bottom: 0;
+		height: 100%;
 		position: absolute;
 	}
 `;
@@ -122,20 +117,21 @@ export const TemplateCardImage = styled(animated(Image))`
 
 export const Descriptions = styled.div`
 	position: relative;
-	margin-top: 2.8rem;
+	margin-top: 20px;
 	text-align: center;
 	width: 100%;
 `;
 
 export const Description = styled(TextAnimation)<{ $withAbsolutePosition?: boolean }>`
 	${styledMixin.textMixin}
+	top: 0;
 	left: 0;
 	width: 100%;
 	font-size: 28px;
-	top: ${({ $withAbsolutePosition }) => $withAbsolutePosition && "34px"};
+	/* top: ${({ $withAbsolutePosition }) => $withAbsolutePosition && "34px"}; */
 	position: ${({ $withAbsolutePosition }) => $withAbsolutePosition && "absolute"};
 `;
 
 export const BoldDescription = styled(Description)`
-	font-size: 42px;
+	font-size: 34px;
 `;

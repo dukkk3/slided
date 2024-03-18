@@ -74,4 +74,5 @@ export const SlideButtonLabel = styled.p`
 	font-size: 18px;
 	font-weight: 600;
 	opacity: 0.6;
+	margin: 0;
 `;

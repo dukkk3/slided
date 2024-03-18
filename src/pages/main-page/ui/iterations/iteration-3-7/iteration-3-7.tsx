@@ -1,9 +1,11 @@
 import { useUnit } from "effector-react";
-import { memo, useEffect } from "react";
+import { memo } from "react";
 
 import { interpolators, springUtils } from "@shared/helpers";
 import { VisibilityToggler } from "@shared/ui";
 import { common } from "@shared/utils";
+
+import { IterationContainer } from "../../iteration-container";
 
 import * as assets from "./assets";
 import { TEMPLATES } from "./iteration-3-7.config";
@@ -16,30 +18,32 @@ export const Iteration3_7 = () => {
 
 	return (
 		<VisibilityToggler isHidden={!isSectionVisible}>
-			<S.PhoneWrapper
-				style={springUtils.optimizeStyleForRendering({
-					opacity: model.iteration7.opening.progress
-						.to(interpolators.toStepped(0.45))
-						.to(interpolators.toEased("easeInOutCubic"))
-						.to(interpolators.toInverted),
-				})}>
-				<S.Phone
-					openingProgress={model.iteration3.opening.progress.to(
-						interpolators.toEased("easeInOutCubic")
-					)}>
-					<S.Content>
-						<div>
-							<Face />
-							<Description />
-						</div>
-						<S.TemplateCardsContainer>
-							<Ray />
-							<TemplateCards />
-						</S.TemplateCardsContainer>
-						<PhoneFooter />
-					</S.Content>
-				</S.Phone>
-			</S.PhoneWrapper>
+			<IterationContainer>
+				<S.PhoneWrapper
+					style={springUtils.optimizeStyleForRendering({
+						opacity: model.iteration7.opening.progress
+							.to(interpolators.toStepped(0.45))
+							.to(interpolators.toEased("easeInOutCubic"))
+							.to(interpolators.toInverted),
+					})}>
+					<S.Phone
+						openingProgress={model.iteration3.opening.progress.to(
+							interpolators.toEased("easeInOutCubic")
+						)}>
+						<S.Content>
+							<div>
+								<Face />
+								<Description />
+							</div>
+							<S.TemplateCardsContainer>
+								<Ray />
+								<TemplateCards />
+							</S.TemplateCardsContainer>
+							<PhoneFooter />
+						</S.Content>
+					</S.Phone>
+				</S.PhoneWrapper>
+			</IterationContainer>
 		</VisibilityToggler>
 	);
 };
@@ -159,7 +163,7 @@ const PhoneFooter = memo(() => {
 			<VisibilityToggler isHidden={!iteration6OpeningStarted}>
 				<S.Slider
 					isSwipeEnabled={!iteration6ClosingStarted}
-					onSwipeEnd={() => console.log("Swiped ended")}
+					onSwipeEnd={() => model.iterationSlided({ direction: 1 })}
 					style={springUtils.optimizeStyleForRendering({
 						opacity: common.variant({
 							if: iteration6OpeningStarted,

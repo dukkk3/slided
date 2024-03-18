@@ -4,6 +4,8 @@ import { interpolators, springUtils } from "@shared/helpers";
 import { VisibilityToggler } from "@shared/ui";
 import { common } from "@shared/utils";
 
+import { IterationContainer } from "../../iteration-container";
+
 import { PRESENTATIONS, OFFSET_BETWEEN_CARDS } from "./iteration-7-9.config";
 import { calculateCardTranslate } from "./iteration-7-9.lib";
 import * as model from "./iteration-7-9.model";
@@ -14,23 +16,25 @@ export const Iteration7_9 = () => {
 
 	return (
 		<VisibilityToggler isHidden={!isVisible}>
-			<S.PhoneWrapper
-				style={{
-					opacity: model.iteration9.closing.progress
-						.to(interpolators.toEased("easeInOutCubic"))
-						.to(interpolators.toInverted),
-				}}>
-				<S.Phone
-					openingProgress={model.iteration7.closing.progress
-						.to(interpolators.toRanged(0.99, 1))
-						.to(interpolators.toEased("easeInOutCubic"))}
-					hiddenContent
-					alternative>
-					<Description />
-					<Presentations />
-					<PhoneFooter />
-				</S.Phone>
-			</S.PhoneWrapper>
+			<IterationContainer>
+				<S.PhoneWrapper
+					style={{
+						opacity: model.iteration9.closing.progress
+							.to(interpolators.toEased("easeInOutCubic"))
+							.to(interpolators.toInverted),
+					}}>
+					<S.Phone
+						openingProgress={model.iteration7.closing.progress
+							.to(interpolators.toRanged(0.99, 1))
+							.to(interpolators.toEased("easeInOutCubic"))}
+						hiddenContent
+						alternative>
+						<Description />
+						<Presentations />
+						<PhoneFooter />
+					</S.Phone>
+				</S.PhoneWrapper>
+			</IterationContainer>
 		</VisibilityToggler>
 	);
 };
@@ -159,16 +163,18 @@ const PhoneFooter = () => {
 
 	return (
 		<VisibilityToggler isHidden={!isVisible}>
-			<S.Button
-				style={springUtils.optimizeStyleForRendering({
-					y: model.iteration9.opening.progress
-						.to(interpolators.toEased("easeInOutCubic"))
-						.to(interpolators.toInverted)
-						.to(interpolators.toScaledOn(50)),
-					opacity: model.iteration9.opening.progress.to(interpolators.toEased("easeInOutCubic")),
-				})}>
-				Download
-			</S.Button>
+			<S.PhoneFooter>
+				<S.Button
+					style={springUtils.optimizeStyleForRendering({
+						y: model.iteration9.opening.progress
+							.to(interpolators.toEased("easeInOutCubic"))
+							.to(interpolators.toInverted)
+							.to(interpolators.toScaledOn(50)),
+						opacity: model.iteration9.opening.progress.to(interpolators.toEased("easeInOutCubic")),
+					})}>
+					Download
+				</S.Button>
+			</S.PhoneFooter>
 		</VisibilityToggler>
 	);
 };

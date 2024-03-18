@@ -5,6 +5,8 @@ import { interpolators } from "@shared/helpers";
 import { VisibilityToggler } from "@shared/ui";
 import { common } from "@shared/utils";
 
+import { IterationContainer } from "../../iteration-container";
+
 import * as model from "./iteration-5-6.model";
 import * as S from "./iteration-5-6.styled";
 
@@ -13,10 +15,12 @@ export const Iteration5_6 = () => {
 
 	return (
 		<VisibilityToggler isHidden={!isSectionVisible}>
-			<S.Pulses>
-				<Pulse />
-				<Locator />
-			</S.Pulses>
+			<IterationContainer>
+				<S.Pulses>
+					<Pulse />
+					<Locator />
+				</S.Pulses>
+			</IterationContainer>
 		</VisibilityToggler>
 	);
 };

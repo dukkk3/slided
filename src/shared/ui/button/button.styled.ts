@@ -38,6 +38,7 @@ export const Button = styled.button<ButtonProps>`
 	text-align: center;
 	border-radius: 6px;
 	font-weight: 600;
+	cursor: pointer;
 	border: none;
 	transition: background 0.3s ease, transform 0.3s ease;
 	${({ $size }) => buttonSizes[$size]}

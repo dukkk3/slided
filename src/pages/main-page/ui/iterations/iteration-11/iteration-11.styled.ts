@@ -9,7 +9,7 @@ export const Tariffs = styled.div`
 	left: 0;
 	width: 100%;
 	display: flex;
-	margin-top: 40px;
+	margin-top: 30px;
 	position: absolute;
 	align-items: center;
 	flex-direction: column;
@@ -22,6 +22,7 @@ export const Head = styled(animated.div)`
 
 export const Title = styled.p`
 	${styledMixin.textMixin}
+	margin: 0;
 	font-size: 80px;
 	text-align: center;
 `;

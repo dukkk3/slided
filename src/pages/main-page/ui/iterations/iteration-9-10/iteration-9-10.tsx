@@ -5,6 +5,8 @@ import { interpolators, springUtils } from "@shared/helpers";
 import { VisibilityToggler } from "@shared/ui";
 import { common, math } from "@shared/utils";
 
+import { IterationContainer } from "../../iteration-container";
+
 import { PRESENTATIONS } from "./iteration-9-10.config";
 import * as model from "./iteration-9-10.model";
 import * as S from "./iteration-9-10.styled";
@@ -23,25 +25,27 @@ export const Iteration9_10 = memo(({ hidden }: Iteration9_10Props) => {
 
 	return (
 		<VisibilityToggler isHidden={!isVisible || hidden}>
-			<S.Grid
-				style={springUtils.optimizeStyleForRendering(
-					common.variant({
-						if: !hidden,
-						then: {
-							y: model.iteration10.closing.progress
-								.to(interpolators.toEased("easeInOutCubic"))
-								.to(interpolators.toScaledOn(-50))
-								.to(interpolators.toPercents),
-							opacity: model.iteration10.closing.progress
-								.to(interpolators.toEased("easeInOutCubic"))
-								.to(interpolators.toInverted),
-						},
-						else: {},
-					})
-				)}>
-				<Grid hidden={hidden} />
-				{!hidden ? <Description /> : null}
-			</S.Grid>
+			<IterationContainer>
+				<S.Grid
+					style={springUtils.optimizeStyleForRendering(
+						common.variant({
+							if: !hidden,
+							then: {
+								y: model.iteration10.closing.progress
+									.to(interpolators.toEased("easeInOutCubic"))
+									.to(interpolators.toScaledOn(-50))
+									.to(interpolators.toPercents),
+								opacity: model.iteration10.closing.progress
+									.to(interpolators.toEased("easeInOutCubic"))
+									.to(interpolators.toInverted),
+							},
+							else: {},
+						})
+					)}>
+					<Grid hidden={hidden} />
+					{!hidden ? <Description /> : null}
+				</S.Grid>
+			</IterationContainer>
 		</VisibilityToggler>
 	);
 });

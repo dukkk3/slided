@@ -9,6 +9,8 @@ import { designerModel } from "../../designer";
 export const { useRect: useAssistantShapeRect } = assistantModel.assistantShapeInterpolator;
 export const { useRect: useDesignerShapeRect } = designerModel.designerShapeInterpolator;
 
+export const { iterationSlided } = model;
+
 export const iteration3 = model.createSpringUtilsOfFlowIteration(3);
 export const $iteration3 = model.createStoreUtilsOfFlowIteration(3);
 export const $iteration3Status = or($iteration3.opening.$inFlight, $iteration3.closing.$inFlight);

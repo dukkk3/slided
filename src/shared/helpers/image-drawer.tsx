@@ -4,6 +4,16 @@ import useMeasure from "react-use-measure";
 
 import { common } from "@shared/utils";
 
+const resolveImage = (image: HTMLImageElement | string | null) => {
+	if (!image) return null;
+	if (typeof image === "string") {
+		const imageElement = new Image();
+		imageElement.src = image;
+		return imageElement;
+	}
+	return image;
+};
+
 export const create = () => {
 	const $image = createStore<HTMLImageElement | null>(null, {
 		updateFilter: (update, current) => update?.src !== current?.src,
@@ -11,7 +21,7 @@ export const create = () => {
 	const $context = createStore<CanvasRenderingContext2D | null>(null);
 	const $rect = createStore<{ width: number; height: number } | null>(null);
 
-	const imageSetted = createEvent<HTMLImageElement | null>();
+	const imageSetted = createEvent<HTMLImageElement | string | null>();
 	const contextSetted = createEvent<CanvasRenderingContext2D | null>();
 	const rectSetted = createEvent<{ width: number; height: number }>();
 
@@ -64,6 +74,7 @@ export const create = () => {
 
 	sample({
 		clock: imageSetted,
+		fn: resolveImage,
 		target: $image,
 	});
 

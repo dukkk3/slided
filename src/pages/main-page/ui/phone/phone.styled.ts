@@ -61,7 +61,6 @@ export const ContentWrapper = styled.div`
 	width: 100%;
 	height: 100%;
 	padding: 24px;
-	padding-top: 0;
 	box-sizing: border-box;
 `;
 
