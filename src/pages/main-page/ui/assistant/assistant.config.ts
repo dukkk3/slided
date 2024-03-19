@@ -1,3 +1,3 @@
-import { ImageKitPreloader } from "@shared/helpers";
+import * as config from "../../main-page.config";
 
-export const IMAGES_PRELOADER = new ImageKitPreloader(24, "assistant");
+export const IMAGES_PRELOADER = config.ASSISTANT_IMAGES_PRELOADER;

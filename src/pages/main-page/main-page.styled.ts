@@ -3,7 +3,18 @@ import styled from "styled-components";
 
 import { Image } from "@shared/ui";
 
-import { SlideDots as _SlideDots, IterationContainer } from "./ui";
+import { SlideDots as _SlideDots, Loader as _Loader, IterationContainer } from "./ui";
+
+export const Loader = styled(animated(_Loader))`
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 9999;
+	position: fixed;
+	background: white;
+	position: absolute;
+`;
 
 export const MainPage = styled.div`
 	top: 0;
@@ -68,7 +79,7 @@ export const Logo = styled(Image)`
 	max-height: 50px;
 `;
 
-export const Content = styled(animated.div)`
+export const Content = styled(animated.main)`
 	width: 100%;
 	height: 100%;
 	position: relative;
@@ -115,7 +126,7 @@ export const Buttons = styled.div`
 	background: black;
 `;
 
-export const SlideDots = styled(_SlideDots)`
+export const SlideDots = styled(animated(_SlideDots))`
 	top: 50%;
 	right: 40px;
 	z-index: 999;

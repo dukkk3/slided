@@ -2,6 +2,7 @@ export * from "./background";
 export * from "./assistant";
 export * from "./designer";
 export * from "./slide-dots";
+export * from "./loader";
 export * from "./presentation";
 export * from "./iteration-container";
 export * from "./iterations/iteration-0";

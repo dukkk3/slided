@@ -1,4 +1,5 @@
-import { memo, useMemo } from "react";
+import { useUnit } from "effector-react";
+import { forwardRef, memo } from "react";
 
 import { interpolators } from "@shared/helpers";
 import type { Range } from "@shared/types";
@@ -6,11 +7,10 @@ import { math } from "@shared/utils";
 
 import * as model from "./slide-dots.model";
 import * as S from "./slide-dots.styled";
-import { useUnit } from "effector-react";
 
-export const SlideDots = memo((props: React.ComponentProps<"div">) => {
+export const SlideDots = forwardRef<HTMLDivElement, React.ComponentProps<"div">>((props, ref) => {
 	return (
-		<S.SlideDots {...props}>
+		<S.SlideDots {...props} ref={ref}>
 			{model.ITERATIONS_CHAIN_WITH_PAYLOAD.map((iteration, index) => (
 				<SlideDot key={iteration.range.join("-")} index={index} range={iteration.range} />
 			))}

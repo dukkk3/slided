@@ -1,11 +1,6 @@
-import { imageDrawer, interpolators, shapeInterpolator } from "@shared/helpers";
+import { interpolators, shapeInterpolator } from "@shared/helpers";
 
 import * as model from "../../main-page.model";
-
-import * as config from "./presentation.config";
-
-export const { Canvas: PresentationCanvas, imageSetted: presentationImageSetted } =
-	imageDrawer.create();
 
 export const iteration8 = model.createSpringUtilsOfFlowIteration(8);
 export const $iteration8 = model.createStoreUtilsOfFlowIteration(8);
@@ -23,21 +18,22 @@ export const presentationShapeInterpolator = shapeInterpolator.create<
 	{
 		from: "initial",
 		to: "in-phone",
+		changeRect: true,
 		progress: iteration8.opening.progress.to(interpolators.toEased("easeInOutCubic")),
 		filter: $iteration8.opening.$started,
 	},
 	{
 		from: "in-phone",
 		to: "in-phone-shifted",
+		changeRect: true,
 		progress: iteration9.opening.progress.to(interpolators.toEased("easeInOutCubic")),
 		filter: $iteration9.opening.$started,
 	},
 	{
 		from: "in-phone-shifted",
 		to: "in-grid",
+		changeRect: true,
 		progress: iteration9.closing.progress.to(interpolators.toEased("easeInOutCubic")),
 		filter: $iteration9.closing.$started,
 	},
 ]);
-
-presentationImageSetted(config.PRESENTATION_POSTER);

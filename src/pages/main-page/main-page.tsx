@@ -1,3 +1,7 @@
+import { useSpring } from "@react-spring/web";
+import { useGate, useUnit } from "effector-react";
+import { Fragment, memo, useEffect } from "react";
+
 import { interpolators, springUtils } from "@shared/helpers";
 
 import * as assets from "./assets";
@@ -5,7 +9,6 @@ import * as model from "./main-page.model";
 import * as S from "./main-page.styled";
 import {
 	Background,
-	IterationContainer,
 	Iteration0,
 	Iteration1_2,
 	Iteration5,
@@ -19,7 +22,6 @@ import {
 	Designer,
 	Presentation,
 } from "./ui";
-import { Fragment } from "react";
 
 const contentOpacityProgress = model.smoothedDistanceOfBiggestStep.to(interpolators.toInverted);
 const contentPointerEventsProgress = model.smoothedDistanceOfBiggestStep
@@ -32,6 +34,8 @@ const contentStyle = springUtils.optimizeStyleForRendering({
 });
 
 export const MainPage = () => {
+	useGate(model.Gate);
+
 	return (
 		<S.MainPage>
 			<S.BackgroundWrapper style={contentStyle}>
@@ -41,11 +45,21 @@ export const MainPage = () => {
 				<S.Header as='header'>
 					<S.Logo src={assets.logo} />
 					<S.Navigation>
-						<S.NavigationItem>How it works</S.NavigationItem>
-						<S.NavigationItem>Pricing</S.NavigationItem>
+						<S.NavigationItem
+							onClick={() => {
+								model.toIterationRunned({ index: 3 });
+							}}>
+							How it works
+						</S.NavigationItem>
+						<S.NavigationItem
+							onClick={() => {
+								model.toIterationRunned({ index: 9, toEnd: true });
+							}}>
+							Pricing
+						</S.NavigationItem>
 					</S.Navigation>
 				</S.Header>
-				<S.Content as='main' style={contentStyle}>
+				<S.Content style={contentStyle}>
 					{[
 						<Iteration0 />,
 						<Iteration1_2 />,
@@ -60,7 +74,7 @@ export const MainPage = () => {
 					].map((node, index) => (
 						<Fragment key={index}>{node}</Fragment>
 					))}
-					<S.SlideDots />
+					<SlideDots />
 					<S.FlowContent>
 						<Assistant />
 						<Designer />
@@ -69,18 +83,59 @@ export const MainPage = () => {
 						<Presentation />
 					</S.FlowContent>
 				</S.Content>
-				<S.Buttons>
-					{/* <button onClick={() => model.runnedToIteration({ index: 0 })}>to: 0</button>
-				<button onClick={() => model.runnedToIteration({ index: 1 })}>to: 1</button>
-				<button onClick={() => model.runnedToIteration({ index: 2 })}>to: 2</button>
-				<button onClick={() => model.runnedToIteration({ index: 3 })}>to: 3</button>
-				<button onClick={() => model.runnedToIteration({ index: 4 })}>to: 4</button>
-				<button onClick={() => model.runnedToIteration({ index: 5 })}>to: 5</button>
-				<button onClick={() => model.runnedToIteration({ index: 6 })}>to: 6</button>
-				<button onClick={() => model.runnedToIteration({ index: 7 })}>to: 7</button> */}
-					<S.Debugger>{model.progress}</S.Debugger>
-				</S.Buttons>
 			</S.Overlay>
+			<Loader />
 		</S.MainPage>
 	);
 };
+
+const SlideDots = memo(() => {
+	const interactiveEnabled = useUnit(model.$interactiveEnabled);
+	const [style, api] = useSpring(() => ({ progress: 0 }));
+
+	useEffect(() => {
+		if (!interactiveEnabled) return;
+		api.start({
+			from: { progress: 0 },
+			to: { progress: 1 },
+		});
+	}, [api, interactiveEnabled]);
+
+	return (
+		<S.SlideDots
+			style={{
+				opacity: style.progress,
+				pointerEvents: style.progress
+					.to(interpolators.toStepped(0.999))
+					.to((value) => (value ? "auto" : "none")),
+			}}
+		/>
+	);
+});
+
+const Loader = memo(() => {
+	const contentLoaded = useUnit(model.$contentLoaded);
+	const [style, api] = useSpring(() => ({
+		progress: 0,
+	}));
+
+	useEffect(() => {
+		if (!contentLoaded) return;
+		api.start({
+			from: { progress: 0 },
+			to: { progress: 1 },
+			onRest: () => model.setLoaderVisible(false),
+		});
+	}, [api, contentLoaded]);
+
+	return (
+		<S.Loader
+			style={{
+				opacity: style.progress.to(interpolators.toInverted),
+				pointerEvents: style.progress
+					.to(interpolators.toStepped(0.999))
+					.to((value) => (value ? "none" : "auto")),
+			}}
+		/>
+	);
+});

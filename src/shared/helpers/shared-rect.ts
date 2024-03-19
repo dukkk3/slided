@@ -23,7 +23,6 @@ export const create = () => {
 
 		useEffect(() => {
 			if (Object.keys(rect).every((key) => !rect[key])) return;
-			console.log(rect);
 			rectSetted(rect);
 		}, [rect]);
 

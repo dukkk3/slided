@@ -1,6 +1,5 @@
 import { createEvent, createStore, sample, combine, type Store } from "effector";
 import { useUnit } from "effector-react";
-import { previous } from "patronum";
 import { useMemo, useEffect } from "react";
 import useMeasure, { type RectReadOnly } from "react-use-measure";
 
@@ -8,36 +7,21 @@ import type { LikeSpringValue } from "@shared/types";
 
 import { math, array } from "../utils";
 
-const calculateRectInterpolation = (progress: number, from: number, to: number) => {
+const calculateRectInterpolation = (from: number, to: number) => (progress: number) => {
 	return from + (to - from) * progress;
 };
 
-const calculateScaleInterpolation = (progress: number, base: number, from: number, to: number) => {
-	from = math.invert(from / base);
-	to = math.invert(to / base);
-	return math.invert(from + (to - from) * progress);
-};
-
-const DEFAULT_RECT: RectReadOnly = {
-	width: 0,
-	height: 0,
-	left: 0,
-	top: 0,
-	right: 0,
-	bottom: 0,
-	x: 0,
-	y: 0,
-};
-
-interface Config<Key extends string> {
-	progress: LikeSpringValue<number> | null;
-	current: Key | null;
-	to: Key | null;
-}
+const calculateScaleInterpolation =
+	(base: number, from: number, to: number) => (progress: number) => {
+		const _from = math.invert(from / base);
+		const _to = math.invert(to / base);
+		return math.invert(_from + (_to - _from) * progress);
+	};
 
 interface InterpolationChain<Key> {
 	from: Key;
 	to: Key;
+	changeRect?: boolean;
 	progress: LikeSpringValue<number>;
 	filter: Store<boolean>;
 }
@@ -115,24 +99,29 @@ export const create = <Key extends string>(initialState: Key, chain: Interpolati
 			};
 		}
 
-		const chainItem = chain[chainIndex];
+		const chainItem = chain[chainIndex] || null;
+		const changeRect = chainItem?.changeRect || false;
 
 		return {
-			width: baseRect?.width,
-			height: baseRect?.height,
+			width: changeRect
+				? chainItem?.progress?.to(calculateRectInterpolation(from.width, to.width))
+				: baseRect?.width,
+			height: changeRect
+				? chainItem?.progress?.to(calculateRectInterpolation(from.height, to.height))
+				: baseRect?.height,
 			transformOrigin: "left top",
-			x: chainItem?.progress?.to((value) => {
-				return calculateRectInterpolation(value, from.left, to.left);
-			}),
-			y: chainItem?.progress?.to((value) => {
-				return calculateRectInterpolation(value, from.top, to.top);
-			}),
-			scaleX: chainItem?.progress?.to((value) => {
-				return calculateScaleInterpolation(value, baseRect?.width || 0, from.width, to.width);
-			}),
-			scaleY: chainItem?.progress?.to((value) => {
-				return calculateScaleInterpolation(value, baseRect?.height || 0, from.height, to.height);
-			}),
+			x: chainItem?.progress?.to(calculateRectInterpolation(from.left, to.left)),
+			y: chainItem?.progress?.to(calculateRectInterpolation(from.top, to.top)),
+			scaleX: !changeRect
+				? chainItem?.progress?.to(
+						calculateScaleInterpolation(baseRect?.width || 0, from.width, to.width)
+				  )
+				: 1,
+			scaleY: !changeRect
+				? chainItem?.progress?.to(
+						calculateScaleInterpolation(baseRect?.height || 0, from.height, to.height)
+				  )
+				: 1,
 		};
 	});
 

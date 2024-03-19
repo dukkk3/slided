@@ -15,6 +15,8 @@ export const record = <Key extends string, Value>(
 	);
 };
 
+export const getUniqueItems = <Item>(array: Item[]) => [...new Set(array)];
+
 export const orderBy = <T extends object>(
 	items: T[],
 	orders: {

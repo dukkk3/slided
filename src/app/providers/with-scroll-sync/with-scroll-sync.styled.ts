@@ -1,9 +1,9 @@
 import styled from "styled-components";
 
-export const ScrollArea = styled.div`
+export const ScrollArea = styled.div<{ $enabled?: boolean }>`
 	width: 100vw;
 	height: 100vh;
-	overflow: hidden auto;
+	overflow: ${({ $enabled }) => ($enabled ? "hidden auto" : "hidden")};
 `;
 
 export const ScrollContent = styled.div`

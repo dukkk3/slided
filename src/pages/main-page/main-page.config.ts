@@ -1,4 +1,4 @@
-import { iterationsChain } from "@shared/helpers";
+import { iterationsChain, ImageKitPreloader } from "@shared/helpers";
 
 export const ITERATIONS_CHAIN = iterationsChain
 	.create(2000)
@@ -15,3 +15,7 @@ export const ITERATIONS_CHAIN = iterationsChain
 	.get();
 
 export const MAX_ITERATION_NUMBER = ITERATIONS_CHAIN.rightBound;
+
+export const BACKGROUND_IMAGES_PRELOADER = new ImageKitPreloader(283, "table");
+export const ASSISTANT_IMAGES_PRELOADER = new ImageKitPreloader(24, "assistant");
+export const PRESENTATION_IMAGES_PRELOADER = new ImageKitPreloader(125, "presentation/16x9");

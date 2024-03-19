@@ -1,5 +1,6 @@
-import { attach, createEffect, createEvent, createStore, sample } from "effector";
+import { createEffect, sample } from "effector";
 import { createGate } from "effector-react";
+import { and, not, or } from "patronum";
 
 import { storeUtils, imageDrawer } from "@shared/helpers";
 import { math } from "@shared/utils";
@@ -11,23 +12,12 @@ import {
 	LAST_OPENING_IMAGE_INDEX,
 	IMAGES_PARTS,
 	IMAGES_PRELOADER,
-	PRELOADED_IMAGES_COUNT_PER_STEP,
 } from "./background.config";
 
 const ticker = storeUtils.createTicker(30);
-const endedOpening = createEvent();
 
-const loadImagesFx = createEffect(async ({ from, to }: { from: number; to: number }) => {
-	const images = await IMAGES_PRELOADER.preload(from, to);
-	return images;
-});
+const $progressMore0 = model.$progress.map((progress) => progress > 0);
 
-const loadOpeningFx = attach({
-	effect: loadImagesFx,
-	mapParams: () => ({ from: 0, to: LAST_OPENING_IMAGE_INDEX + PRELOADED_IMAGES_COUNT_PER_STEP }),
-});
-
-export const $openingEnded = createStore(false);
 export const { Canvas, imageSetted: canvasImageSetted } = imageDrawer.create();
 export const Gate = createGate();
 
@@ -35,10 +25,12 @@ export const parentModel = model;
 
 const getIterationImagesRange = (iterationIndex: number) => {
 	const prevImagePart = IMAGES_PARTS.find((item) => item.iterationIndex === iterationIndex - 1);
-
 	const imagePart = IMAGES_PARTS.find((item) => item.iterationIndex === iterationIndex);
 
-	if (!imagePart) return null;
+	if (!imagePart) {
+		const lastImagePart = IMAGES_PARTS.at(-1)!;
+		return { from: lastImagePart.toImageIndex, to: lastImagePart.toImageIndex };
+	}
 
 	const fromImageIndex = prevImagePart?.toImageIndex || LAST_OPENING_IMAGE_INDEX;
 
@@ -49,15 +41,16 @@ const getIterationImagesRange = (iterationIndex: number) => {
 };
 
 sample({
-	clock: model.$progress,
-	source: model.$currentIterationIndex,
-	filter: $openingEnded,
-	fn: (currentIterationIndex: number, progress: number) => ({ currentIterationIndex, progress }),
+	source: {
+		progress: model.$progress,
+		currentIterationIndex: model.$currentIterationIndex,
+		animationCanBePlayed: model.$animationCanBePlayed,
+	},
+	filter: and(or(model.$openingEnded, $progressMore0), model.$animationCanBePlayed),
+	fn: ({ currentIterationIndex, progress }) => ({ currentIterationIndex, progress }),
 	target: createEffect(
 		({ currentIterationIndex, progress }: { currentIterationIndex: number; progress: number }) => {
 			const iterationImagesIndexRange = getIterationImagesRange(currentIterationIndex);
-
-			if (!iterationImagesIndexRange) return;
 
 			const { from, to } = ITERATIONS_CHAIN[currentIterationIndex];
 			const imageIndex = math.toInt(
@@ -73,33 +66,17 @@ sample({
 });
 
 sample({
-	clock: Gate.status,
-	filter: Boolean,
-	target: loadOpeningFx,
-});
-
-sample({
 	clock: ticker.$ticks,
 	filter: (ticks) => ticks === LAST_OPENING_IMAGE_INDEX,
-	target: endedOpening,
-});
-
-sample({
-	clock: endedOpening,
 	fn: () => true,
-	target: $openingEnded,
+	target: model.setOpeningEnded,
 });
 
 sample({
-	clock: model.$progress,
-	source: model.$currentIterationIndex,
-	filter: $openingEnded,
-	fn: (currentIterationIndex) => ({ currentIterationIndex }),
-	target: createEffect(({ currentIterationIndex }: { currentIterationIndex: number }) => {
-		const iterationImagesIndexRange = getIterationImagesRange(currentIterationIndex);
-		if (!iterationImagesIndexRange) return;
-		loadImagesFx({ from: iterationImagesIndexRange.from, to: iterationImagesIndexRange.to });
-	}),
+	clock: model.$animationCanBePlayed,
+	filter: $progressMore0,
+	fn: () => true,
+	target: model.setOpeningEnded,
 });
 
 sample({
@@ -112,7 +89,8 @@ sample({
 });
 
 sample({
-	clock: loadOpeningFx.doneData,
+	clock: model.$animationCanBePlayed,
+	filter: and(not($progressMore0), model.$animationCanBePlayed),
 	target: ticker.start,
 });
 
@@ -123,6 +101,7 @@ sample({
 // });
 
 sample({
-	clock: endedOpening,
+	clock: model.$openingEnded,
+	filter: Boolean,
 	target: ticker.stop,
 });

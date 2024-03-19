@@ -1,6 +1,6 @@
 import { easings, type InterpolatorConfig } from "@react-spring/web";
 
-import { math } from "../utils";
+import { array, math } from "../utils";
 
 type ValueSchema<Value> = { value: Value };
 type ResolveInterpolatedValue<Value, Response> = Value extends ValueSchema<any>
@@ -43,7 +43,8 @@ export const withInFlight = createInterpolator((value: number) => ({
 }));
 
 export const optimizeStyleForRendering = <Style extends object>(
-	style: Style
+	style: Style,
+	dangerouslyIncludedPresets: "rect"[] = []
 ): Style & { willChange?: string } => {
 	const willChange: string[] = [];
 
@@ -87,9 +88,17 @@ export const optimizeStyleForRendering = <Style extends object>(
 		willChange.push("opacity");
 	}
 
+	if (dangerouslyIncludedPresets.includes("rect") && someInKeys(["width"])) {
+		willChange.push("width");
+	}
+
+	if (dangerouslyIncludedPresets.includes("rect") && someInKeys(["height"])) {
+		willChange.push("height");
+	}
+
 	return {
 		...style,
-		willChange: willChange.length ? willChange.join(",") : "",
+		willChange: willChange.length ? array.getUniqueItems(willChange).join(",") : undefined,
 	};
 };
 

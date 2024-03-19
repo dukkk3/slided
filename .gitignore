@@ -6,6 +6,7 @@
 .pnp.js
 
 /.swc
+/dist
 
 prisma/*
 !prisma/index.d.ts

@@ -1,4 +1,4 @@
-import { createEffect, sample } from "effector";
+import { sample } from "effector";
 
 import { imageDrawer, interpolators } from "@shared/helpers";
 import { math } from "@shared/utils";
@@ -27,13 +27,8 @@ export const $inRange7_8 = model.$progress.map(
 );
 
 sample({
-	clock: $iteration6.opening.$started,
-	filter: Boolean,
-	target: createEffect(() => IMAGES_PRELOADER.preloadAll()),
-});
-
-sample({
 	clock: $iteration7.closing.$progress,
-	fn: (value) => IMAGES_PRELOADER.items[math.toInt(value, 0, IMAGES_PRELOADER.imagesCount)].image,
+	fn: (value) =>
+		IMAGES_PRELOADER.items[math.toInt(value, 0, IMAGES_PRELOADER.imagesCount - 1)].image,
 	target: presentationImageSetted,
 });

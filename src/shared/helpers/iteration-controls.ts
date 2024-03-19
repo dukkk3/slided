@@ -23,14 +23,21 @@ const calculateDistanceOfStep = (
 	return math.clamp(distance, 0, 1);
 };
 
-export const create = ({ iterationsChain }: { iterationsChain: IterationsChain }) => {
-	const progress = new SpringValue(7, {
+export const create = ({
+	initialProgress = 0,
+	iterationsChain,
+}: {
+	initialProgress?: number;
+	iterationsChain: IterationsChain;
+}) => {
+	const progress = new SpringValue(initialProgress, {
 		onChange: (value) => progressSetted(value as unknown as number),
 	});
 
 	const toProgressRunned = createEvent<number>();
 	const toIterationRunned = createEvent<{ index: number; toEnd?: boolean }>();
 	const iterationSlided = createEvent<{ direction: number; toEnd?: boolean }>();
+	const setSettedProgressData = createEvent<{ from: number; to: number }>();
 
 	const progressSetted = createEvent<number>();
 	const targetProgressSetted = createEvent<number>();
@@ -64,21 +71,13 @@ export const create = ({ iterationsChain }: { iterationsChain: IterationsChain }
 		}
 	);
 
-	const runToIteration = (index: number, toEnd?: boolean) => {
-		if (index < 0 || index >= iterationsChain.length) return;
-		runToProgress(iterationsChain[index][toEnd ? "to" : "from"]);
-	};
-
-	const slideIteration = (direction: number, toEnd?: boolean) => {
-		const currentIterationIndex = $currentIterationIndex.getState();
-		runToIteration(currentIterationIndex + direction, toEnd);
-	};
-
 	const runToProgress = (targetProgress: number) => {
 		const currentProgress = $progress.getState();
 		const direction = Math.sign(targetProgress - currentProgress);
 
-		if (direction === 0) return;
+		if (direction === 0) {
+			return;
+		}
 
 		progress.stop();
 
@@ -124,7 +123,13 @@ export const create = ({ iterationsChain }: { iterationsChain: IterationsChain }
 		} else {
 			progress.start({
 				to: targetProgress,
-				config: { duration: (distanceToTargetProgress / iterationsChain.rightBound) * 2000 },
+				config: {
+					duration:
+						(distanceToTargetProgress / iterationsChain.rightBound) * iterationsChain.defaultDuration * 2,
+				},
+				onRest: () => {
+					setSettedProgressData({ from: 0, to: 0 });
+				},
 			});
 		}
 	};
@@ -133,6 +138,11 @@ export const create = ({ iterationsChain }: { iterationsChain: IterationsChain }
 		clock: targetProgressSetted,
 		source: $progress,
 		fn: (progress, target) => ({ from: progress, to: target }),
+		target: setSettedProgressData,
+	});
+
+	sample({
+		clock: setSettedProgressData,
 		target: $settedProgressData,
 	});
 

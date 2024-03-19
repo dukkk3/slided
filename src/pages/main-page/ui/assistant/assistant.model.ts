@@ -74,17 +74,12 @@ sample({
 });
 
 sample({
-	clock: $iteration1.opening.$progress,
+	clock: model.$progress,
+	source: $iteration1.opening.$progress,
 	filter: Gate.status,
 	fn: (progress) => {
 		const imageIndex = math.toInt(progress, 0, IMAGES_PRELOADER.imagesCount - 1);
 		return IMAGES_PRELOADER.items[imageIndex].image;
 	},
 	target: assistantImageSetted,
-});
-
-sample({
-	clock: Gate.status,
-	filter: Boolean,
-	target: createEffect(() => IMAGES_PRELOADER.preloadAll()),
 });

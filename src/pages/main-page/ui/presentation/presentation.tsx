@@ -3,6 +3,7 @@ import { useUnit } from "effector-react";
 import { springUtils } from "@shared/helpers";
 import { VisibilityToggler } from "@shared/ui";
 
+import * as config from "./presentation.config";
 import * as model from "./presentation.model";
 import * as S from "./presentation.styled";
 
@@ -12,7 +13,10 @@ export const Presentation = () => {
 
 	return (
 		<VisibilityToggler isHidden={!isVisible}>
-			<S.Presentation style={springUtils.optimizeStyleForRendering(presentationStyle)} />
+			<S.Presentation
+				src={config.PRESENTATION_POSTER}
+				style={springUtils.optimizeStyleForRendering(presentationStyle, ["rect"])}
+			/>
 		</VisibilityToggler>
 	);
 };
