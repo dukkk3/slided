@@ -8,6 +8,7 @@ import * as assets from "./assets";
 import * as model from "./main-page.model";
 import * as S from "./main-page.styled";
 import {
+	ScrollSync,
 	Background,
 	Iteration0,
 	Iteration1_2,
@@ -37,55 +38,57 @@ export const MainPage = () => {
 	useGate(model.Gate);
 
 	return (
-		<S.MainPage>
-			<S.BackgroundWrapper style={contentStyle}>
-				<Background />
-			</S.BackgroundWrapper>
-			<S.Overlay>
-				<S.Header as='header'>
-					<S.Logo src={assets.logo} />
-					<S.Navigation>
-						<S.NavigationItem
-							onClick={() => {
-								model.toIterationRunned({ index: 3 });
-							}}>
-							How it works
-						</S.NavigationItem>
-						<S.NavigationItem
-							onClick={() => {
-								model.toIterationRunned({ index: 9, toEnd: true });
-							}}>
-							Pricing
-						</S.NavigationItem>
-					</S.Navigation>
-				</S.Header>
-				<S.Content style={contentStyle}>
-					{[
-						<Iteration0 />,
-						<Iteration1_2 />,
-						<Iteration3_7 />,
-						<Iteration5 />,
-						<Iteration5_6 />,
-						<Iteration7_9 />,
-						<Iteration7_8 />,
-						<Iteration9_10 />,
-						<Iteration9_10 hidden />,
-						<Iteration11 />,
-					].map((node, index) => (
-						<Fragment key={index}>{node}</Fragment>
-					))}
-					<SlideDots />
-					<S.FlowContent>
-						<Assistant />
-						<Designer />
-					</S.FlowContent>
-					<S.FlowContent style={{ zIndex: 9 }}>
-						<Presentation />
-					</S.FlowContent>
-				</S.Content>
-			</S.Overlay>
-			<Loader />
-		</S.MainPage>
+		<ScrollSync>
+			<S.MainPage>
+				<S.BackgroundWrapper style={contentStyle}>
+					<Background />
+				</S.BackgroundWrapper>
+				<S.Overlay>
+					<S.Header as='header'>
+						<S.Logo src={assets.logo} />
+						<S.Navigation>
+							<S.NavigationItem
+								onClick={() => {
+									model.toIterationRunned({ index: 3 });
+								}}>
+								How it works
+							</S.NavigationItem>
+							<S.NavigationItem
+								onClick={() => {
+									model.toIterationRunned({ index: 9, toEnd: true });
+								}}>
+								Pricing
+							</S.NavigationItem>
+						</S.Navigation>
+					</S.Header>
+					<S.Content style={contentStyle}>
+						{[
+							<Iteration0 />,
+							<Iteration1_2 />,
+							<Iteration3_7 />,
+							<Iteration5 />,
+							<Iteration5_6 />,
+							<Iteration7_9 />,
+							<Iteration7_8 />,
+							<Iteration9_10 />,
+							<Iteration9_10 hidden />,
+							<Iteration11 />,
+						].map((node, index) => (
+							<Fragment key={index}>{node}</Fragment>
+						))}
+						<SlideDots />
+						<S.FlowContent>
+							<Assistant />
+							<Designer />
+						</S.FlowContent>
+						<S.FlowContent style={{ zIndex: 9 }}>
+							<Presentation />
+						</S.FlowContent>
+					</S.Content>
+				</S.Overlay>
+				<Loader />
+			</S.MainPage>
+		</ScrollSync>
 	);
 };
 

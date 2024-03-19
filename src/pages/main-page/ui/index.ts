@@ -4,6 +4,7 @@ export * from "./designer";
 export * from "./slide-dots";
 export * from "./loader";
 export * from "./presentation";
+export * from "./scroll-sync";
 export * from "./iteration-container";
 export * from "./iterations/iteration-0";
 export * from "./iterations/iteration-1-2";
